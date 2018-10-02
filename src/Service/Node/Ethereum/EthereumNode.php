@@ -460,6 +460,16 @@ class EthereumNode
     }
 
     /**
+     * Creates a filter object, based on filter options, to notify when the state changes (logs). To check if the state has changed, call eth_getFilterChanges.
+        A note on specifying topic filters:
+
+        Topics are order-dependent. A transaction with a log with topics [A, B] will be matched by the following topic filters:
+
+        [] "anything"
+        [A] "A in first position (and anything after)"
+        [null, B] "anything in first position AND B in second position (and anything after)"
+        [A, B] "A in first position AND B in second position (and anything after)"
+        [[A, B], [A, B]] "(A OR B) in first position AND (A OR B) in second position (and anything after)"
      * @param $fromBlock, fromBlock: QUANTITY|TAG - (optional, default: "latest") Integer block number,
      *  or "latest" for the last mined block or "pending", "earliest" for not yet mined transactions.
      * @param $toBlock, toBlock: QUANTITY|TAG - (optional, default: "latest") Integer block number,
@@ -479,26 +489,119 @@ class EthereumNode
         ]]);
     }
 
-
-
-
-
-    public function newTransactionFilter(string $address)
+    /**
+     * Creates a filter in the node, to notify when a new block arrives. To check if the state has changed, call eth_getFilterChanges.
+     * Returns
+        QUANTITY - A filter id.
+     */
+    public function newBlockFilter()
     {
-        return $this->_call('eth_newFilter', [[
-            'address' => $address
-        ]]);
+        return $this->_call('eth_newBlockFilter', []);
     }
 
+    /**
+     * Creates a filter in the node, to notify when new pending transactions arrive. To check if the state has changed, call eth_getFilterChanges.
+     * Returns
+        QUANTITY - A filter id.
+     */
     public function newPendingTransactionFilter()
     {
-        return $this->_call('eth_newPendingTransactionFilter');
+        return $this->_call('eth_newPendingTransactionFilter', []);
     }
 
+    /**
+     * Uninstalls a filter with given id. Should always be called when watch is no longer needed. Additonally Filters timeout when they aren't requested with eth_getFilterChanges for a period of time.
+     * @param $filterID, QUANTITY - The filter id.
+     * @return mixed|String
+     * Returns
+        Boolean - true if the filter was successfully uninstalled, otherwise false.
+     */
+    public function uninstallFilter($filterID)
+    {
+        return $this->_call('eth_uninstallFilter', [$filterID]);
+    }
+
+    /**
+     * Polling method for a filter, which returns an array of logs which occurred since last poll.
+     * @param , QUANTITY - the filter id.
+     * @return mixed|String
+     * Returns
+        Array - Array of log objects, or an empty array if nothing has changed since last poll.
+
+        For filters created with eth_newBlockFilter the return are block hashes (DATA, 32 Bytes), e.g. ["0x3454645634534..."].
+
+        For filters created with eth_newPendingTransactionFilter the return are transaction hashes (DATA, 32 Bytes), e.g. ["0x6345343454645..."].
+
+        For filters created with eth_newFilter logs are objects with following params:
+        removed: TAG - true when the log was removed, due to a chain reorganization. false if its a valid log.
+        logIndex: QUANTITY - integer of the log index position in the block. null when its pending log.
+        transactionIndex: QUANTITY - integer of the transactions index position log was created from. null when its pending log.
+        transactionHash: DATA, 32 Bytes - hash of the transactions this log was created from. null when its pending log.
+        blockHash: DATA, 32 Bytes - hash of the block where this log was in. null when its pending. null when its pending log.
+        blockNumber: QUANTITY - the block number where this log was in. null when its pending. null when its pending log.
+        address: DATA, 20 Bytes - address from which this log originated.
+        data: DATA - contains the non-indexed arguments of the log.
+        topics: Array of DATA - Array of 0 to 4 32 Bytes DATA of indexed log arguments.
+     * (In solidity: The first topic is the hash of the signature of the event (e.g. Deposit(address,bytes32,uint256)), except you declared the event with the anonymous specifier.)
+     */
     public function getFilterChanges($filterID)
     {
         return $this->_call('eth_getFilterChanges', [$filterID]);
     }
+
+    /**
+     * Returns an array of all logs matching filter with given id.
+     * @param $filterID, QUANTITY - The filter id.
+     * @return mixed|String
+     * Returns
+        See eth_getFilterChanges
+     */
+    public function getFilterLogs($filterID)
+    {
+        return $this->_call('eth_getFilterLogs', [$filterID]);
+    }
+
+    /**
+     * Returns an array of all logs matching a given filter object.
+     * @param $address, address: DATA|Array, 20 Bytes - (optional) Contract address or a list of addresses from which logs should originate.
+     * @param $fromBlock, fromBlock: QUANTITY|TAG - (optional, default: "latest") Integer block number, or "latest" for the last mined block or "pending", "earliest" for not yet mined transactions.
+     * @param $toBlock, toBlock: QUANTITY|TAG - (optional, default: "latest") Integer block number, or "latest" for the last mined block or "pending", "earliest" for not yet mined transactions.
+     * @param $topic, topics: Array of DATA, - (optional) Array of 32 Bytes DATA topics. Topics are order-dependent. Each topic can also be an array of DATA with "or" options.
+     * @param $blockHash, blockhash: DATA, 32 Bytes - (optional) With the addition of EIP-234 (Geth >= v1.8.13 or Parity >= v2.1.0), blockHash is a new filter option which restricts the logs returned to the single block with the 32-byte hash blockHash. Using blockHash is equivalent to fromBlock = toBlock = the block number with hash blockHash. If blockHash is present in the filter criteria, then neither fromBlock nor toBlock are allowed.
+     * @return mixed|String
+     * Returns
+        See eth_getFilterChanges
+     */
+    public function getLogs($address, $fromBlock, $toBlock, $topic, $blockHash)
+    {
+        return $this->_call('eth_getLogs', [[
+            'fromBlock' => $fromBlock,
+            'address' => $address
+        ]]);
+    }
+
+    /**
+     * Returns the hash of the current block, the seedHash, and the boundary condition to be met ("target").
+     * @return mixed|String
+     * Array - Array with the following properties:
+        DATA, 32 Bytes - current block header pow-hash
+        DATA, 32 Bytes - the seed hash used for the DAG.
+        DATA, 32 Bytes - the boundary condition ("target"), 2^256 / difficulty.
+     */
+    public function getWork()
+    {
+        return $this->_call('eth_getWork');
+    }
+
+    public function submitWork()
+    {
+        throw new \Exception('Not implemented');
+    }
+    public function submitHashrate()
+    {
+        throw new \Exception('Not implemented');
+    }
+
 
     private function _call(string $method, $params = [])
     {
@@ -507,15 +610,6 @@ class EthereumNode
         } else {
             return $this->client->error;
         }
-    }
-
-
-
-
-
-    public function getNewAddress(string $name = null)
-    {
-        return $this->_call('personal_newAccount', ['']);
     }
 
     public function send(string $from, string $to, string $b_value, string $b_gas, string $b_gas_price, string $b_data = '')
