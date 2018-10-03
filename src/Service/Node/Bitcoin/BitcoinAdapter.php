@@ -2,26 +2,34 @@
 
 namespace App\Service\Node\Bitcoin;
 
-
 use App\Entity\Currency;
 use App\Service\DB\DBNodeAdapterInterface;
 use App\Service\Node\NodeAdapterInterface;
-use App\Service\Node\Bitcoin;
 
 class BitcoinAdapter implements NodeAdapterInterface
 {
+    public const NAME = 'BTC';
 
-    public function getName()
+    private $node;
+    private $currency;
+
+    public function __construct(DBNodeAdapterInterface $db)
     {
-        // TODO: Implement getName() method.
+        $this->node = new BitcoinNode();
+        $this->currency = $db->getCurrencyByName(self::NAME);
+    }
+
+    public function getName(): string
+    {
+        return $this->currency->getName();
     }
 
     /**
      * @return Currency
      */
-    public function getCurrency()
+    public function getCurrency(): Currency
     {
-        // TODO: Implement getCurrency() method.
+        return $this->currency;
     }
 
     public function getStatus()
@@ -36,41 +44,41 @@ class BitcoinAdapter implements NodeAdapterInterface
 
     public function getAccounts()
     {
-        // TODO: Implement getAccounts() method.
+        return $this->node->listAccounts();
     }
 
-    public function getAccount(string $name)
+    public function getAccount(string $address)
     {
-        // TODO: Implement getAccount() method.
+        return $this->node->getAccount($address);
     }
 
     public function getBalance(string $name)
     {
-        // TODO: Implement getBalance() method.
+        return $this->node->getBalance($name);
     }
 
-    public function getTransaction(string $hash)
+    public function getTransaction(string $txId)
     {
-        // TODO: Implement getTransaction() method.
+        return $this->node->getTransaction($txId);
     }
 
     public function getTransactions(string $account)
     {
-        // TODO: Implement getTransactions() method.
+        return $this->node->listTransactions($account);
     }
 
-    public function getNewAddress(string $name = null)
+    public function getNewAddress(string $account = null)
     {
-        // TODO: Implement getNewAddress() method.
+        return $this->node->getNewAddress($account);
     }
 
     public function createAccount(string $name, $data = null)
     {
-        // TODO: Implement createAccount() method.
+        return $this->node->getNewAddress($name);
     }
 
     public function send(string $address, int $amount)
     {
-        // TODO: Implement send() method.
+        return $this->node->sendToAddress($address, $amount);
     }
 }
