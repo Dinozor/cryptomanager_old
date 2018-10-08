@@ -18,7 +18,6 @@ abstract class BaseNode
     ];
 
     private $id = 0;
-    private $error;
     protected $response;
 
     private $username;
@@ -27,7 +26,7 @@ abstract class BaseNode
     private $host;
     private $port;
 
-    public function __construct($username, $password, $host = 'localhost', $port = 18332, $proto = 'http')
+    public function __construct($username, $password, $host = '127.0.0.1', $port = 18332, $proto = 'http')
     {
         $this->username = $username;
         $this->password = $password;
@@ -40,7 +39,6 @@ abstract class BaseNode
     {
         // The ID should be unique for each call
         $this->id++;
-        $this->error = null;
         $this->response = null;
 
         $request = json_encode([
@@ -65,22 +63,14 @@ abstract class BaseNode
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
         if (isset($this->httpErrors[$httpCode])) {
-            throw new \RuntimeException('Response Http Error - ' . self::HTTP_ERRORS[$httpCode]);
+            return 'Response Http Error - ' . self::HTTP_ERRORS[$httpCode];
         }
         if (0 < curl_errno($ch)) {
-            throw new \RuntimeException('Unable to connect to ' . $url . '. Error: ' . curl_error($ch));
+            return 'Unable to connect to ' . $url . '. Error: ' . curl_error($ch);
         }
         curl_close($ch);
 
         return $this->getResponse();
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getError(): ?string
-    {
-        return $this->error;
     }
 
     /**
@@ -89,13 +79,12 @@ abstract class BaseNode
     public function getResponse()
     {
         if ($this->response == null) {
-            return null;
+            return '';
         }
         $data = json_decode($this->response, true);
         if (isset($data['error']) && $data['error'] != '') {
-            $this->error = $data['error']['message'];
+            return $data['error']['message'];
         }
-
-        return $data['result'] ?? null;
+        return $data['result'] ?? '';
     }
 }

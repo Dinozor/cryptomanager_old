@@ -12,7 +12,9 @@ class BitcoinNode extends BaseNode
 
     public function __construct(NodeDataManager $dataManager = null, ?string $rootWallet = null, $settings = null)
     {
-        parent::__construct('test', '123456', '127.0.0.1', '18332');
+        parent::__construct('test', '123456');
+        $this->dataManager = $dataManager;
+        $this->rootWallet = $rootWallet;
     }
 
     /*== Blockchain ==*/

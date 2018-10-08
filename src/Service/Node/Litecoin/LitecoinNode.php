@@ -2,33 +2,19 @@
 
 namespace App\Service\Node\Litecoin;
 
+use App\Service\Node\BaseNode;
 use App\Service\NodeDataManager;
-use JsonRpc\Client;
 
-class LitecoinNode
+class LitecoinNode extends BaseNode
 {
-    private const URL = 'http://127.0.0.1:8545';
-    private $client;
     private $rootWallet;
     private $dataManager;
 
-    public $status;
-    public $error;
-    public $raw_response;
-    public $response;
-
     public function __construct(NodeDataManager $dataManager = null, ?string $rootWallet = null, $settings = null)
     {
+        parent::__construct('test', '123456');
         $this->dataManager = $dataManager;
         $this->rootWallet = $rootWallet;
-        $this->client = new Client(self::URL);
-    }
-
-    private function _call(string $method, array $params = [])
-    {
-        return $this->client->call($method, $params)
-            ? $this->client->result
-            : $this->client->error;
     }
 
     /**
