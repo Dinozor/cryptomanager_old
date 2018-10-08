@@ -84,14 +84,18 @@ abstract class BaseNode
     }
 
     /**
-     * @return array
+     * @return mixed
      */
-    public function getResponse(): array
+    public function getResponse()
     {
         if ($this->response == null) {
-            return [];
+            return null;
         }
         $data = json_decode($this->response, true);
-        return $data['result'] ?? [];
+        if (isset($data['error']) && $data['error'] != '') {
+            $this->error = $data['error']['message'];
+        }
+
+        return $data['result'] ?? null;
     }
 }
