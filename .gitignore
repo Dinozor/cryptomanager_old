@@ -10,4 +10,7 @@
 /.web-server-pid
 ###< symfony/web-server-bundle ###
 
+###> IDE metadata ###
+**.idea/**
 .idea
+###< IDE metadata ###
