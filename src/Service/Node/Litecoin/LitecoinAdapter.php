@@ -8,20 +8,20 @@ use App\Service\Node\NodeAdapterInterface;
 
 class LitecoinAdapter implements NodeAdapterInterface
 {
-    public const NAME = 'LTC';
+    public const NAME = 'ltc';
 
     private $node;
-    private $currency;
+    private $db;
 
-    public function __construct(DBNodeAdapterInterface $db)
+    public function __construct(DBNodeAdapterInterface $db = null)
     {
         $this->node = new LitecoinNode();
-        $this->currency = $db->getCurrencyByName(self::NAME);
+        $this->db = $db;
     }
 
     public function getName(): string
     {
-        return $this->currency->getName();
+        return $this->db->getCurrencyByName(self::NAME)->getName();
     }
 
     /**
@@ -29,7 +29,7 @@ class LitecoinAdapter implements NodeAdapterInterface
      */
     public function getCurrency(): Currency
     {
-        return $this->currency;
+        return $this->db->getCurrencyByName(self::NAME);
     }
 
     public function getStatus()
