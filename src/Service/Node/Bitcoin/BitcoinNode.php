@@ -17,8 +17,6 @@ class BitcoinNode extends BaseNode
         $this->rootWallet = $rootWallet;
     }
 
-    /*== Blockchain ==*/
-
     /**
      * version 0.9
      * Returns the hash of the best (tip) block in the longest block chain.
@@ -289,8 +287,6 @@ class BitcoinNode extends BaseNode
         return $this->_call('verifytxoutproof', [$proof]);
     }
 
-    /*== Control ==*/
-
     /**
      * Returns an object containing information about memory usage.
      * [mode]
@@ -335,8 +331,6 @@ class BitcoinNode extends BaseNode
         return $this->_call('uptime');
     }
 
-    /*== Generating ==*/
-
     /**
      * Returns true or false whether bitcoind is currently generating hashes
      *
@@ -361,8 +355,6 @@ class BitcoinNode extends BaseNode
     {
         return $this->_call('generatetoaddress', [$nBlocks, $address, $maxTries]);
     }
-
-    /*== Mining ==*/
 
     /**
      * Returns data needed to construct a block to work on.
@@ -453,8 +445,6 @@ class BitcoinNode extends BaseNode
         return $this->_call('submitblock', [$hexData, $params]);
     }
 
-    /*== Network ==*/
-
     /**
      * version 0.8
      * Attempts add or remove <node>
@@ -539,7 +529,7 @@ class BitcoinNode extends BaseNode
      *
      * @return mixed
      */
-    public function getNetWorkInfo()
+    public function getNetworkInfo()
     {
         return $this->_call('getnetworkinfo');
     }
@@ -604,8 +594,6 @@ class BitcoinNode extends BaseNode
     {
         return $this->_call('setnetworkactive', [$status]);
     }
-
-    /*== Rawtransactions ==*/
 
     /**
      * Combine multiple partially signed transactions into one transaction.
@@ -729,8 +717,6 @@ class BitcoinNode extends BaseNode
         return $this->_call('signrawtransaction', [$hexString, $data, $privateKeys]);
     }
 
-    /*== Util ==*/
-
     /**
      * Creates a multi-signature address and returns a json object
      * <nrequired> <'["key,"key"]'>
@@ -815,8 +801,6 @@ class BitcoinNode extends BaseNode
     {
         return $this->_call('verifymessage', [$bitcoinAddress, $signature, $message]);
     }
-
-    /*== Wallet ==*/
 
     /**
      * Mark in-wallet transaction <txid> as abandoned

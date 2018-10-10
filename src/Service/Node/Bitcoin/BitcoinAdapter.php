@@ -39,7 +39,11 @@ class BitcoinAdapter implements NodeAdapterInterface
 
     public function getVersion()
     {
-        // TODO: Implement getVersion() method.
+        $info = $this->node->getNetworkInfo();
+        if (!empty($info)) {
+            return $info['version'];
+        }
+        return '';
     }
 
     public function getAccounts()
