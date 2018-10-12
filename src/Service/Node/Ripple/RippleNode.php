@@ -487,6 +487,7 @@ class RippleNode
      * @param int $limit
      * @param string $marker
      * @param string $format
+     * @param bool $descending
      * @return mixed
      */
     public function getValidations(string $start = '', string $end = '', int $limit = 200, string $marker = '', string $format = 'json', bool $descending = false)
