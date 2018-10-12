@@ -2,7 +2,6 @@
 
 namespace App\Service\Node\Ripple;
 
-use App\Service\Node\BaseNode;
 use App\Service\NodeDataManager;
 
 class RippleNode
