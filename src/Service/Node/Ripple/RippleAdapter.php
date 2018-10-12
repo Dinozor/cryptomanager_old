@@ -48,41 +48,41 @@ class RippleAdapter implements NodeAdapterInterface
 
     public function getAccounts()
     {
-        return $this->node->listAccounts();
+        // TODO: Implement getAccounts() method.
     }
 
     public function getAccount(string $address)
     {
-        return $this->node->getAccount($address);
+        return $this->node->accountInfo($address);
     }
 
-    public function getBalance(string $name)
+    public function getBalance(string $account)
     {
-        return $this->node->getBalance($name);
+        return $this->node->gatewayBalances($account);
     }
 
     public function getTransaction(string $txId)
     {
-        return $this->node->getTransaction($txId);
+        return $this->node->tx($txId);
     }
 
     public function getTransactions(string $account)
     {
-        return $this->node->listTransactions($account);
+        return $this->node->accountTx($account);
     }
 
     public function getNewAddress(string $account = null)
     {
-        return $this->node->getNewAddress($account);
+        // TODO: Implement getNewAddress() method.
     }
 
     public function createAccount(string $name, $data = null)
     {
-        return $this->node->getNewAddress($name);
+        return $this->node->walletPropose();
     }
 
     public function send(string $address, int $amount)
     {
-        return $this->node->sendToAddress($address, $amount);
+        // TODO: Implement send() method.
     }
 }
