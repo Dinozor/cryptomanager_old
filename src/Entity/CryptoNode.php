@@ -32,7 +32,7 @@ class CryptoNode
     private $mainAddress;
 
     /**
-     * @ORM\Column(type="json_array", nullable=true)
+     * @ORM\Column(type="json", nullable=true)
      */
     private $settings;
 
@@ -46,7 +46,6 @@ class CryptoNode
      * @ORM\JoinColumn(nullable=false)
      */
     private $currency;
-
 
     /**
      * @ORM\Column(type="boolean")
@@ -152,7 +151,7 @@ class CryptoNode
 
     public function getIsActive(): bool
     {
-        return $this->isEnabled && $this->isLocked;
+        return $this->isEnabled && !$this->isLocked;
     }
 
     public function getIsLocked(): bool

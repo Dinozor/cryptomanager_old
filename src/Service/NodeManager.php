@@ -40,21 +40,26 @@ class NodeManager
      * @var CryptoNode
      */
     private $nodeData;
-    private $dbAdapter;
+//    private $dbAdapter;
 
     public function __construct(ObjectManager $objectManager, GlobalUser $globalUser = null)
     {
         $this->objectManager = $objectManager;
         $this->globalUser = $globalUser;
-        $this->dbAdapter = new DefaultDBAdapter($objectManager);
     }
+
+    /**
+     * @param string $currency
+     * @return NodeAdapterInterface|null
+     */
     public function loadNodeAdapter(string $currency)
     {
-        $currency = $this->objectManager->getRepository(Currency::class)->findOneBy([
+        /** @var Currency $currency_obj */
+        $currency_obj = $this->objectManager->getRepository(Currency::class)->findOneBy([
             'code_a' => $currency
         ]);
-        if ($currency) {
-            return $this->getNodeAdapter($currency);
+        if ($currency_obj) {
+            return $this->getNodeAdapter($currency_obj);
         }
         return null;
     }
@@ -69,8 +74,14 @@ class NodeManager
         ]);
 
         if ($this->nodeData) {
-            $class_name =  $this->nodeData->getClassName();
-            return $this->nodeAdapter = new $class_name($this->dbAdapter);
+            try {
+                $class_name = $this->nodeData->getClassName();
+                $dbAdapter = new DefaultDBAdapter($this->objectManager, $this->nodeData);
+                $this->nodeAdapter = new $class_name($dbAdapter);
+                return $this->nodeAdapter;
+            } catch (\Exception $exception) {
+                return null;
+            }
         }
         return null;
     }

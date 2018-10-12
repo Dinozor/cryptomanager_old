@@ -52,16 +52,26 @@ class Currency
      */
     public function isActive(): bool
     {
-        return $this->is_active;
+        return $this->isEnabled && !$this->isLocked;
+    }
+
+    public function isNotActive(): bool
+    {
+        return !$this->isActive();
+    }
+
+    public function getIsActive(): bool
+    {
+        return $this->isEnabled && $this->isLocked;
     }
 
     /**
-     * @param bool $is_active
+     * @param bool $isEnabled
      * @return Currency
      */
-    public function setIsActive(bool $is_active): Currency
+    public function setIsEnabled(bool $isEnabled): Currency
     {
-        $this->is_active = $is_active;
+        $this->isEnabled = $isEnabled;
         return $this;
     }
 
@@ -70,25 +80,25 @@ class Currency
      */
     public function isLocked(): bool
     {
-        return $this->is_locked;
+        return $this->isLocked;
     }
 
     /**
-     * @param bool $is_locked
+     * @param bool $isLocked
      * @return Currency
      */
-    public function setIsLocked(bool $is_locked): Currency
+    public function setIsLocked(bool $isLocked): Currency
     {
-        $this->is_locked = $is_locked;
+        $this->isLocked = $isLocked;
         return $this;
     }
 
     /**
-     * @var boolean If currency is not active it should not be displayed or used anywhere
+     * @var boolean If currency is not enabled it should not be displayed or used anywhere
      * Like CurrencyPairs, balances etc. would be locked/disabled
      * @ORM\Column(type="boolean", nullable=false, options={"default":true})
      */
-    private $is_active;
+    private $isEnabled;
 
     /**
      * @var boolean Shows if there was a problem with a currency/rate
@@ -99,7 +109,7 @@ class Currency
      *
      * @ORM\Column(type="boolean", nullable=false, options={"default":true})
      */
-    private $is_locked;
+    private $isLocked;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Account", mappedBy="currency", orphanRemoval=true)
@@ -113,8 +123,8 @@ class Currency
 
     public function __construct()
     {
-        $this->is_locked = true;
-        $this->is_active = true;
+        $this->isLocked = true;
+        $this->isEnabled = true;
         $this->accounts = new ArrayCollection();
         $this->cryptoNodes = new ArrayCollection();
     }
