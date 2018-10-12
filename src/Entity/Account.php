@@ -63,6 +63,12 @@ class Account
     private $timeUpdated;
 
     /**
+     * @ORM\Column(type="datetimetz")
+     */
+    private $timeLastChecked;
+
+
+    /**
      * @ORM\Column(type="integer")
      */
     private $blockWhenCreated;
@@ -189,6 +195,18 @@ class Account
     public function setTimeUpdated(\DateTimeInterface $timeUpdated): self
     {
         $this->timeUpdated = $timeUpdated;
+
+        return $this;
+    }
+
+    public function getTimeLastChecked(): ?\DateTimeInterface
+    {
+        return $this->timeLastChecked;
+    }
+
+    public function setTimeLastChecked(\DateTimeInterface $timeLastChecked): self
+    {
+        $this->timeLastChecked = $timeLastChecked;
 
         return $this;
     }

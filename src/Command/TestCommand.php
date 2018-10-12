@@ -46,6 +46,12 @@ class TestCommand extends Command
 
         $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
     }
+
+    private function transactionUpdate()
+    {
+
+    }
+
     protected function execute1(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
