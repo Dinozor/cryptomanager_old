@@ -39,50 +39,50 @@ class RippleAdapter implements NodeAdapterInterface
 
     public function getVersion()
     {
-        $info = $this->node->serverInfo();
+        $info = $this->node->getRippledVersions();
         if (!empty($info)) {
-            return $info['info']['build_version'];
+            return $info['rows'][0]['version'];
         }
         return '';
     }
 
     public function getAccounts()
     {
-        // TODO: Implement getAccounts() method.
+        return $this->node->getAccounts();
     }
 
     public function getAccount(string $address)
     {
-        return $this->node->accountInfo($address);
+        return $this->node->getAccount($address);
     }
 
-    public function getBalance(string $account)
+    public function getBalance(string $address)
     {
-        return $this->node->gatewayBalances($account);
+        return $this->node->getAccountBalances($address);
     }
 
-    public function getTransaction(string $txId)
+    public function getTransaction(string $hash)
     {
-        return $this->node->tx($txId);
+        return $this->node->getTransaction($hash);
     }
 
-    public function getTransactions(string $account)
+    public function getTransactions(string $address)
     {
-        return $this->node->accountTx($account);
+        return $this->node->getAccountTransactionHistory($address);
     }
 
     public function getNewAddress(string $account = null)
     {
-        // TODO: Implement getNewAddress() method.
+        return null;
     }
 
     public function createAccount(string $name, $data = null)
     {
-        return $this->node->walletPropose();
+        return null;
     }
 
     public function send(string $address, int $amount)
     {
-        // TODO: Implement send() method.
+        return null;
     }
 }

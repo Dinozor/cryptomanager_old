@@ -5,530 +5,805 @@ namespace App\Service\Node\Ripple;
 use App\Service\Node\BaseNode;
 use App\Service\NodeDataManager;
 
-class RippleNode extends BaseNode
+class RippleNode
 {
+    private const URL = 'http://127.0.0.1:8545';
     private $rootWallet;
     private $dataManager;
 
     public function __construct(NodeDataManager $dataManager = null, ?string $rootWallet = null, $settings = null)
     {
-        parent::__construct('test', '123456');
         $this->dataManager = $dataManager;
         $this->rootWallet = $rootWallet;
     }
 
-    /**
-     * Get a list of payment channels where the account is the source of the channel.
-     * <account> [destination_account] [ledger_hash] [ledger_index] [limit=200]
-     *
-     * @param string $account
-     * @param string $destinationAccount
-     * @param string $ledgerHash
-     * @param string $ledgerIndex
-     * @param int $limit
-     * @return mixed
-     */
-    public function accountChannels(string $account, string $destinationAccount = '', string $ledgerHash = '', string $ledgerIndex = '', int $limit = 200)
+    public function _call(string $method, array $params = [])
     {
-        return $this->_call('account_channels', [$account, $destinationAccount, $ledgerHash, $ledgerIndex, $limit]);
+        $args = http_build_query($params);
+        $url =  self::URL . "{$method}?{$args}";
+        $data = @file_get_contents($url);
+        return json_decode($data, true);
     }
 
     /**
-     * Get a list of currencies an account can send or receive.
-     * <account> [strict=false] [ledger_hash] [ledger_index]
+     * Retrieve a specific Ledger by hash, index, date, or latest validated.
+     * <ledger_identifier> [transactions=false] [binary=false] [expand=false]
      *
-     * @param string $account
-     * @param bool $strict
-     * @param string $ledgerHash
-     * @param string $ledgerIndex
-     * @return mixed
-     */
-    public function accountCurrencies(string $account, bool $strict = false, string $ledgerHash = '', string $ledgerIndex = '')
-    {
-        return $this->_call('account_currencies', [$account, $strict, $ledgerHash, $ledgerIndex]);
-    }
-
-    /**
-     * Get basic data about an account.
-     * [account] [strict=false] [ledger_hash] [ledger_index] [queue=true] [signer_lists=true]
-     *
-     * @param string $account
-     * @param bool $strict
-     * @param string $ledgerHash
-     * @param string $ledgerIndex
-     * @param bool $queue
-     * @param bool $signerLists
-     * @return mixed
-     */
-    public function accountInfo(string $account, bool $strict = false, string $ledgerHash = '', string $ledgerIndex = '', bool $queue = true, bool $signerLists = true)
-    {
-        return $this->_call('account_info', [$account, $strict, $ledgerHash, $ledgerIndex, $queue, $signerLists]);
-    }
-
-    /**
-     * Get info about an account's trust lines.
-     * <account> [ledger_hash] [ledger_index] [peer] [limit=200]
-     *
-     * @param string $account
-     * @param string $ledgerHash
-     * @param string $ledgerIndex
-     * @param string $peer
-     * @param int $limit
-     * @return mixed
-     */
-    public function accountLines(string $account, string $ledgerHash = '', string $ledgerIndex = '', string $peer = '', int $limit = 200)
-    {
-        return $this->_call('account_lines', [$account, $ledgerHash, $ledgerIndex, $peer, $limit]);
-    }
-
-    /**
-     * Get all ledger objects owned by an account.
-     * <account> <type> [ledger_hash] [ledger_index] [limit=200]
-     *
-     * @param string $account
-     * @param string $type - check, deposit_preauth, escrow, offer, payment_channel, signer_list, state
-     * @param string $ledgerHash
-     * @param string $ledgerIndex
-     * @param int $limit
-     * @return mixed
-     */
-    public function accountObjects(string $account, string $type, string $ledgerHash = '', string $ledgerIndex = '', int $limit = 200)
-    {
-        return $this->_call('account_objects', [$account, $type, $ledgerHash, $ledgerIndex, $limit]);
-    }
-
-    /**
-     * Get info about an account's currency exchange offers.
-     * <account> [ledger] [ledger_hash] [ledger_index] [limit=200]
-     *
-     * @param string $account
-     * @param string $ledger
-     * @param string $ledgerHash
-     * @param string $ledgerIndex
-     * @param int $limit
-     * @return mixed
-     */
-    public function accountOffers(string $account, string $ledger = '', string $ledgerHash = '', string $ledgerIndex = '', int $limit = 200)
-    {
-        return $this->_call('account_offers', [$account, $ledger, $ledgerHash, $ledgerIndex, $limit]);
-    }
-
-    /**
-     * Get info about an account's transactions.
-     * <account> [ledger_index_min=-1] [ledger_index_max=-1] [ledger_hash] [ledger_index] [binary=false] [forward=false] [limit=200]
-     *
-     * @param string $account
-     * @param int $ledgerIndexMin
-     * @param int $ledgerIndexMax
-     * @param string $ledgerHash
-     * @param string $ledgerIndex
+     * @param string $identifier
+     * @param bool $transactions
      * @param bool $binary
-     * @param bool $forward
-     * @param int $limit
-     * @return mixed
-     */
-    public function accountTx(string $account, int $ledgerIndexMin = -1, int $ledgerIndexMax = -1, string $ledgerHash = '', string $ledgerIndex = '', bool $binary = false, bool $forward = false, int $limit = 200)
-    {
-        return $this->_call('account_tx', [$account, $ledgerIndexMin, $ledgerIndexMax, $ledgerHash, $ledgerIndex, $binary, $forward, $limit]);
-    }
-
-    /**
-     * Calculate total amounts issued by an account.
-     * <account> [strict=false] [hotwallet] [ledger_hash] [ledger_index]
-     *
-     * @param string $account
-     * @param bool $strict
-     * @param array $hotWallet
-     * @param string $ledgerHash
-     * @param string $ledgerIndex
-     * @return mixed
-     */
-    public function gatewayBalances(string $account, bool $strict = false, array $hotWallet = [], string $ledgerHash = '', string $ledgerIndex = '')
-    {
-        return $this->_call('gateway_balances', [$account, $strict, $hotWallet, $ledgerHash, $ledgerIndex]);
-    }
-
-    /**
-     * Get recommended changes to an account's DefaultRipple and NoRipple settings.
-     * <account> [role=user] [transactions=false] [limit=300] [ledger_hash] [ledger_index]
-     *
-     * @param string $account
-     * @param string $role
-     * @param bool $transactions
-     * @param string $ledgerHash
-     * @param string $ledgerIndex
-     * @return mixed
-     */
-    public function noRippleCheck(string $account, string $role = 'user', bool $transactions = false, string $ledgerHash = '', string $ledgerIndex = '')
-    {
-        return $this->_call('noripple_check', [$account, $role, $transactions, $ledgerHash, $ledgerIndex]);
-    }
-
-    /**
-     * Retrieve information about the public ledger.
-     * [ledger_hash] [ledger_index] [full=false] [accounts=false] [transactions=false] [expand=false] [owner_funds=false] [binary=false] [queue=true]
-     *
-     * @param string $ledgerHash
-     * @param string $ledgerIndex
-     * @param bool $full
-     * @param bool $accounts
-     * @param bool $transactions
      * @param bool $expand
-     * @param bool $ownerFunds
-     * @param bool $binary
-     * @param bool $queue
      * @return mixed
      */
-    public function ledger(string $ledgerHash = '', string $ledgerIndex = '', bool $full = false, bool $accounts = false, bool $transactions = false, bool $expand = false, bool $ownerFunds = false, bool $binary = false, bool $queue = true)
+    public function getLedger(string $identifier, bool $transactions = false, bool $binary = false, bool $expand = false)
     {
-        return $this->_call('ledger', [$ledgerHash, $ledgerIndex, $full, $accounts, $transactions, $expand, $ownerFunds, $binary, $queue]);
+        return $this->_call("/v2/ledgers/{$identifier}", [$transactions, $binary, $expand]);
     }
 
     /**
-     * Get the latest closed ledger version.
-     *
-     * @return mixed
-     */
-    public function ledgerClosed()
-    {
-        return $this->_call('ledger_closed');
-    }
-
-    /**
-     * Get the current working ledger version.
-     *
-     * @return mixed
-     */
-    public function ledgerCurrent()
-    {
-        return $this->_call('ledger_current');
-    }
-
-    /**
-     * Get the raw contents of a ledger version.
-     * [ledger_hash] [ledger_index] [binary=false] [limit=200]
+     * Retrieve a any validations recorded for a specific ledger hash.
+     * This dataset includes ledger versions that are outside
+     * the validated ledger chain. (New in v2.2.0)
+     * <ledger_hash> [limit=200] [marker] [format=json]
      *
      * @param string $ledgerHash
-     * @param string $ledgerIndex
+     * @param int $limit
+     * @param string $marker
+     * @param string $format
+     * @return mixed
+     */
+    public function getLedgerValidations(string $ledgerHash, int $limit = 200, string $marker = '', string $format = 'json')
+    {
+        return $this->_call("/v2/ledgers/{$ledgerHash}/validations", [$limit, $marker, $format]);
+    }
+
+    /**
+     * Retrieve a validation vote recorded for a specific ledger
+     * hash by a specific validator. This dataset includes ledger
+     * versions that are outside the validated ledger chain. (New in v2.2.0)
+     * <ledger_hash> <pubkey>
+     *
+     * @param string $ledgerHash
+     * @param string $pubKey
+     * @return mixed
+     */
+    public function getLedgerValidation(string $ledgerHash, string $pubKey)
+    {
+        return $this->_call("/v2/ledgers/{$ledgerHash}/validations/{$pubKey}", []);
+    }
+
+    /**
+     * Retrieve a specific transaction by its identifying hash.
+     * <hash> [binary=false]
+     *
+     * @param string $hash
+     * @param bool $binary
+     * @return mixed
+     */
+    public function getTransaction(string $hash, bool $binary = false)
+    {
+        return $this->_call("/v2/transactions/{$hash}", [$binary]);
+    }
+
+    /**
+     * Retrieve transactions by time
+     * [start] [end] [descending=false] [type] [result] [binary=false] [limit=20] [marker]
+     *
+     * @param string $start
+     * @param string $end
+     * @param bool $descending
+     * @param string $type
+     * @param string $result
      * @param bool $binary
      * @param int $limit
+     * @param string $marker
      * @return mixed
      */
-    public function ledgerData(string $ledgerHash = '', string $ledgerIndex = '', bool $binary = false, int $limit = 200)
+    public function getTransactions(string $start = '', string $end = '', bool $descending = false, string $type = '', string $result = '', bool $binary = false, int $limit = 20, string $marker = '')
     {
-        return $this->_call('ledger_data', [$ledgerHash, $ledgerIndex, $binary, $limit]);
+        return $this->_call('/v2/transactions/', [$start, $end, $descending, $type, $result, $binary, $limit, $marker]);
     }
 
     /**
-     * Get one element from a ledger version.
-     * [index] [account_root] [check] [deposit_preauth] [directory] [escrow] [offer] [payment_channel] [ripple_state] [binary=true] [ledger_hash] [ledger_index]
+     * Retrieve Payments over time, where Payments are defined as Payment type
+     * transactions where the sender of the transaction is not also the destination.
+     * (New in v2.0.4)
      *
-     * @param string $index
-     * @param string $accountRoot
-     * @param string $check
-     * @param array $depositPreAuth
-     * @param array $directory
-     * @param array $escrow
-     * @param array $offer
-     * @param string $paymentChannel
-     * @param array $rippleState
-     * @param bool $binary
-     * @param string $ledgerHash
-     * @param string $ledgerIndex
-     * @return mixed|string
-     */
-    public function ledgerEntry(string $index, string $accountRoot, string $check = '', array $depositPreAuth = [], array $directory = [], array $escrow = [], array $offer = [], string $paymentChannel = '', array $rippleState = [], bool $binary = true, string $ledgerHash = '', string $ledgerIndex = '')
-    {
-        return $this->_call('ledger_entry', [$index, $accountRoot, $check, $depositPreAuth, $directory, $escrow, $offer, $paymentChannel, $rippleState, $binary, $ledgerHash, $ledgerIndex]);
-    }
-
-    /**
-     * Cryptographically sign a transaction.
-     * <tx_json> [secret] [seed] [seed_hex] [passphrase] [key_type=secp256k1] [offline=false] [build_path=false] [fee_mult_max=10] [fee_div_max=1]
+     * Results can be returned as individual payments, or aggregated
+     * to a specific list of intervals if currency and issuer are provided.
+     * <currency> [start] [end] [descending=false] [limit=200] [marker] [format=json]
      *
-     * @param array $txJson
-     * @param string $secret
-     * @param string $seed
-     * @param string $seedHex
-     * @param string $passPhrase
-     * @param string $keyType
-     * @param bool $offline
-     * @param bool $buildPath
-     * @param int $feeMultMax
-     * @param int $feeDivMax
-     * @return mixed
-     */
-    public function sign(array $txJson, string $secret = '', string $seed = '', string $seedHex = '', string $passPhrase = '', string $keyType = 'secp256k1', bool $offline = false, bool $buildPath = false, int $feeMultMax = 10, int $feeDivMax = 1)
-    {
-        return $this->_call('sign', [$txJson, $secret, $seed, $seedHex, $passPhrase, $keyType, $offline, $buildPath, $feeMultMax, $feeDivMax]);
-    }
-
-    /**
-     * Contribute to a multi-signature.
-     * <account> <tx_json> [secret] [seed] [seed_hex] [passphrase] [key_type=secp256k1]
-     *
-     * @param string $account
-     * @param array $txJson
-     * @param string $secret
-     * @param string $seed
-     * @param string $seedHex
-     * @param string $passPhrase
-     * @param string $keyType
-     * @return mixed
-     */
-    public function signFor(string $account, array $txJson, string $secret = '', string $seed = '', string $seedHex = '', string $passPhrase = '', string $keyType = 'secp256k1')
-    {
-        return $this->_call('sign_for', [$account, $txJson, $secret, $seed, $seedHex, $passPhrase, $keyType]);
-    }
-
-    /**
-     * Send a transaction to the network.
-     * <tx_blob> [fail_hard=false]
-     *
-     * @param string $txBlob
-     * @param bool $failHard
-     * @return mixed
-     */
-    public function submit(string $txBlob, bool $failHard = false)
-    {
-        return $this->_call('submit', [$txBlob, $failHard]);
-    }
-
-    /**
-     * Send a multi-signed transaction to the network.
-     * <tx_blob> [fail_hard=false]
-     *
-     * @param string $txBlob
-     * @param bool $failHard
-     * @return mixed
-     */
-    public function submitMultiSigned(string $txBlob, bool $failHard = false)
-    {
-        return $this->_call('submit_multisigned', [$txBlob, $failHard]);
-    }
-
-    /**
-     * Retrieve info about a transaction from a particular ledger version.
-     * <tx_hash> [ledger_hash] [ledger_index]
-     *
-     * @param string $txHash
-     * @param string $ledgerHash
-     * @param string $ledgerIndex
-     * @return mixed
-     */
-    public function transactionEntry(string $txHash, string $ledgerHash = '', string $ledgerIndex = '')
-    {
-        return $this->_call('transaction_entry', [$txHash, $ledgerHash, $ledgerIndex]);
-    }
-
-    /**
-     * Retrieve info about a transaction from all the ledgers on hand.
-     * <transaction> [binary=false]
-     *
-     * @param string $transaction
-     * @param bool $binary
-     * @return mixed
-     */
-    public function tx(string $transaction, bool $binary = false)
-    {
-        return $this->_call('tx', [$transaction, $binary]);
-    }
-
-    /**
-     * Retrieve info about all recent transactions.
-     * <start>
-     *
-     * @deprecated
-     * @param int $start
-     * @return mixed
-     */
-    public function txHistory(int $start)
-    {
-        return $this->_call('tx_history', [$start]);
-    }
-
-    /**
-     * Get info about offers to exchange two currencies.
-     * <taker_pays> <taker_gets> [ledger_hash] [ledger_index] [limit=200] [taker]
-     *
-     * @param array $takerPays
-     * @param array $takerGets
-     * @param string $ledgerHash
-     * @param string $ledgerIndex
+     * @param string $currency
+     * @param string $start
+     * @param string $end
+     * @param bool $descending
      * @param int $limit
-     * @param string $taker
+     * @param string $marker
+     * @param string $format
      * @return mixed
      */
-    public function bookOffers(array $takerPays, array $takerGets, string $ledgerHash = '', string $ledgerIndex = '', int $limit = 200, string $taker = '')
+    public function getPayments(string $currency = '', string $start = '', string $end = '', bool $descending = false, int $limit = 200, string $marker = '', string $format = 'json')
     {
-        return $this->_call('book_offers', [$takerPays, $takerGets, $ledgerHash, $ledgerIndex, $limit, $taker]);
+        return $this->_call("/v2/payments/{$currency}", [$start, $end, $descending, $limit, $marker, $format]);
     }
 
     /**
-     * Look up whether one account is authorized to send payments directly to another.
-     * <source_account> <destination_account> [ledger_hash] [ledger_index]
+     * Retrieve Exchanges for a given currency pair over time.
+     * Results can be returned as individual exchanges or aggregated
+     * to a specific list of intervals
+     * <base> <counter> [start] [end] [interval] [descending=false] [reduce=false] [limit=200] [marker] [autobridged] [format=json]
      *
-     * @param string $sourceAccount
-     * @param string $destinationAccount
-     * @param string $ledgerHash
+     * @param string $base
+     * @param string $counter
+     * @param string $start
+     * @param string $end
+     * @param string $interval
+     * @param bool $descending
+     * @param bool $reduce
+     * @param int $limit
+     * @param string $marker
+     * @param bool $autoBridged
+     * @param string $format
+     * @return mixed
+     */
+    public function getExchanges(string $base, string $counter, string $start = '', string $end = '', string $interval = '', bool $descending = false, bool $reduce = false, int $limit = 200, string $marker = '', bool $autoBridged = true, string $format = 'json')
+    {
+        return $this->_call("/v2/exchanges/{$base}/{$counter}", [$start, $end, $interval, $descending, $reduce, $limit, $marker, $autoBridged, $format]);
+    }
+
+    /**
+     * Retrieve an exchange rate for a given currency pair at a specific time.
+     * <base> <counter> [date] [strict=true]
+     *
+     * @param string $base
+     * @param string $counter
+     * @param string $date
+     * @param bool $strict
+     * @return mixed
+     */
+    public function getExchangeRates(string $base, string $counter, string $date = '', bool $strict = true)
+    {
+        return $this->_call("/v2/exchange_rates/{$base}/{$counter}", [$date, $strict]);
+    }
+
+    /**
+     * Convert an amount from one currency and issuer to another,
+     * using the network exchange rates.
+     * [amount] [currency] [issuer] [exchange_currency] [exchange_issuer] [date] [strict=false]
+     *
+     * @param float $amount
+     * @param string $currency
+     * @param string $issuer
+     * @param string $exchangeCurrency
+     * @param string $exchangeIssuer
+     * @param string $date
+     * @param bool $strict
+     * @return mixed
+     */
+    public function normalize(float $amount = 0, string $currency = '', string $issuer = '', string $exchangeCurrency = '', string $exchangeIssuer = '', string $date = '', bool $strict = false)
+    {
+        return $this->_call('/v2/normalize', [$amount, $currency, $issuer, $exchangeCurrency, $exchangeIssuer, $date, $strict]);
+    }
+
+    /**
+     * Retrieve per account per day aggregated payment summaries
+     * <date> [accounts=false] [payments=false] [format=json] [limit=200] [marker]
+     *
+     * @param string $date
+     * @param bool $accounts
+     * @param bool $payments
+     * @param string $format
+     * @param int $limit
+     * @param string $marker
+     * @return mixed
+     */
+    public function getDailyReports(string $date, bool $accounts = false, bool $payments = false, string $format = 'json', int $limit = 200, string $marker = '')
+    {
+        return $this->_call("/v2/reports/{$date}", [$accounts, $payments, $format, $limit, $marker]);
+    }
+
+    /**
+     * Retrieve statistics about transaction activity in the XRP Ledger,
+     * divided into intervals of time.
+     * [family] [metrics] [start] [end] [interval=day] [limit=200] [marker] [descending=false] [format=json]
+     *
+     * @param string $family
+     * @param string $metrics
+     * @param string $start
+     * @param string $end
+     * @param string $interval
+     * @param int $limit
+     * @param string $marker
+     * @param bool $descending
+     * @param string $format
+     * @return mixed
+     */
+    public function getStats(string $family = '', string $metrics = '', string $start = '', string $end = '', string $interval = 'day', int $limit = 200, string $marker = '', bool $descending = false, string $format = 'json')
+    {
+        return $this->_call('/v2/stats', [$family, $metrics, $start, $end, $interval, $limit, $marker, $descending, $format]);
+    }
+
+    /**
+     * Get information on which accounts are actively trading in a
+     * specific currency pair.
+     * <base> <counter> [period=1day] [date] [include_exchanges=false] [format=json]
+     *
+     * @param string $base
+     * @param string $counter
+     * @param string $period
+     * @param string $date
+     * @param bool $includeExchanges
+     * @param string $format
+     * @return mixed
+     */
+    public function getActiveAccounts(string $base, string $counter, string $period = '1day', string $date = '', bool $includeExchanges = false, string $format = 'json')
+    {
+        return $this->_call("/v2/active_accounts/{$base}/{$counter}", [$period, $date, $includeExchanges, $format]);
+    }
+
+    /**
+     * Get aggregated exchange volume for a given time period. (New in v2.0.4)
+     * [live] [exchange_currency] [exchange_issuer] [format=json]
+     *
+     * @param string $live
+     * @param string $exchangeCurrency
+     * @param string $exchangeIssuer
+     * @param string $format
+     * @return mixed
+     */
+    public function getExchangeVolume(string $live = '', string $exchangeCurrency = '', string $exchangeIssuer = '', string $format = 'json')
+    {
+        return $this->_call('/v2/network/exchange_volume', [$live, $exchangeCurrency, $exchangeIssuer, $format]);
+    }
+
+    /**
+     * Get aggregated payment volume for a given time period. (New in v2.0.4)
+     * [live] [exchange_currency] [exchange_issuer] [format=json]
+     *
+     * @param string $live
+     * @param string $exchangeCurrency
+     * @param string $exchangeIssuer
+     * @param string $format
+     * @return mixed
+     */
+    public function getPaymentVolume(string $live = '', string $exchangeCurrency = '', string $exchangeIssuer = '', string $format = 'json')
+    {
+        return $this->_call('/v2/network/payment_volume', [$live, $exchangeCurrency, $exchangeIssuer, $format]);
+    }
+
+    /**
+     * Get aggregated exchange volume from a list of off ledger exchanges for a specified rolling interval.
+     * [period=1day] [exchange_currency] [exchange_issuer]
+     *
+     * @param string $period
+     * @param string $exchangeCurrency
+     * @param string $exchangeIssuer
+     * @return mixed
+     */
+    public function getExternalMarkets(string $period = '1day', string $exchangeCurrency = '', string $exchangeIssuer = '')
+    {
+        return $this->_call('/v2/network/external_markets', [$period, $exchangeCurrency, $exchangeIssuer]);
+    }
+
+    /**
+     * Get information on the total amount of XRP in existence and in circulation,
+     * by weekly intervals. (New in v2.2.0)
+     * [start] [end] [limit=200] [marker] [descending=false] [format=json]
+     *
+     * @param string $start
+     * @param string $end
+     * @param int $limit
+     * @param string $marker
+     * @param bool $descending
+     * @param string $format
+     * @return mixed
+     */
+    public function getXRPDistribution(string $start = '', string $end = '', int $limit = 200, string $marker = '', bool $descending = false, string $format = 'json')
+    {
+        return $this->_call('/v2/network/xrp_distribution', [$start, $end, $limit, $marker, $descending, $format]);
+    }
+
+    /**
+     * Returns the top currencies on the XRP Ledger, ordered from highest rank to
+     * lowest. The ranking is determined by the volume and count of transactions
+     * and the number of unique counterparties. By default, returns results
+     * for the 30-day rolling window ending on the current date.
+     * You can specify a date to get results for the 30-day window ending
+     * on that date. (New in v2.1.0)
+     * [date] [limit=1000] [format=json]
+     *
+     * @param string $date
+     * @param int $limit
+     * @param string $format
+     * @return mixed
+     */
+    public function getTopCurrencies(string $date = '', int $limit = 1000, string $format = 'json')
+    {
+        return $this->_call("/v2/network/top_currencies/{$date}", [$limit, $format]);
+    }
+
+    /**
+     * Returns the top exchange markets on the XRP Ledger, ordered from highest
+     * rank to lowest. The rank is determined by the number and volume of exchanges
+     * and the number of counterparties participating. By default, returns top markets
+     * for the 30-day rolling window ending on the current date. You can specify
+     * a date to get results for the 30-day window ending on that date. (New in v2.1.0)
+     * [date] [limit=1000] [format=json]
+     *
+     * @param string $date
+     * @param int $limit
+     * @param string $format
+     * @return mixed
+     */
+    public function getTopMarkets(string $date = '', int $limit = 1000, string $format = 'json')
+    {
+        return $this->_call("/v2/network/top_markets/{$date}", [$limit, $format]);
+    }
+
+    /**
+     * Returns transaction cost stats per ledger, hour, or day.
+     * The data shows the average, minimum, maximum, and total transaction
+     * costs paid for the given interval or ledger. (New in v2.2.0)
+     * [start] [end] [interval=ledger] [descending=false] [limit=200] [marker] [format=json]
+     *
+     * @param string $start
+     * @param string $end
+     * @param string $interval
+     * @param bool $descending
+     * @param int $limit
+     * @param string $marker
+     * @param string $format
+     * @return mixed
+     */
+    public function getTransactionCosts(string $start = '', string $end = '', string $interval = 'ledger', bool $descending = false, int $limit = 200, string $marker = '', string $format = 'json')
+    {
+        return $this->_call('/v2/network/fees', [$start, $end, $interval, $descending, $limit, $marker, $format]);
+    }
+
+    /**
+     * Returns snapshots of the metrics derived from rippled's fee command. (New in v2.3.2)
+     * [start] [end] [interval=day] [descending=false] [limit=200] [marker] [format=json]
+     *
+     * @param string $start
+     * @param string $end
+     * @param string $interval
+     * @param bool $descending
+     * @param int $limit
+     * @param string $marker
+     * @param string $format
+     * @return mixed
+     */
+    public function getFeeStats(string $start = '', string $end = '', string $interval = 'day', bool $descending = false, int $limit = 200, string $marker = '', string $format = 'json')
+    {
+        return $this->_call('/v2/network/fee_stats', [$start, $end, $interval, $descending, $limit, $marker, $format]);
+    }
+
+    /**
+     * Get known rippled servers and peer-to-peer connections between them. (New in v2.2.0)
+     * [date] [verbose=false]
+     *
+     * @param string $date
+     * @param bool $verbose
+     * @return mixed
+     */
+    public function getTopology(string $date = '', bool $verbose = false)
+    {
+        return $this->_call('/v2/network/topology', [$date, $verbose]);
+    }
+
+    /**
+     * Get known rippled nodes. (This is a subset of the data returned by the
+     * Get Topology method.) (New in v2.2.0)
+     * [date] [verbose=false] [format=json]
+     *
+     * @param string $date
+     * @param bool $verbose
+     * @param string $format
+     * @return mixed
+     */
+    public function getTopologyNodes(string $date = '', bool $verbose = false, string $format = 'json')
+    {
+        return $this->_call('/v2/network/topology/nodes', [$date, $verbose, $format]);
+    }
+
+    /**
+     * Get information about a single rippled server by its node public key
+     * (not validator public key). (New in v2.2.0)
+     * <pubkey>
+     *
+     * @param string $pubKey
+     * @return mixed
+     */
+    public function getTopologyNode(string $pubKey)
+    {
+        return $this->_call("/v2/network/topology/nodes/{$pubKey}");
+    }
+
+    /**
+     * Get information on peer-to-peer connections between rippled servers.
+     * (This is a subset of the data returned by the Get Topology method.)
+     * (New in v2.2.0)
+     * [date] [format=json]
+     *
+     * @param string $date
+     * @param string $format
+     * @return mixed
+     */
+    public function getTopologyLinks(string $date = '', string $format = 'json')
+    {
+        return $this->_call('/v2/network/topology/links', [$date, $format]);
+    }
+
+    /**
+     * Get details of a single validator in the consensus network. (New in v2.2.0)
+     * <pubkey> [format=json]
+     *
+     * @param string $pubKey
+     * @param string $format
+     * @return mixed
+     */
+    public function getValidator(string $pubKey, string $format = 'json')
+    {
+        return $this->_call("/v2/network/validators/{$pubKey}", [$format]);
+    }
+
+    /**
+     * Get a list of known validators. (New in v2.2.0)
+     * [format=json]
+     *
+     * @param string $format
+     * @return mixed
+     */
+    public function getValidators(string $format = 'json')
+    {
+        return $this->_call('/v2/network/validators', [$format]);
+    }
+
+    /**
+     * Retrieve validation votes signed by a specified validator,
+     * including votes for ledger versions that are outside the main
+     * ledger chain. (New in v2.2.0)
+     * <pubkey> [start] [end] [limit=200] [marker] [format=json]
+     *
+     * @param string $pubKey
+     * @param string $start
+     * @param string $end
+     * @param int $limit
+     * @param string $marker
+     * @param string $format
+     * @return mixed
+     */
+    public function getValidatorValidations(string $pubKey, string $start = '', string $end = '', int $limit = 200, string $marker = '', string $format = 'json')
+    {
+        return $this->_call("/v2/network/validators/{$pubKey}/validations", [$start, $end, $limit, $marker, $format]);
+    }
+
+    /**
+     * Retrieve validation votes, including votes for ledger versions
+     * that are outside the main ledger chain. (New in v2.2.0)
+     * [start] [end] [limit=200] [marker] [format=json] [descending=false]
+     *
+     * @param string $start
+     * @param string $end
+     * @param int $limit
+     * @param string $marker
+     * @param string $format
+     * @return mixed
+     */
+    public function getValidations(string $start = '', string $end = '', int $limit = 200, string $marker = '', string $format = 'json', bool $descending = false)
+    {
+        return $this->_call('/v2/network/validations', [$start, $end, $limit, $marker, $format, $descending]);
+    }
+
+    /**
+     * Get a single validator's validation vote stats for 24-hour intervals.
+     * <pubkey> [start] [end] [format=json]
+     *
+     * @param string $pubKey
+     * @param string $start
+     * @param string $end
+     * @param string $format
+     * @return mixed
+     */
+    public function getSingleValidatorReports(string $pubKey, string $start = '', string $end = '', string $format = 'json')
+    {
+        return $this->_call("/v2/network/validators/{$pubKey}/reports", [$start, $end, $format]);
+    }
+
+    /**
+     * Get a validation vote stats and validator information for all known validators in a 24-hour period.
+     * [date] [format=json]
+     *
+     * @param string $date
+     * @param string $format
+     * @return mixed
+     */
+    public function getDailyValidatorReports(string $date = '', string $format = 'json')
+    {
+        return $this->_call('/v2/network/validator_reports', [$date, $format]);
+    }
+
+    /**
+     * Reports the latest versions of rippled available from the official
+     * Ripple Yum repositories. (New in v2.3.0.)
+     *
+     * @return mixed
+     */
+    public function getRippledVersions()
+    {
+        return $this->_call('/v2/network/rippled_versions');
+    }
+
+    /**
+     * Get information about known gateways. (New in v2.0.4)
+     *
+     * @return mixed
+     */
+    public function getAllGateways()
+    {
+        return $this->_call('/v2/gateways/');
+    }
+
+    /**
+     * Get information about a specific gateway from the Data API's
+     * list of known gateways. (New in v2.0.4)
+     * <gateway>
+     *
+     * @param string $gateway
+     * @return mixed
+     */
+    public function getGateway(string $gateway)
+    {
+        return $this->_call("/v2/gateways/{$gateway}");
+    }
+
+    /**
+     * Retrieve vector icons for various currencies. (New in v2.0.4)
+     *
+     * @param string $currencyImage
+     * @return mixed
+     */
+    public function getCurrencyImage(string $currencyImage)
+    {
+        return $this->_call("/v2/currencies/{$currencyImage}");
+    }
+
+    /**
+     * Retrieve information about the creation of new accounts in the XRP Ledger.
+     * [start] [end] [limit=200] [marker] [descending=false] [parent] [format=json]
+     *
+     * @param string $start
+     * @param string $end
+     * @param int $limit
+     * @param string $marker
+     * @param bool $descending
+     * @param string $parent
+     * @param string $format
+     * @return mixed
+     */
+    public function getAccounts(string $start = '', string $end = '', int $limit = 200, string $marker = '', bool $descending = false, string $parent = '', string $format = 'json')
+    {
+        return $this->_call('/v2/accounts', [$start, $end, $limit, $marker, $descending, $parent, $format]);
+    }
+
+    /**
+     * Get creation info for a specific ripple account
+     * <address>
+     *
+     * @param string $address
+     * @return mixed
+     */
+    public function getAccount(string $address)
+    {
+        return $this->_call("/v2/accounts/{$address}");
+    }
+
+    /**
+     * Get all balances held or owed by a specific XRP Ledger account.
+     * <address> [ledger_index] [ledger_hash] [date] [currency] [counterparty] [limit=200] [format=json]
+     *
+     * @param string $address
      * @param string $ledgerIndex
-     * @return mixed
-     */
-    public function depositAuthorized(string $sourceAccount, string $destinationAccount, string $ledgerHash = '', string $ledgerIndex = '')
-    {
-        return $this->_call('deposit_authorized', [$sourceAccount, $destinationAccount, $ledgerHash, $ledgerIndex]);
-    }
-
-    /**
-     * Find a path for payment between two accounts, once.
-     * <source_account> <destination_account> [destination_amount] [send_max] [source_currencies] [ledger_hash] [ledger_index]
-     *
-     * @param string $sourceAccount
-     * @param string $destinationAccount
-     * @param string $destinationAmount
-     * @param string $sendMax
-     * @param array $sourceCurrencies
      * @param string $ledgerHash
+     * @param string $date
+     * @param string $currency
+     * @param string $counterParty
+     * @param int $limit
+     * @param string $format
+     * @return mixed
+     */
+    public function getAccountBalances(string $address, string $ledgerIndex = '', string $ledgerHash = '', string $date = '', string $currency = '', string $counterParty = '', int $limit = 200, string $format = 'json')
+    {
+        return $this->_call("/v2/accounts/{$address}/balances", [$date, $ledgerIndex, $ledgerHash, $currency, $counterParty, $limit, $format]);
+    }
+
+    /**
+     * Get orders in the order books, placed by a specific account.
+     * This does not return orders that have already been filled.
+     *
+     * @param string $address
      * @param string $ledgerIndex
+     * @param string $ledgerHash
+     * @param string $date
+     * @param int $limit
+     * @param string $format
      * @return mixed
      */
-    public function ripplePathFind(string $sourceAccount, string $destinationAccount, string $destinationAmount = '', string $sendMax = '', array $sourceCurrencies = [], string $ledgerHash = '', string $ledgerIndex = '')
+    public function getAccountOrders(string $address, string $ledgerIndex = '', string $ledgerHash = '', string $date = '', int $limit = 200, string $format = 'json')
     {
-        return $this->_call('ripple_path_find', [$sourceAccount, $destinationAccount, $destinationAmount, $sendMax, $sourceCurrencies, $ledgerHash, $ledgerIndex]);
+        return $this->_call("/v2/account/{$address}/orders", [$ledgerIndex, $ledgerHash, $date, $limit, $format]);
     }
 
     /**
-     * Sign a claim for money from a payment channel.
-     * <channel_id> <secret> <amount>
+     * Retrieve a history of transactions that affected a specific account.
+     * This includes all transactions the account sent,
+     * payments the account received, and payments that rippled through the account.
+     * <address> [start] [end] [min_sequence] [max_sequence] [type] [result] [binary] [descending] [limit] [marker]
      *
-     * @param string $channelId
-     * @param string $secret
-     * @param string $amount
+     * @param string $address
+     * @param string $start
+     * @param string $end
+     * @param string $minSequence
+     * @param string $maxSequence
+     * @param string $type
+     * @param string $result
+     * @param bool $binary
+     * @param bool $descending
+     * @param int $limit
+     * @param string $marker
      * @return mixed
      */
-    public function channelAuthorize(string $channelId, string $secret, string $amount)
+    public function getAccountTransactionHistory(string $address, string $start = '', string $end = '', string $minSequence = '', string $maxSequence = '', string $type = '', string $result = '', bool $binary = false, bool $descending = false, int $limit = 20, string $marker = '')
     {
-        return $this->_call('channel_authorize', [$channelId, $secret, $amount]);
+        return $this->_call("/v2/accounts/{$address}/transactions", [$start, $end, $minSequence, $maxSequence, $type, $result, $binary, $descending, $limit, $marker]);
     }
 
     /**
-     * Check a payment channel claim's signature.
-     * <amount> <channel_id> <public_key> <signature>
+     * Retrieve a specific transaction originating from a specified account
+     * <address> <sequence> [binary=false]
      *
-     * @param string $amount
-     * @param string $channelId
-     * @param string $publicKey
-     * @param string $signature
+     * @param string $address
+     * @param int $sequence
+     * @param bool $binary
      * @return mixed
      */
-    public function channelVerify(string $amount, string $channelId, string $publicKey, string $signature)
+    public function getTransactionByAccountAndSequence(string $address, int $sequence, bool $binary = false)
     {
-        return $this->_call('channel_verify', [$amount, $channelId, $publicKey, $signature]);
+        return $this->_call("/v2/accounts/{$address}/transactions/{$sequence}", [$binary]);
     }
 
     /**
-     * Listen for updates about a particular subject.
-     * <url> [streams] [accounts] [accounts_proposed] [books] [url_username] [url_password]
+     * Retrieve a payments for a specified account
+     * <address> [start] [end] [type] [currency] [issuer] [source_tag] [destination_tag] [limit=200] [marker] [format=json]
      *
-     * @param string $url
-     * @param array $streams
-     * @param array $accounts
-     * @param array $accountsProposed
-     * @param array $books
-     * @param string $urlUsername
-     * @param string $urlPassword
+     * @param string $address
+     * @param string $start
+     * @param string $end
+     * @param string $type
+     * @param string $currency
+     * @param string $issuer
+     * @param int $sourceTag
+     * @param int $destinationTag
+     * @param int $limit
+     * @param string $marker
+     * @param string $format
      * @return mixed
      */
-    public function subscribe(string $url, array $streams = [], array $accounts = [], array $accountsProposed = [], array $books = [], string $urlUsername = '', string $urlPassword = '')
+    public function getAccountPayments(string $address, string $start = '', string $end = '', string $type = '', string $currency = '', string $issuer = '', int $sourceTag = 0, int $destinationTag = 0, int $limit = 200, string $marker = '', string $format = 'json')
     {
-        return $this->_call('subscribe', [$url, $streams, $accounts, $accountsProposed, $books, $urlUsername, $urlPassword]);
+        return $this->_call("/v2/accounts/{$address}/payments", [$start, $end, $type, $currency, $issuer, $sourceTag, $destinationTag, $limit, $marker, $format]);
     }
 
     /**
-     * Stop listening for updates about a particular subject.
-     * [streams] [accounts] [accounts_proposed] [books]
+     * Retrieve Exchanges for a given account over time.
+     * <address> [start] [end] [descending=false] [limit=200] [marker] [format=json]
      *
-     * @param array $streams
-     * @param array $accounts
-     * @param array $accountsProposed
-     * @param array $books
+     * @param string $address
+     * @param string $start
+     * @param string $end
+     * @param bool $descending
+     * @param int $limit
+     * @param string $marker
+     * @param string $format
      * @return mixed
      */
-    public function unsubscribe(array $streams = [], array $accounts = [], array $accountsProposed = [], array $books = [])
+    public function getAllAccountExchanges(string $address, string $start = '', string $end = '', bool $descending = false, int $limit = 200, string $marker = '', string $format = 'json')
     {
-        return $this->_call('unsubscribe', [$streams, $accounts, $accountsProposed, $books]);
+        return $this->_call("/v2/accounts/{$address}/exchanges/", [$start, $end, $descending, $limit, $marker, $format]);
     }
 
     /**
-     * Get information about transaction cost.
-     * <current_ledger_size> <current_queue_size> <drops> <expected_ledger_size> <ledger_current_index> <levels> <max_queue_size>
+     * Retrieve Exchanges for a given account over time.
+     * <address> <base> <counter> [start] [end] [descending=false] [limit=200] [marker] [format=json]
      *
-     * @param int $currentLedgerSize
-     * @param int $currentQueueSize
-     * @param array $drops
-     * @param int $expectedLedgerSize
-     * @param float $ledgerCurrentIndex
-     * @param array $levels
-     * @param int $maxQueueSize
+     * @param string $address
+     * @param string $base
+     * @param string $counter
+     * @param string $start
+     * @param string $end
+     * @param bool $descending
+     * @param int $limit
+     * @param string $marker
+     * @param string $format
      * @return mixed
      */
-    public function fee(int $currentLedgerSize, int $currentQueueSize, array $drops, int $expectedLedgerSize, float $ledgerCurrentIndex, array $levels, int $maxQueueSize)
+    public function getAccountExchanges(string $address, string $base, string $counter, string $start = '', string $end = '', bool $descending = false, int $limit = 200, string $marker = '', string $format = 'json')
     {
-        return $this->_call('fee', [$currentLedgerSize, $currentQueueSize, $drops, $expectedLedgerSize, $ledgerCurrentIndex, $levels, $maxQueueSize]);
+        return $this->_call("/v2/accounts/{$address}/exchanges/{$base}/{$counter}", [$start, $end, $descending, $limit, $marker, $format]);
     }
 
     /**
-     * Retrieve status of the server in human-readable format.
+     * Retrieve Balance changes for a given account over time.
+     * <address> [currency] [counterparty] [start] [end] [descending=false] [limit=200] [marker] [format=json]
      *
+     * @param string $address
+     * @param string $currency
+     * @param string $counterParty
+     * @param string $start
+     * @param string $end
+     * @param bool $descending
+     * @param int $limit
+     * @param string $marker
+     * @param string $format
      * @return mixed
      */
-    public function serverInfo()
+    public function getAccountBalanceChanges(string $address, string $currency = '', string $counterParty = '', string $start = '', string $end = '', bool $descending = false, int $limit = 200, string $marker = '', string $format = 'json')
     {
-        return $this->_call('server_info');
+        return $this->_call("/v2/accounts/{$address}/balance_changes/", [$currency, $counterParty, $start, $end, $descending, $limit, $marker, $format]);
     }
 
     /**
-     * Retrieve status of the server in machine-readable format.
+     * Retrieve daily summaries of payment activity for an account.
+     * <address> <date> [start] [end] [accounts=false] [payments=false] [descending=false] [format=json]
      *
+     * @param string $address
+     * @param string $date
+     * @param string $start
+     * @param string $end
+     * @param bool $accounts
+     * @param bool $payments
+     * @param bool $descending
+     * @param string $format
      * @return mixed
      */
-    public function serverState()
+    public function getAccountReports(string $address, string $date = '', string $start = '', string $end = '', bool $accounts = false, bool $payments = false, bool $descending = false, string $format = 'json')
     {
-        return $this->_call('server_state');
+        return $this->_call("/v2/accounts/{$address}/reports/{$date}", [$start, $end, $accounts, $payments, $descending, $format]);
     }
 
     /**
-     * Confirm connectivity with the server.
+     * Retrieve daily summaries of transaction activity for an account. (New in v2.1.0.)
+     * <address> [start] [end] [descending=false] [limit=200] [marker] [format=json]
      *
+     * @param string $address
+     * @param string $start
+     * @param string $end
+     * @param bool $descending
+     * @param int $limit
+     * @param string $marker
+     * @param string $format
      * @return mixed
      */
-    public function ping()
+    public function getAccountTransactionStats(string $address, string $start = '', string $end = '', int $limit = 200, bool $descending = false, string $marker = '', string $format = 'json')
     {
-        return $this->_call('ping');
+        return $this->_call("/v2/accounts/{$address}/stats/transactions", [$start, $end, $limit, $descending, $marker, $format]);
     }
 
     /**
-     * Generate a random number.
+     * Retrieve daily summaries of transaction activity for an account. (New in v2.1.0.)
+     * <address> [start] [end] [limit=200] [marker] [descending=false] [format=json]
      *
+     * @param string $address
+     * @param string $start
+     * @param string $end
+     * @param int $limit
+     * @param string $marker
+     * @param bool $descending
+     * @param string $format
      * @return mixed
      */
-    public function random()
+    public function getAccountValueStats(string $address, string $start = '', string $end = '', int $limit = 200, string $marker = '', bool $descending = false, string $format = 'json')
     {
-        return $this->_call('random');
-    }
-
-    /**
-     * Generate keys for a new account.
-     * [key_type=secp256k1] [passphrase] [seed] [seed_hex]
-     *
-     * @param string $keyType
-     * @param string $passPhrase
-     * @param string $seed
-     * @param string $seedHex
-     * @return mixed|string
-     */
-    public function walletPropose(string $keyType = 'secp256k1', string $passPhrase = '', string $seed = '', string $seedHex = '')
-    {
-        return $this->_call('wallet_propose', [$keyType, $passPhrase, $seed, $seedHex]);
+        return $this->_call("/v2/accounts/{$address}/stats/value", [$start, $end, $limit, $marker, $descending, $format]);
     }
 }
