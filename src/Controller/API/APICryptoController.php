@@ -5,8 +5,10 @@ namespace App\Controller\API;
 use App\Entity\Currency;
 use App\Entity\GlobalUser;
 use App\Entity\User;
+use App\Service\NodeManager;
 use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\NonUniqueResultException;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -26,31 +28,28 @@ class APICryptoController extends Controller
     }
 
     /**
+     * @param string $currencyCode
      * @param string $guid
-     * @param string $currency_code
-     * @param KeyStoreManager $keyStoreManager
-     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     * @param NodeManager $nodeManager
+     * @return JsonResponse
      * @throws EntityNotFoundException
      * @throws NonUniqueResultException
      * @throws \Exception
-     * @Route("/wallet/create/{currency_code}/{guid}", name="api_wallet_create")
+     * @Route("/wallet/create/{currencyCode}/{guid}", name="api_wallet_create")
      */
-//    public function createWallet($guid, $currency_code, KeyStoreManager $keyStoreManager)
-//    {
-//        $currency = $this->getCurrency($currency_code);
-//        $user = $this->getGlobalUser($guid, true);
-//
-//        $address = $keyStoreManager->createWallet($user, $currency);
-//
-//        return $this->json([
-//            'code' => 0,
-//            'message' => 'Wallet created',
-//            'wallet' => [
-//                'currency' => $currency->getCode_a(),
-//                'address' => $address
-//            ]
-//        ]);
-//    }
+    public function createWallet(string $currencyCode, string $guid, NodeManager $nodeManager): JsonResponse
+    {
+        $address = '';
+        if ($nodeLoader = $nodeManager->loadNodeAdapter($currencyCode)) {
+            $address = $nodeLoader->getNewAddress($guid);
+        }
+
+        return $this->json([
+            'code' => 0,
+            'message' => 'Wallet created',
+            'wallet' => ['address' => $address],
+        ]);
+    }
 
     /**
      * @param string $guid
@@ -117,11 +116,11 @@ class APICryptoController extends Controller
 
     /**
      * @param string $currency
-     * @return Currency|null
+     * @return Currency
      * @throws EntityNotFoundException
      * @throws NonUniqueResultException
      */
-//    private function getCurrency(string $currency)
+//    private function getCurrency(string $currency): Currency
 //    {
 //        $cur = $this->getDoctrine()->getRepository(Currency::class)->findByCodeAInsensitive($currency);
 //        if (!$cur) {
@@ -133,13 +132,11 @@ class APICryptoController extends Controller
     /**
      * @param string $guid
      * @param bool $create
-     * @return GlobalUser|null|object
+     * @return GlobalUser
      */
-//    private function getGlobalUser(string $guid, bool $create = false)
+//    private function getGlobalUser(string $guid, bool $create = false): GlobalUser
 //    {
-//        $user = $this->getDoctrine()->getRepository(GlobalUser::class)->findOneBy([
-//            'guid' => $guid
-//        ]);
+//        $user = $this->getDoctrine()->getRepository(GlobalUser::class)->findOneBy(['guid' => $guid]);
 //        if ($user) {
 //            return $user;
 //        }

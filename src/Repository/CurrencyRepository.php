@@ -19,32 +19,19 @@ class CurrencyRepository extends ServiceEntityRepository
         parent::__construct($registry, Currency::class);
     }
 
-//    /**
-//     * @return Currency[] Returns an array of Currency objects
-//     */
-    /*
-    public function findByExampleField($value)
+    /**
+     * @param string $code Currency alphabetic code
+     * @param bool $enabled_only If true - returns active and not locked currencies
+     * @return Currency|null
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function findByCodeAInsensitive(string $code, bool $enabled_only = true): ?Currency
     {
-        return $this->createQueryBuilder('c')
-            ->andWhere('c.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('c.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
+        $qb = $this->createQueryBuilder('a')
+            ->where('upper(a.code_a) = upper(:code)')->setParameter('code', $code);
+        if ($enabled_only) {
+            $qb->andWhere('a.is_active = 1')->andWhere('a.is_locked = 0');
+        }
+        return $qb->getQuery()->getOneOrNullResult();
     }
-    */
-
-    /*
-    public function findOneBySomeField($value): ?Currency
-    {
-        return $this->createQueryBuilder('c')
-            ->andWhere('c.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
 }

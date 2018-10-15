@@ -52,7 +52,7 @@ class Currency
      */
     public function isActive(): bool
     {
-        return $this->isEnabled && !$this->isLocked;
+        return $this->isActive && !$this->isLocked;
     }
 
     public function isNotActive(): bool
@@ -62,7 +62,17 @@ class Currency
 
     public function getIsActive(): bool
     {
-        return $this->isEnabled && $this->isLocked;
+        return $this->isActive && $this->isLocked;
+    }
+
+    /**
+     * @param bool $isActive
+     * @return Currency
+     */
+    public function setIsActive(bool $isActive): Currency
+    {
+        $this->isActive = $isActive;
+        return $this;
     }
 
     /**
@@ -98,7 +108,7 @@ class Currency
      * Like CurrencyPairs, balances etc. would be locked/disabled
      * @ORM\Column(type="boolean", nullable=false, options={"default":true})
      */
-    private $isEnabled;
+    private $isActive;
 
     /**
      * @var boolean Shows if there was a problem with a currency/rate
@@ -124,7 +134,7 @@ class Currency
     public function __construct()
     {
         $this->isLocked = true;
-        $this->isEnabled = true;
+        $this->isActive = true;
         $this->accounts = new ArrayCollection();
         $this->cryptoNodes = new ArrayCollection();
     }
