@@ -20,93 +20,51 @@ class Currency
 
     /**
      * @ORM\Column(type="string", length=255, nullable=false)
+     * @var string
      */
     private $name;
+
     /**
      * @ORM\Column(type="string", length=5, nullable=false)
+     * @var string
      */
     private $code_a;
+
     /**
      * @ORM\Column(type="smallint", nullable=true)
+     * @var int
      */
     private $code_n;
+
     /**
      * @ORM\Column(type="smallint", nullable=true)
+     * @var int
      */
     private $minor_unit;
+
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @var string
      */
     private $fraction_unit;
+
     /**
      * @ORM\Column(type="string", length=5, nullable=true)
+     * @var string
      */
     private $symbol;
+
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @var string
      */
     private $country;
-
-    /**
-     * @return bool
-     */
-    public function isActive(): bool
-    {
-        return $this->isActive && !$this->isLocked;
-    }
-
-    public function isNotActive(): bool
-    {
-        return !$this->isActive();
-    }
-
-    public function getIsActive(): bool
-    {
-        return $this->isActive && $this->isLocked;
-    }
-
-    /**
-     * @param bool $isActive
-     * @return Currency
-     */
-    public function setIsActive(bool $isActive): Currency
-    {
-        $this->isActive = $isActive;
-        return $this;
-    }
-
-    /**
-     * @param bool $isEnabled
-     * @return Currency
-     */
-    public function setIsEnabled(bool $isEnabled): Currency
-    {
-        $this->isEnabled = $isEnabled;
-        return $this;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isLocked(): bool
-    {
-        return $this->isLocked;
-    }
-
-    /**
-     * @param bool $isLocked
-     * @return Currency
-     */
-    public function setIsLocked(bool $isLocked): Currency
-    {
-        $this->isLocked = $isLocked;
-        return $this;
-    }
 
     /**
      * @var boolean If currency is not enabled it should not be displayed or used anywhere
      * Like CurrencyPairs, balances etc. would be locked/disabled
      * @ORM\Column(type="boolean", nullable=false, options={"default":true})
+     * @var bool
      */
     private $isActive;
 
@@ -118,6 +76,7 @@ class Currency
      * New currencies are locked automatically in case they were created accidentally or imported via API
      *
      * @ORM\Column(type="boolean", nullable=false, options={"default":true})
+     * @var bool
      */
     private $isLocked;
 
@@ -150,7 +109,7 @@ class Currency
     /**
      * Get the value of name
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
@@ -158,19 +117,21 @@ class Currency
     /**
      * Set the value of name
      *
-     * @return  self
+     * @param string $name
+     * @return self
      */
-    public function setName($name)
+    public function setName(string $name): self
     {
         $this->name = $name;
-
         return $this;
     }
 
     /**
      * Get the value of code_a
+     *
+     * @return string
      */
-    public function getCode_a()
+    public function getCode_a(): string
     {
         return $this->code_a;
     }
@@ -178,19 +139,21 @@ class Currency
     /**
      * Set the value of code_a
      *
-     * @return  self
+     * @param string $codeA
+     * @return self
      */
-    public function setCode_a($code_a)
+    public function setCode_a(string $codeA): self
     {
-        $this->code_a = $code_a;
-
+        $this->code_a = $codeA;
         return $this;
     }
 
     /**
      * Get the value of code_n
+     *
+     * @return int
      */
-    public function getCode_n()
+    public function getCode_n(): int
     {
         return $this->code_n;
     }
@@ -198,19 +161,21 @@ class Currency
     /**
      * Set the value of code_n
      *
-     * @return  self
+     * @param int $codeN
+     * @return self
      */
-    public function setCode_n($code_n)
+    public function setCode_n(int $codeN): self
     {
-        $this->code_n = $code_n;
-
+        $this->code_n = $codeN;
         return $this;
     }
 
     /**
      * Get the value of minor_unit
+     *
+     * @return int
      */
-    public function getMinor_unit()
+    public function getMinor_unit(): int
     {
         return $this->minor_unit;
     }
@@ -218,19 +183,21 @@ class Currency
     /**
      * Set the value of minor_unit
      *
-     * @return  self
+     * @param int $minorUnit
+     * @return self
      */
-    public function setMinor_unit($minor_unit)
+    public function setMinor_unit(int $minorUnit): self
     {
-        $this->minor_unit = $minor_unit;
-
+        $this->minor_unit = $minorUnit;
         return $this;
     }
 
     /**
      * Get the value of fraction_unit
+     *
+     * @return string
      */
-    public function getFraction_unit()
+    public function getFraction_unit(): string
     {
         return $this->fraction_unit;
     }
@@ -238,19 +205,21 @@ class Currency
     /**
      * Set the value of fraction_unit
      *
-     * @return  self
+     * @param string $fractionUnit
+     * @return self
      */
-    public function setFraction_unit($fraction_unit)
+    public function setFraction_unit(string $fractionUnit): self
     {
-        $this->fraction_unit = $fraction_unit;
-
+        $this->fraction_unit = $fractionUnit;
         return $this;
     }
 
     /**
      * Get the value of symbol
+     *
+     * @return string
      */
-    public function getSymbol()
+    public function getSymbol(): string
     {
         return $this->symbol;
     }
@@ -258,19 +227,21 @@ class Currency
     /**
      * Set the value of symbol
      *
-     * @return  self
+     * @param string $symbol
+     * @return self
      */
-    public function setSymbol($symbol)
+    public function setSymbol(string $symbol): self
     {
         $this->symbol = $symbol;
-
         return $this;
     }
 
     /**
      * Get the value of country
+     *
+     * @return string
      */
-    public function getCountry()
+    public function getCountry(): string
     {
         return $this->country;
     }
@@ -278,12 +249,64 @@ class Currency
     /**
      * Set the value of country
      *
-     * @return  self
+     * @param string $country
+     * @return self
      */
-    public function setCountry($country)
+    public function setCountry(string $country): self
     {
         $this->country = $country;
+        return $this;
+    }
 
+    /**
+     * @return bool
+     */
+    public function isActive(): bool
+    {
+        return $this->isActive && !$this->isLocked;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isNotActive(): bool
+    {
+        return !$this->isActive();
+    }
+
+    /**
+     * @return bool
+     */
+    public function getIsActive(): bool
+    {
+        return $this->isActive && $this->isLocked;
+    }
+
+    /**
+     * @param bool $isActive
+     * @return Currency
+     */
+    public function setIsActive(bool $isActive): Currency
+    {
+        $this->isActive = $isActive;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isLocked(): bool
+    {
+        return $this->isLocked;
+    }
+
+    /**
+     * @param bool $isLocked
+     * @return Currency
+     */
+    public function setIsLocked(bool $isLocked): Currency
+    {
+        $this->isLocked = $isLocked;
         return $this;
     }
 
@@ -295,6 +318,10 @@ class Currency
         return $this->accounts;
     }
 
+    /**
+     * @param Account $account
+     * @return Currency
+     */
     public function addAccount(Account $account): self
     {
         if (!$this->accounts->contains($account)) {
@@ -305,6 +332,10 @@ class Currency
         return $this;
     }
 
+    /**
+     * @param Account $account
+     * @return Currency
+     */
     public function removeAccount(Account $account): self
     {
         if ($this->accounts->contains($account)) {
@@ -326,6 +357,10 @@ class Currency
         return $this->cryptoNodes;
     }
 
+    /**
+     * @param CryptoNode $cryptoNode
+     * @return Currency
+     */
     public function addCryptoNode(CryptoNode $cryptoNode): self
     {
         if (!$this->cryptoNodes->contains($cryptoNode)) {
@@ -336,6 +371,10 @@ class Currency
         return $this;
     }
 
+    /**
+     * @param CryptoNode $cryptoNode
+     * @return Currency
+     */
     public function removeCryptoNode(CryptoNode $cryptoNode): self
     {
         if ($this->cryptoNodes->contains($cryptoNode)) {
