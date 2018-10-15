@@ -2,12 +2,14 @@
 
 namespace App\Controller\API;
 
+use App\Entity\Account;
 use App\Entity\Currency;
 use App\Entity\GlobalUser;
 use App\Entity\User;
 use App\Service\NodeManager;
 use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\NonUniqueResultException;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
@@ -48,6 +50,28 @@ class APICryptoController extends Controller
             'code' => 0,
             'message' => 'Wallet created',
             'wallet' => ['address' => $address],
+        ]);
+    }
+
+    /**
+     * @Route("/wallet/transactions/{currency}/{wallet}", name="api_wallet_get")
+     * @param string $currency
+     * @param string $wallet
+     * @param NodeManager $nodeManager
+     * @return JsonResponse
+     * @throws NonUniqueResultException
+     */
+    public function getNewTransactions(string $currency, string $wallet, NodeManager $nodeManager): JsonResponse
+    {
+        $txs = [];
+        if ($nodeLoader = $nodeManager->loadNodeAdapter($currency)) {
+            $txs = $nodeLoader->getTransactions($wallet);
+        }
+
+        return $this->json([
+            'code' => 0,
+            'message' => 'Check transactions',
+            'transactions' => $txs,
         ]);
     }
 
