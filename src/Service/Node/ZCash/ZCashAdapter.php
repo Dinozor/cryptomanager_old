@@ -2,6 +2,7 @@
 
 namespace App\Service\Node\ZCash;
 
+use App\Entity\Account;
 use App\Entity\Currency;
 use App\Service\DB\DBNodeAdapterInterface;
 use App\Service\Node\NodeAdapterInterface;
@@ -17,6 +18,21 @@ class ZCashAdapter implements NodeAdapterInterface
     {
         $this->node = new ZCashNode();
         $this->db = $db;
+    }
+
+    public function checkAccount(Account $account, int $lastBlock = -1)
+    {
+        // TODO: Implement checkAccount() method.
+    }
+
+    public function fixedUpdate($data)
+    {
+        // TODO: Implement fixedUpdate() method.
+    }
+
+    public function update($data)
+    {
+        // TODO: Implement update() method.
     }
 
     public function getName(): string
