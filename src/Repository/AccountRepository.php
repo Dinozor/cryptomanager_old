@@ -19,22 +19,37 @@ class AccountRepository extends ServiceEntityRepository
         parent::__construct($registry, Account::class);
     }
 
-//    /**
-//     * @return Account[] Returns an array of Account objects
-//     */
-    /*
-    public function findByExampleField($value)
+    /**
+     * @param int $limit
+     * @param int $lastBlock
+     * @param \DateTimeInterface|null $timeLastCheck
+     * @param int $offset
+     * @return Account[] Returns an array of Account objects
+     */
+    public function findTopAccounts(int $limit = 100, int $lastBlock = -1, ?\DateTimeInterface $timeLastCheck = null, int $offset = 0)
     {
+        $qb = $this->createQueryBuilder('a');
+        if ($timeLastCheck) {
+            $qb->andWhere('a.timeLastChecked < :timeLastCheck')
+                ->setParameter('lastTimeCheck', $timeLastCheck);
+        }
+        if ($lastBlock > -1) {
+            $qb->andWhere('a.lastBlock > :lastBlock')
+                ->setParameter('lastBlock', $lastBlock);
+        }
+        if ($offset > 0) {
+            $qb->setFirstResult($offset);
+        }
+
         return $this->createQueryBuilder('a')
-            ->andWhere('a.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('a.id', 'ASC')
-            ->setMaxResults(10)
+            ->orderBy('a.type', 'ASC') //temporary{0}, current{1}, deprecated{2}
+            ->addOrderBy('a.priority', 'ASC') //0-top priority, 10 - usually lowest
+            ->setMaxResults($limit)
             ->getQuery()
             ->getResult()
         ;
     }
-    */
+
 
     /*
     public function findOneBySomeField($value): ?Account
