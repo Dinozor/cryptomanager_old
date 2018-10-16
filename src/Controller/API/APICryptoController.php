@@ -53,7 +53,7 @@ class APICryptoController extends Controller
      * @return JsonResponse
      * @throws NonUniqueResultException
      */
-    public function getNewTransactions(string $currency, string $wallet, NodeManager $nodeManager): JsonResponse
+    public function getTransactions(string $currency, string $wallet, NodeManager $nodeManager): JsonResponse
     {
         $txs = [];
         if ($nodeLoader = $nodeManager->loadNodeAdapter($currency)) {
