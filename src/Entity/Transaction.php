@@ -51,6 +51,27 @@ class Transaction
      */
     private $status;
 
+    /**
+     * @ORM\Column(type="json", nullable=true)
+     */
+    private $extra = [];
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Currency", inversedBy="transactions")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $currency;
+
+    /**
+     * @ORM\Column(type="datetimetz")
+     */
+    private $timeUpdated;
+
+    public function __construct()
+    {
+        $this->timeCreated = new \DateTimeImmutable();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -136,6 +157,42 @@ class Transaction
     public function setStatus(string $status): self
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function getExtra(): ?array
+    {
+        return $this->extra;
+    }
+
+    public function setExtra(?array $extra): self
+    {
+        $this->extra = $extra;
+
+        return $this;
+    }
+
+    public function getCurrency(): ?Currency
+    {
+        return $this->currency;
+    }
+
+    public function setCurrency(?Currency $currency): self
+    {
+        $this->currency = $currency;
+
+        return $this;
+    }
+
+    public function getTimeUpdated(): ?\DateTimeInterface
+    {
+        return $this->timeUpdated;
+    }
+
+    public function setTimeUpdated(\DateTimeInterface $timeUpdated): self
+    {
+        $this->timeUpdated = $timeUpdated;
 
         return $this;
     }

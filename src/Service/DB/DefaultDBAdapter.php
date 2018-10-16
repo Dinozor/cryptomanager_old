@@ -9,10 +9,13 @@
 namespace App\Service\DB;
 
 
+use App\Entity\Account;
 use App\Entity\CryptoNode;
 use App\Entity\Currency;
 use App\Entity\GlobalUser;
+use App\Entity\Transaction;
 use App\Service\Node\NodeAdapterInterface;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\Common\Persistence\ObjectManager;
 
 class DefaultDBAdapter implements DBNodeAdapterInterface
@@ -23,6 +26,8 @@ class DefaultDBAdapter implements DBNodeAdapterInterface
     private $objectManager;
     private $currencyRepository;
     private $nodeRepository;
+    private $transactionRepository;
+    private $accountRepository;
     private $node;
     private $nodeData;
     private $nodeAdapter;
@@ -40,6 +45,8 @@ class DefaultDBAdapter implements DBNodeAdapterInterface
         $this->objectManager = $objectManager;
         $this->currencyRepository = $objectManager->getRepository(Currency::class);
         $this->nodeRepository = $objectManager->getRepository(CryptoNode::class);
+        $this->transactionRepository = $objectManager->getRepository(Transaction::class);
+        $this->accountRepository = $objectManager->getRepository(Account::class);
 
         if ($nodeData) {
             $this->nodeData = $nodeData;
@@ -104,9 +111,12 @@ class DefaultDBAdapter implements DBNodeAdapterInterface
         // TODO: Implement storeTransaction() method.
     }
 
-    public function getTransaction(string $tx_hash)
+    public function getTransaction(string $txn_hash)
     {
-        // TODO: Implement getTransaction() method.
+        return $this->transactionRepository->findOneBy([
+            'currency' => $this->currency,
+            'hash' => $txn_hash
+        ]);
     }
 
     public function getTransactionsForGUID(string $guid): array
@@ -119,7 +129,7 @@ class DefaultDBAdapter implements DBNodeAdapterInterface
         // TODO: Implement getGlobalUser() method.
     }
 
-    public function getNodeSettings(): array
+    public function getNodeSettings()
     {
         return $this->nodeData->getSettings();
     }
@@ -150,8 +160,37 @@ class DefaultDBAdapter implements DBNodeAdapterInterface
         $this->currency = $nodeAdapter->getCurrency();
     }
 
-    public function getTopWallets($limit = 100, $lastBlock = -1, $timeLastCheck = null)
+    public function getTopWallets(int $limit = 100, int $lastBlock = -1, ?\DateTimeInterface $timeLastCheck = null, int $offset = 0)
     {
-        // TODO: Implement getTopWallets() method.
+        $this->accountRepository->findTopAccounts($limit, $lastBlock, $timeLastCheck, $offset);
+    }
+
+    public function addOrUpdateTransaction(string $hash, string $block, string $fromAddress, string $toAddress, int $amount, $status): ?bool
+    {
+        $isNew = null;
+        if (!$transaction = $this->getTransaction($hash)) {
+            $transaction = new Transaction();
+            $this->persist($transaction);
+            $isNew = true;
+        } else {
+            $isNew = false;
+        }
+        $transaction->setAmount($amount);
+        $transaction->setBlock($block);
+        $transaction->setFromAddress($fromAddress);
+        $transaction->setHash($hash);
+        $transaction->setToAddress($toAddress);
+        $transaction->setTimeUpdated(new \DateTimeImmutable());
+        $transaction->setStatus($status);
+        return $isNew;
+    }
+
+    private function persist($object) {
+        $this->objectManager->persist($object);
+    }
+
+    public function __destruct()
+    {
+        $this->objectManager->flush();
     }
 }

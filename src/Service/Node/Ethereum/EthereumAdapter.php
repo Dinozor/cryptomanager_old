@@ -5,6 +5,7 @@ namespace App\Service\Node\Ethereum;
 
 use App\Entity\Account;
 use App\Entity\Currency;
+use App\Entity\Transaction;
 use App\Service\DB\DBNodeAdapterInterface;
 use App\Service\Node\NodeAdapterInterface;
 use App\Service\Node\Ethereum;
@@ -140,11 +141,7 @@ class EthereumAdapter implements NodeAdapterInterface
      */
     public function update($data)
     {
-         $lastCheckedBlock = $this->settings['lastCheckedBlock'];
-         $filters = $this->settings['filters'];
-         if ($filters) {
 
-         }
 //        $this->node->getF
     }
 
@@ -193,6 +190,46 @@ class EthereumAdapter implements NodeAdapterInterface
      */
     public function fixedUpdate($data)
     {
-        // TODO: Implement fixedUpdate() method.
+        if (!$this->settings) {
+            $this->settings = $this->initDefaultSettings();
+        }
+        $lastCheckedBlock = $this->settings['lastCheckedBlock'];
+        $filters = $this->settings['filters'];
+        if ($filters) {
+            // Luckily we had filter active. It should have all new transactions
+            $pending = $filters['pending'];
+            if ($pending) {
+                $this->checkPending($pending);
+            }
+        } else {
+            // No filters found. Need to install one and manually check everything from last update
+            // Let's hope we will end here only once after first start or long downtime of system
+            // Still, better to send notification that something can be wrong here
+        }
+        $this->checkFilter();
+        return 0;
+    }
+
+    private function checkPending($filter) {
+        if (is_array($filter)){
+
+        } else {
+            $transactions = $this->node->getFilterChanges($filter);
+
+        }
+    }
+
+    private function addOrUpdateTransactions(array $txn_hashes) {
+        foreach ($txn_hashes as $hash) {
+            $txn = $this->node->getTransactionByHash($hash);
+//            $this->db->
+        }
+    }
+
+    private function initDefaultSettings() {
+        return [
+            'lastCheckedBlock' => 0,
+            'filters' => []
+        ];
     }
 }

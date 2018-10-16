@@ -90,12 +90,18 @@ class Currency
      */
     private $cryptoNodes;
 
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Transaction", mappedBy="currency")
+     */
+    private $transactions;
+
     public function __construct()
     {
         $this->isLocked = true;
         $this->isActive = true;
         $this->accounts = new ArrayCollection();
         $this->cryptoNodes = new ArrayCollection();
+        $this->transactions = new ArrayCollection();
     }
 
     /**
@@ -382,6 +388,37 @@ class Currency
             // set the owning side to null (unless already changed)
             if ($cryptoNode->getCurrency() === $this) {
                 $cryptoNode->setCurrency(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Transaction[]
+     */
+    public function getTransactions(): Collection
+    {
+        return $this->transactions;
+    }
+
+    public function addTransaction(Transaction $transaction): self
+    {
+        if (!$this->transactions->contains($transaction)) {
+            $this->transactions[] = $transaction;
+            $transaction->setCurrency($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTransaction(Transaction $transaction): self
+    {
+        if ($this->transactions->contains($transaction)) {
+            $this->transactions->removeElement($transaction);
+            // set the owning side to null (unless already changed)
+            if ($transaction->getCurrency() === $this) {
+                $transaction->setCurrency(null);
             }
         }
 
