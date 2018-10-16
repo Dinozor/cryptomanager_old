@@ -1275,7 +1275,7 @@ class BitcoinNode extends BaseNode
      * @param int $from
      * @return mixed
      */
-    public function listTransactions(string $account, int $count = 10, int $from = 0)
+    public function listTransactions(string $account = '*', int $count = 10, int $from = 0)
     {
         return $this->_call('listtransactions', [$account, $count, $from]);
     }

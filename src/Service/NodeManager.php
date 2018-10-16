@@ -56,7 +56,7 @@ class NodeManager
     public function loadNodeAdapter(string $codeA): ?NodeAdapterInterface
     {
         /** @var Currency $currency */
-        $currency = $this->objectManager->getRepository(Currency::class)->findByCodeAInsensitive($codeA);
+        $currency = $this->objectManager->getRepository(Currency::class)->findOneBy(['code_a' => strtolower($codeA)]);
         if ($currency) {
             return $this->getNodeAdapter($currency);
         }

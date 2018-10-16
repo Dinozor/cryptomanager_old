@@ -2,39 +2,22 @@
 
 namespace App\Controller\API;
 
-use App\Entity\Account;
 use App\Entity\Currency;
 use App\Entity\GlobalUser;
-use App\Entity\User;
 use App\Service\NodeManager;
 use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\NonUniqueResultException;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 
 class APICryptoController extends Controller
 {
-    /**
-     * @Route("/wallet", name="api_wallet")
-     */
-    public function index()
-    {
-        return $this->json([
-            'message' => 'Welcome to your new controller!',
-            'path' => 'src/Controller/APIWalletController.php',
-        ]);
-    }
-
     /**
      * @param string $currencyCode
      * @param string $guid
      * @param NodeManager $nodeManager
      * @return JsonResponse
-     * @throws EntityNotFoundException
      * @throws NonUniqueResultException
      * @throws \Exception
      * @Route("/wallet/create/{currencyCode}/{guid}", name="api_wallet_create")
@@ -42,8 +25,17 @@ class APICryptoController extends Controller
     public function createWallet(string $currencyCode, string $guid, NodeManager $nodeManager): JsonResponse
     {
         $address = '';
+        $user = $this->getDoctrine()->getRepository(GlobalUser::class)->findBy(['guid' => $guid]);
+        if (!$user) {
+            return $this->json([
+                'code' => 0,
+                'message' => 'Impossible to create wallet',
+                'wallet' => ['address' => $address],
+            ]);
+        }
+
         if ($nodeLoader = $nodeManager->loadNodeAdapter($currencyCode)) {
-            $address = $nodeLoader->getNewAddress($guid);
+            $address = $nodeLoader->getNewAddress();
         }
 
         return $this->json([
@@ -65,7 +57,8 @@ class APICryptoController extends Controller
     {
         $txs = [];
         if ($nodeLoader = $nodeManager->loadNodeAdapter($currency)) {
-            $txs = $nodeLoader->getTransactions($wallet);
+            $account = $nodeLoader->getAccount($wallet);
+            $txs = $nodeLoader->getTransactions($account);
         }
 
         return $this->json([
