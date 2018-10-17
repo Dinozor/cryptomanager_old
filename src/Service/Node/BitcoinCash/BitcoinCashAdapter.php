@@ -94,7 +94,14 @@ class BitcoinCashAdapter implements NodeAdapterInterface
 
     public function createAccount(string $name, $data = null)
     {
-        return $this->node->getNewAddress($name);
+        $address = $this->node->getNewAddress($name);
+        $account = $this->node->getAccount($address);
+        $lastBalance = $this->node->getBalance($account);
+        $blockChainInfo = $this->node->getBlockChainInfo();
+
+        $this->db->addAccount($data['guid'], $address, $account, $lastBalance, $blockChainInfo['headers']);
+
+        return $address;
     }
 
     public function send(string $address, int $amount)

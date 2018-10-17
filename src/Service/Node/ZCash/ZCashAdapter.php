@@ -94,7 +94,13 @@ class ZCashAdapter implements NodeAdapterInterface
 
     public function createAccount(string $name, $data = null)
     {
-        return $this->node->getNewAddress($name);
+        $address = $this->node->getNewAddress($name);
+        $lastBalance = $this->node->z_getBalance($address);
+        $blockChainInfo = $this->node->getBlockChainInfo();
+
+        $this->db->addAccount($data['guid'], $address, $data['guid'], $lastBalance, $blockChainInfo['headers']);
+
+        return $address;
     }
 
     public function send(string $address, int $amount)
