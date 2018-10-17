@@ -124,9 +124,18 @@ class DefaultDBAdapter implements DBNodeAdapterInterface
         // TODO: Implement getTransactionsForGUID() method.
     }
 
+    /**
+     * @param string $guid
+     * @return GlobalUser
+     * @throws \Exception
+     */
     public function getGlobalUser(string $guid): GlobalUser
     {
-        // TODO: Implement getGlobalUser() method.
+        $user = $this->objectManager->getRepository(GlobalUser::class)->findOneBy(['guid' => $guid]);
+        if ($user == null) {
+            throw new \Exception("User with GUID: '{$guid}' not found");
+        }
+        return $user;
     }
 
     public function getNodeSettings()
@@ -185,7 +194,33 @@ class DefaultDBAdapter implements DBNodeAdapterInterface
         return $isNew;
     }
 
-    private function persist($object) {
+    /**
+     * @param string $guid
+     * @param string $address
+     * @param string $name
+     * @param float $lastBalance
+     * @param int $lastBlock
+     * @throws \Exception
+     */
+    public function addAccount(string $guid, string $address, string $name, float $lastBalance, int $lastBlock): void
+    {
+        $account = new Account();
+        $account
+            ->setCurrency($this->currency)
+            ->setAddress($address)
+            ->setName($name)
+            ->setGlobalUser($this->getGlobalUser($guid))
+            ->setLastBalance($lastBalance)
+            ->setLastBlock($lastBlock)
+            ->setTimeCreated(new \DateTimeImmutable())
+            ->setTimeUpdated(new \DateTimeImmutable())
+        ;
+
+        $this->persist($account);
+    }
+
+    private function persist($object): void
+    {
         $this->objectManager->persist($object);
     }
 

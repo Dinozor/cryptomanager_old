@@ -25,17 +25,8 @@ class APICryptoController extends Controller
     public function createWallet(string $currencyCode, string $guid, NodeManager $nodeManager): JsonResponse
     {
         $address = '';
-        $user = $this->getDoctrine()->getRepository(GlobalUser::class)->findBy(['guid' => $guid]);
-        if (!$user) {
-            return $this->json([
-                'code' => 0,
-                'message' => 'Impossible to create wallet',
-                'wallet' => ['address' => $address],
-            ]);
-        }
-
         if ($nodeLoader = $nodeManager->loadNodeAdapter($currencyCode)) {
-            $address = $nodeLoader->getNewAddress();
+            $address = $nodeLoader->createAccount($guid, ['guid' => $guid]);
         }
 
         return $this->json([
@@ -63,7 +54,7 @@ class APICryptoController extends Controller
 
         return $this->json([
             'code' => 0,
-            'message' => 'Check transactions',
+            'message' => 'Transactions',
             'transactions' => $txs,
         ]);
     }
