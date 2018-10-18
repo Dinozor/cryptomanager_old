@@ -50,7 +50,8 @@ class BitcoinCashAdapter implements NodeAdapterInterface
 
     public function getStatus()
     {
-        // TODO: Implement getStatus() method.
+        $info = $this->node->getNetworkInfo();
+        return $info['networkactive'];
     }
 
     public function getVersion()
