@@ -54,9 +54,52 @@ class BitcoinAdapter implements NodeAdapterInterface
         return ['updated' => $updated, 'total' => $total];
     }
 
+    /**
+     * This method is called automatically by CRON once each specific amount
+     * of time (1 min). FixedUpdate is limited by time execution.
+     * Method should get specific count of accounts/wallets so they could be
+     * updated in specific amount of time.
+     * Be sure to check specific constant amount of wallets and try to
+     * not exceed max method execution time (less than 1 min)
+     *
+     * Note: database cleaning of extra account and other stuff that are related
+     * to node should be done here.
+     * You can use data and settings to store temporary variables (like time
+     * since last cleaning) and decide when you should execute such methods
+     * Later there will be separate method to call and queue to tell system,
+     * that node needs maintenance. And system will call it when it has time
+     *
+     * Note: please check lastBlock and current active block of node.
+     * Maybe you do not need to check transactions account each block
+     *
+     * @param array $data As input there are going to be statisctics data about node,
+     * that could be used to decide how much and what accounts should be rechecked
+     * @return bool|int If you method is not finished or needs more time for execution it should
+     * return FALSE to show, that there is a problem with checking
+     * If method succeeded - it should return amount of addresses/account it was
+     * able to check. Data used for statistic and to count
+     * how much and how good the node is holding
+     */
     public function fixedUpdate($data)
     {
-        // TODO: Implement fixedUpdate() method.
+        $result = 0;
+        $start = time();
+        $isOk = function () use ($start) {
+            return (time() - $start) < 60;
+        };
+
+        foreach ($data as $address) {
+            if (!$isOk()) {
+                $result = false;
+                break;
+            }
+
+            // TODO
+            var_dump($address);
+            $result++;
+        }
+
+        return $result;
     }
 
     public function update($data)
