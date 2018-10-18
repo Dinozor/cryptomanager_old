@@ -424,4 +424,14 @@ class Currency
 
         return $this;
     }
+
+    /**
+     * @param Currency $currency
+     * @param float $float
+     * @return int
+     */
+    public static function showMinorCurrency(Currency $currency, float $float): int
+    {
+        return (int)floor($float * (10 ** $currency->getMinor_unit()));
+    }
 }

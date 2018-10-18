@@ -20,6 +20,12 @@ class BitcoinAdapter implements NodeAdapterInterface
         $this->db = $db;
     }
 
+    /**
+     * @inheritdoc
+     * @param Account $account
+     * @param int $lastBlock
+     * @return array|bool|int
+     */
     public function checkAccount(Account $account, int $lastBlock = -1)
     {
         $updated = 0;
@@ -33,7 +39,7 @@ class BitcoinAdapter implements NodeAdapterInterface
                 $tnx['blockindex'],
                 $tnx['address'],
                 $tx['details'][0]['address'],
-                $tx['amount'],
+                Currency::showMinorCurrency($account->getCurrency(), $tx['amount']),
                 ''
             );
 

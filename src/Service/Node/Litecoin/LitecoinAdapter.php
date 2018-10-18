@@ -33,7 +33,7 @@ class LitecoinAdapter implements NodeAdapterInterface
                 $tnx['blockindex'],
                 $tnx['address'],
                 $tx['details'][0]['address'],
-                $tx['amount'],
+                Currency::showMinorCurrency($account->getCurrency(), $tx['amount']),
                 ''
             );
 
