@@ -22,7 +22,29 @@ class RippleAdapter implements NodeAdapterInterface
 
     public function checkAccount(Account $account, int $lastBlock = -1)
     {
-        // TODO: Implement checkAccount() method.
+        $updated = 0;
+        $total = 0;
+        $txs = $this->node->getAccountTransactionHistory($account->getAddress());
+
+        foreach ($txs['transactions'] as $tnx) {
+            $result = $this->db->addOrUpdateTransaction(
+                $tnx['hash'],
+                $tnx['ledger_index'],
+                $tnx['meta']['AffectedNodes'][0]['CreatedNode']['NewFields']['Account'],
+                $tnx['meta']['AffectedNodes'][1]['ModifiedNode']['FinalFields']['Account'],
+                $tnx['tx']['Amount'],
+                $tnx['tx']['TransactionResult']
+            );
+
+            if ($result != null) {
+                $total++;
+            }
+            if ($result) {
+                $updated++;
+            }
+        }
+
+        return ['updated' => $updated, 'total' => $total];
     }
 
     public function fixedUpdate($data)
