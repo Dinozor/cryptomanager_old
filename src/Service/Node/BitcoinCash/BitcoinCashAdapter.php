@@ -22,7 +22,30 @@ class BitcoinCashAdapter implements NodeAdapterInterface
 
     public function checkAccount(Account $account, int $lastBlock = -1)
     {
-        // TODO: Implement checkAccount() method.
+        $updated = 0;
+        $total = 0;
+        $txs = $this->node->listTransactions($account->getName());
+
+        foreach ($txs as $tnx) {
+            $tx = $this->node->getTransaction($tnx['txid']);
+            $result = $this->db->addOrUpdateTransaction(
+                $tnx['blockhash'],
+                $tnx['blockindex'],
+                $tnx['address'],
+                $tx['details'][0]['address'],
+                $tx['amount'],
+                ''
+            );
+
+            if ($result != null) {
+                $total++;
+            }
+            if ($result) {
+                $updated++;
+            }
+        }
+
+        return ['updated' => $updated, 'total' => $total];
     }
 
     public function fixedUpdate($data)

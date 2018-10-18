@@ -184,6 +184,7 @@ class DefaultDBAdapter implements DBNodeAdapterInterface
         } else {
             $isNew = false;
         }
+        $transaction->setCurrency($this->currency);
         $transaction->setAmount($amount);
         $transaction->setBlock($block);
         $transaction->setFromAddress($fromAddress);
