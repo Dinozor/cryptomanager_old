@@ -203,19 +203,23 @@ class DefaultDBAdapter implements DBNodeAdapterInterface
      * @param int $lastBlock
      * @throws \Exception
      */
-    public function addAccount(string $guid, string $address, string $name, float $lastBalance, int $lastBlock): void
+    public function addOrUpdateAccount(string $guid, string $address, string $name, float $lastBalance, int $lastBlock): void
     {
-        $account = new Account();
+        $account = $this->accountRepository->findOneBy(['globalUser' => $this->getGlobalUser($guid)]);
+        if (!$account) {
+            $account = new Account();
+            $account
+                ->setCurrency($this->currency)
+                ->setName($name)
+                ->setGlobalUser($this->getGlobalUser($guid))
+                ->setTimeCreated(new \DateTimeImmutable());
+        }
+
         $account
-            ->setCurrency($this->currency)
             ->setAddress($address)
-            ->setName($name)
-            ->setGlobalUser($this->getGlobalUser($guid))
             ->setLastBalance($lastBalance)
             ->setLastBlock($lastBlock)
-            ->setTimeCreated(new \DateTimeImmutable())
-            ->setTimeUpdated(new \DateTimeImmutable())
-        ;
+            ->setTimeUpdated(new \DateTimeImmutable());
 
         $this->persist($account);
     }

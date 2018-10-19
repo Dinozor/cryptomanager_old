@@ -121,7 +121,7 @@ class RippleAdapter implements NodeAdapterInterface
         $lastBalance = $this->node->getBalance($account);
         $blockChainInfo = $this->node->getBlockChainInfo();
 
-        $this->db->addAccount($data['guid'], $address, $account, $lastBalance, $blockChainInfo['headers']);
+        $this->db->addOrUpdateAccount($data['guid'], $address, $account, $lastBalance, $blockChainInfo['headers']);
 
         return $address;
     }

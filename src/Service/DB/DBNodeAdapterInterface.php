@@ -58,5 +58,5 @@ interface DBNodeAdapterInterface
 
     public function addOrUpdateTransaction(string $hash, string $block, string $fromAddress, string $toAddress, int $amount, $status): ?bool;
 
-    public function addAccount(string $guid, string $address, string $name, float $lastBalance, int $lastBlock): void;
+    public function addOrUpdateAccount(string $guid, string $address, string $name, float $lastBalance, int $lastBlock): void;
 }

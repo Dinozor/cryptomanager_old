@@ -178,7 +178,7 @@ class ZCashAdapter implements NodeAdapterInterface
         $lastBalance = $this->node->z_getBalance($address);
         $blockChainInfo = $this->node->getBlockChainInfo();
 
-        $this->db->addAccount($data['guid'], $address, $data['guid'], $lastBalance, $blockChainInfo['headers']);
+        $this->db->addOrUpdateAccount($data['guid'], $address, $data['guid'], $lastBalance, $blockChainInfo['headers']);
 
         return $address;
     }
