@@ -50,7 +50,64 @@ class BitcoinCashAdapter implements NodeAdapterInterface
 
     public function fixedUpdate($data)
     {
-        // TODO: Implement fixedUpdate() method.
+        $result = 0;
+        $start = time();
+        $isOk = function () use ($start) {
+            echo time() - $start . " sec left \n";
+            return (time() - $start) < 60;
+        };
+
+        /** @var Account[] $wallets */
+        $accounts = $this->db->getTopWallets();
+
+        /** @var Account $account */
+        foreach ($accounts as $account) {
+            if (!$isOk()) {
+                $result = false;
+                break;
+            }
+
+            $currency = $account->getCurrency();
+            $balance = $this->node->getBalance($account->getName());
+            $accountBalance = Currency::showCurrency($currency, $account->getLastBalance());
+
+            if ($balance == $accountBalance) {
+                $result++;
+                continue;
+            }
+
+            $isComplete = true;
+            $limit = $data['filters']['limit'] ?? 10;
+            $from = $data['filters']['from'] ?? 0;
+
+            $txs = $this->node->listTransactions($account->getName(), $limit, $from);
+            foreach ($txs as $tnx) {
+                if (!$isOk()) {
+                    $result = false;
+                    $isComplete = false;
+                    break;
+                }
+
+                $tx = $this->node->getTransaction($tnx['txid']);
+                $this->db->addOrUpdateTransaction(
+                    $tnx['blockhash'],
+                    $tnx['blockindex'],
+                    $tnx['address'],
+                    $tx['details'][0]['address'],
+                    Currency::showMinorCurrency($currency, $tx['amount']),
+                    ''
+                );
+            }
+
+            if ($isComplete) {
+                $account->setLastBalance(Currency::showMinorCurrency($currency, $balance));
+                $account->setLastBalance($tnx['blockindex']);
+            }
+
+            $result++;
+        }
+
+        return $result;
     }
 
     public function update($data)

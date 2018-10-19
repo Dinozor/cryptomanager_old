@@ -427,6 +427,21 @@ class Currency
 
     /**
      * @param Currency $currency
+     * @param int $int
+     * @param bool $showCodeA
+     * @return float|int|string
+     */
+    public static function showCurrency(Currency $currency, int $int, bool $showCodeA = false)
+    {
+        $result = $int / (10 ** $currency->getMinor_unit());
+        if ($showCodeA) {
+            return $result . ' ' . $currency->getCode_a();
+        }
+        return $result;
+    }
+
+    /**
+     * @param Currency $currency
      * @param float $float
      * @return int
      */
