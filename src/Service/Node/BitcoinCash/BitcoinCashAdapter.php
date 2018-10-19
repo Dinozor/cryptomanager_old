@@ -53,7 +53,6 @@ class BitcoinCashAdapter implements NodeAdapterInterface
         $result = 0;
         $start = time();
         $isOk = function () use ($start) {
-            echo time() - $start . " sec left \n";
             return (time() - $start) < 60;
         };
 
