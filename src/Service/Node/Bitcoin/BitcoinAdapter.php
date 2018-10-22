@@ -141,9 +141,48 @@ class BitcoinAdapter implements NodeAdapterInterface
         return $result;
     }
 
+    /**
+     * This method is called automatically by nodes and NOT crontab
+     * when specific event occurs like new transaction or block
+     *
+     * @param $data
+     */
     public function update($data)
     {
-        // TODO: Implement update() method.
+        $currency = $this->getCurrency();
+
+        $txs = [];
+        if ($data['type'] == 'block') {
+            $block = $this->node->getBlock($data['hash']);
+            $txs = $block['tx'];
+        } else if ($data['type'] == 'transaction') {
+            $txs = [$data['hash']];
+        }
+
+        foreach ($txs as $txId) {
+            $tx = $this->node->getRawTransaction($txId, 1);
+            if (\is_string($tx)) {
+                $tx = $this->node->getTransaction($txId);
+
+                $blockHash = $tx['blockhash'];
+                $blockIndex = $tx['blockindex'];
+                $from = $tx['address'];
+                $to = $tx['details'][0]['address'];
+                $amount = Currency::showMinorCurrency($currency, $tx['amount']);
+            } else {
+                $blockHash = $data['hash'];
+                $blockIndex = 0;
+                $from = $tx['vout'][1]['scriptPubKey']['addresses'][0] ?? '';
+                $to = $tx['vout'][1]['scriptPubKey']['addresses'][1] ?? '';
+                $amount = Currency::showMinorCurrency($currency, $tx['vout'][1]['value']);
+            }
+
+            $this->db->addOrUpdateTransaction($blockHash, $blockIndex, $from, $to, $amount, '');
+
+//            $balance = $this->node->getBalance($account->getName());
+//            $account->setLastBalance(Currency::showMinorCurrency($currency, $balance));
+//            $account->setLastBalance($blockIndex);
+        }
     }
 
     public function getName(): string
