@@ -205,7 +205,11 @@ class DefaultDBAdapter implements DBNodeAdapterInterface
      */
     public function addOrUpdateAccount(string $guid, string $address, string $name, float $lastBalance, int $lastBlock): void
     {
-        $account = $this->accountRepository->findOneBy(['globalUser' => $this->getGlobalUser($guid)]);
+        $account = $this->accountRepository->findOneBy([
+            'globalUser' => $this->getGlobalUser($guid),
+            'currency' => $this->currency,
+        ]);
+
         if (!$account) {
             $account = new Account();
             $account
