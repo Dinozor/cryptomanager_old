@@ -83,9 +83,9 @@ class BitcoinAdapter implements NodeAdapterInterface
     public function fixedUpdate($data)
     {
         $result = 0;
-        $start = time();
-        $isOk = function () use ($start) {
-            return (time() - $start) < 60;
+        $timeline = time() + (int)getenv('FIXED_UPDATE_TIMEOUT');
+        $isOk = function () use ($timeline) {
+            return time() >= $timeline;
         };
 
         /** @var Account[] $wallets */
@@ -108,7 +108,7 @@ class BitcoinAdapter implements NodeAdapterInterface
             }
 
             $isComplete = true;
-            $limit = $data['filters']['limit'] ?? 10;
+            $limit = $data['filters']['limit'] ?? 50;
             $from = $data['filters']['from'] ?? 0;
 
             $txs = $this->node->listTransactions($account->getName(), $limit, $from);
