@@ -10,6 +10,23 @@ use Doctrine\Common\Persistence\ObjectManager;
 
 class AppFixtures extends Fixture
 {
+    private $nodes = [
+        [
+            'name' => 'geth',
+            'isLocked' => false,
+            'isEnabled' => true,
+            'currency' => 'ethereum',
+            'className' => 'App\\Service\\Node\\Ethereum',
+        ],
+        [
+            'name' => 'gbtc',
+            'isLocked' => false,
+            'isEnabled' => true,
+            'currency' => 'bitcoin',
+            'className' => 'App\\Service\\Node\\Bitcoin\\BitcoinAdapter',
+        ]
+    ];
+
     public function load(ObjectManager $manager)
     {
         $globalUser = new GlobalUser();
@@ -25,17 +42,31 @@ class AppFixtures extends Fixture
         $ethereum->setSymbol('Ξ');
 
         $manager->persist($ethereum);
+
+        $bitcoin = new Currency();
+        $bitcoin->setCode_a('btc');
+        $bitcoin->setIsActive(true);
+        $bitcoin->setIsLocked(false);
+        $bitcoin->setName('Bitcoin');
+        $bitcoin->setSymbol('₿');
+
+        $manager->persist($bitcoin);
+
         $manager->flush();
 
-        $node = new CryptoNode();
-        $node->setName('geth');
-        $node->setIsLocked(false);
-        $node->setCurrency($ethereum);
-        $node->setIsEnabled(true);
-        $node->setClassName('App\\Service\\Node\\Ethereum');
-        $node->setMainAddress('');
+        foreach ($this->nodes as $cryptoNode) {
+            $currency = $cryptoNode['currency'];
 
-        $manager->persist($node);
+            $node = new CryptoNode();
+            $node->setName($cryptoNode['name']);
+            $node->setIsLocked($cryptoNode['isLocked']);
+            $node->setCurrency($$currency);
+            $node->setIsEnabled($cryptoNode['isEnabled']);
+            $node->setClassName($cryptoNode['className']);
+            $node->setMainAddress('');
+
+            $manager->persist($node);
+        }
 
         $manager->flush();
     }
