@@ -19,6 +19,9 @@ variables:
 
 before_script:
   - composer install --no-interaction --no-progress
+  - pwd
+  - ls -al
+  - cat .env
   - bin/console doctrine:database:create --if-not-exists --verbose
   - bin/console doctrine:schema:create --verbose
 
