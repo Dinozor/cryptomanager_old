@@ -19,6 +19,8 @@ variables:
   APP_SECRET: ThisIsATestSecret
 
 before_script:
+  - php composer-setup.php --install-dir=bin --filename=composer
+  - mv composer.phar /usr/local/bin/composer
   - composer install --no-interaction --no-progress
   - pwd
   - ls -al
