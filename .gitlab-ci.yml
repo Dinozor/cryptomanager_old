@@ -1,3 +1,7 @@
+cache:
+  paths:
+  - vendor/
+
 variables:
   DATABASE_URL: "mysql://db_user@db_password/db_name"
 
