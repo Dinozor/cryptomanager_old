@@ -174,7 +174,7 @@ class DefaultDBAdapter implements DBNodeAdapterInterface
         $this->accountRepository->findTopAccounts($limit, $lastBlock, $timeLastCheck, $offset);
     }
 
-    public function addOrUpdateTransaction(string $hash, string $block, string $fromAddress, string $toAddress, int $amount, $status): ?bool
+    public function addOrUpdateTransaction(string $hash, string $block, string $fromAddress, string $toAddress, int $amount, $status, array $extra = []): ?bool
     {
         $isNew = null;
         if (!$transaction = $this->getTransaction($hash)) {
@@ -192,6 +192,7 @@ class DefaultDBAdapter implements DBNodeAdapterInterface
         $transaction->setToAddress($toAddress);
         $transaction->setTimeUpdated(new \DateTimeImmutable());
         $transaction->setStatus($status);
+        $transaction->setExtra($extra);
         return $isNew;
     }
 
@@ -226,6 +227,19 @@ class DefaultDBAdapter implements DBNodeAdapterInterface
             ->setTimeUpdated(new \DateTimeImmutable());
 
         $this->persist($account);
+    }
+
+    public function getAccounts(array $addresses): array
+    {
+        $result = $this->objectManager
+            ->getRepository(Account::class)
+            ->findBy(['address' => $addresses]);
+
+        $data = [];
+        foreach ($result as $item) {
+            $data[$item->getAddress()] = $item;
+        }
+        return $data;
     }
 
     private function persist($object): void

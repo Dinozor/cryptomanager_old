@@ -56,7 +56,9 @@ interface DBNodeAdapterInterface
 
     public function getTopWallets(int $limit = 100, int $lastBlock = -1, ?\DateTimeInterface $timeLastCheck = null, int $offset = 0);
 
-    public function addOrUpdateTransaction(string $hash, string $block, string $fromAddress, string $toAddress, int $amount, $status): ?bool;
+    public function addOrUpdateTransaction(string $hash, string $block, string $fromAddress, string $toAddress, int $amount, $status, array $extra = []): ?bool;
 
     public function addOrUpdateAccount(string $guid, string $address, string $name, float $lastBalance, int $lastBlock): void;
+
+    public function getAccounts(array $addresses): array;
 }

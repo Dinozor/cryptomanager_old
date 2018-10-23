@@ -108,7 +108,7 @@ class BitcoinAdapter implements NodeAdapterInterface
             }
 
             $isComplete = true;
-            $limit = $data['filters']['limit'] ?? 50;
+            $limit = $data['filters']['limit'] ?? 10;
             $from = $data['filters']['from'] ?? 0;
 
             $txs = $this->node->listTransactions($account->getName(), $limit, $from);
@@ -119,14 +119,15 @@ class BitcoinAdapter implements NodeAdapterInterface
                     break;
                 }
 
-                $tx = $this->node->getTransaction($tnx['txid']);
+                $amount = Currency::showMinorCurrency($currency, $tnx['amount']);
                 $this->db->addOrUpdateTransaction(
                     $tnx['blockhash'],
                     $tnx['blockindex'],
+                    '',
                     $tnx['address'],
-                    $tx['details'][0]['address'],
-                    Currency::showMinorCurrency($currency, $tx['amount']),
-                    ''
+                    $amount,
+                    '',
+                    ['txid' => $tnx['txid'], 'confirmations' => $tnx['confirmations']]
                 );
             }
 
@@ -155,33 +156,47 @@ class BitcoinAdapter implements NodeAdapterInterface
         if ($data['type'] == 'block') {
             $block = $this->node->getBlock($data['hash']);
             $txs = $block['tx'];
-        } else if ($data['type'] == 'transaction') {
+        } else if ($data['type'] == 'wallet') {
             $txs = [$data['hash']];
         }
 
         foreach ($txs as $txId) {
             $tx = $this->node->getRawTransaction($txId, 1);
             if (\is_string($tx)) {
-                $tx = $this->node->getTransaction($txId);
-
-                $blockHash = $tx['blockhash'];
-                $blockIndex = $tx['blockindex'];
-                $from = $tx['address'];
-                $to = $tx['details'][0]['address'];
-                $amount = Currency::showMinorCurrency($currency, $tx['amount']);
-            } else {
-                $blockHash = $data['hash'];
-                $blockIndex = 0;
-                $from = $tx['vout'][1]['scriptPubKey']['addresses'][0] ?? '';
-                $to = $tx['vout'][1]['scriptPubKey']['addresses'][1] ?? '';
-                $amount = Currency::showMinorCurrency($currency, $tx['vout'][1]['value']);
+                continue;
             }
 
-            $this->db->addOrUpdateTransaction($blockHash, $blockIndex, $from, $to, $amount, '');
+            $hash = $tx['blockhash'];
+            $index = 0;
+            $amount = 0;
+            $to = '';
 
-//            $balance = $this->node->getBalance($account->getName());
-//            $account->setLastBalance(Currency::showMinorCurrency($currency, $balance));
-//            $account->setLastBalance($blockIndex);
+            /** @var Account $account */
+            $account = null;
+            $addresses = [];
+            foreach ($tx['vout'] as $i => $out) {
+                foreach ($out['scriptPubKey']['addresses'] as $address) {
+                    $addresses[] = $address;
+                }
+            }
+
+            $accounts = $this->db->getAccounts($addresses);
+            foreach ($addresses as $i => $address) {
+                if ($account = $accounts[$address] ?? null) {
+                    $to = $address;
+                    $amount = Currency::showMinorCurrency($currency, $tx['vout'][$i]['value']);
+                    break;
+                }
+            }
+
+            if ($account) {
+                $extra = ['txid' => $tx['txid'], 'confirmations' => $tx['confirmations']];
+
+                $this->db->addOrUpdateTransaction($hash, $index, '', $to, $amount, '', $extra);
+                $balance = $this->node->getBalance($account->getName());
+                $account->setLastBalance(Currency::showMinorCurrency($currency, $balance));
+                $account->setLastBlock($index);
+            }
         }
     }
 
