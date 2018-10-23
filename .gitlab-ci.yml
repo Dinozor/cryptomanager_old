@@ -31,12 +31,8 @@ test:
   stage: test
   script:
     - vendor/bin/phpunit
-  tags:
-    - docker
     
 dev:
   stage: deploy
   script:
     - echo "Deploy"
-  tags:
-    - docker
