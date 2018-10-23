@@ -19,6 +19,7 @@ variables:
 
 before_script:
   - composer install --optimize-autoloader --no-interaction --no-progress --no-scripts
+  - cat .env
   - bin/console doctrine:database:create --if-not-exists --verbose
   - bin/console doctrine:schema:create --verbose
 
