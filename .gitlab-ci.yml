@@ -1,0 +1,42 @@
+image: php:latest
+
+cache:
+  paths:
+    - ./vendor/
+
+services:
+  - mysql:latest
+  - nginx:latest
+
+variables:
+  MYSQL_ROOT_PASSWORD: Et2jM3l8nA6r4bak
+  MYSQL_USER: symfony
+  MYSQL_PASSWORD: symfony
+  MYSQL_DATABASE: symfony
+  APP_ENV: dev
+  APP_DEBUG: "1"
+  APP_SECRET: ThisIsATestSecret
+
+before_script:
+  - composer install --optimize-autoloader --no-interaction --no-progress --no-scripts
+  - bin/console doctrine:database:create --if-not-exists --verbose
+  - bin/console doctrine:schema:create --verbose
+
+stages:
+  - init
+  - test
+  - deploy
+
+test:
+  stage: test
+  script:
+    - vendor/bin/phpunit
+  tags:
+    - docker
+    
+dev:
+  stage: deploy
+  script:
+    - echo "Deploy"
+  tags:
+    - docker
