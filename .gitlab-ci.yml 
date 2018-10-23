@@ -1,0 +1,25 @@
+variables:
+  DATABASE_URL: "mysql://db_user@db_password/db_name"
+
+stages:
+  - build
+  - deploy
+
+build:
+  stage: build
+  script:
+  - echo "Building the app"
+  - composer install --no-interaction --no-progress
+  - sed -i -e 's/$$DATABASE_URL/$DATABASE_URL/g' .env
+  - bin/console doctrine:database:create --if-not-exists --verbose
+  - bin/console doctrine:migrations:migrate --verbose
+
+deploy_dev:
+  stage: deploy
+  script:
+  - echo "Deploy to dev server"
+  environment:
+    name: dev
+    url: http://it09.dev.mb.org/
+  only:
+  - develop
