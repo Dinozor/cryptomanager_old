@@ -20,6 +20,7 @@ variables:
 
 before_script:
   - php composer-setup.php --install-dir=bin --filename=composer
+  - ls -al
   - mv composer.phar /usr/local/bin/composer
   - composer install --no-interaction --no-progress
   - pwd
