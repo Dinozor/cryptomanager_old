@@ -27,3 +27,4 @@ deploy_dev:
     url: http://it09.dev.mb.org/
   only:
   - develop
+  - master
