@@ -120,15 +120,8 @@ class BitcoinAdapter implements NodeAdapterInterface
                 }
 
                 $amount = Currency::showMinorCurrency($currency, $tnx['amount']);
-                $this->db->addOrUpdateTransaction(
-                    $tnx['blockhash'],
-                    $tnx['blockindex'],
-                    '',
-                    $tnx['address'],
-                    $amount,
-                    '',
-                    ['txid' => $tnx['txid'], 'confirmations' => $tnx['confirmations']]
-                );
+                $extra = ['txid' => $tnx['txid'], 'confirmations' => $tnx['confirmations']];
+                $this->db->addOrUpdateTransaction($tnx['blockhash'], $tnx['blockindex'], '', $tnx['address'], $amount, '', $extra);
             }
 
             if ($isComplete) {

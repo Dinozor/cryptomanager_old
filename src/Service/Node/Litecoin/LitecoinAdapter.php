@@ -51,9 +51,9 @@ class LitecoinAdapter implements NodeAdapterInterface
     public function fixedUpdate($data)
     {
         $result = 0;
-        $start = time();
-        $isOk = function () use ($start) {
-            return (time() - $start) < 60;
+        $timeline = time() + (int)getenv('FIXED_UPDATE_TIMEOUT');
+        $isOk = function () use ($timeline) {
+            return time() >= $timeline;
         };
 
         /** @var Account[] $wallets */
@@ -87,15 +87,9 @@ class LitecoinAdapter implements NodeAdapterInterface
                     break;
                 }
 
-                $tx = $this->node->getTransaction($tnx['txid']);
-                $this->db->addOrUpdateTransaction(
-                    $tnx['blockhash'],
-                    $tnx['blockindex'],
-                    $tnx['address'],
-                    $tx['details'][0]['address'],
-                    Currency::showMinorCurrency($currency, $tx['amount']),
-                    ''
-                );
+                $amount = Currency::showMinorCurrency($currency, $tnx['amount']);
+                $extra = ['txid' => $tnx['txid'], 'confirmations' => $tnx['confirmations']];
+                $this->db->addOrUpdateTransaction($tnx['blockhash'], $tnx['blockindex'], '', $tnx['address'], $amount, '', $extra);
             }
 
             if ($isComplete) {
@@ -111,7 +105,54 @@ class LitecoinAdapter implements NodeAdapterInterface
 
     public function update($data)
     {
-        // TODO: Implement update() method.
+        $currency = $this->getCurrency();
+
+        $txs = [];
+        if ($data['type'] == 'block') {
+            $block = $this->node->getBlock($data['hash']);
+            $txs = $block['tx'];
+        } else if ($data['type'] == 'wallet') {
+            $txs = [$data['hash']];
+        }
+
+        foreach ($txs as $txId) {
+            $tx = $this->node->getRawTransaction($txId, 1);
+            if (\is_string($tx)) {
+                continue;
+            }
+
+            $hash = $tx['blockhash'];
+            $index = 0;
+            $amount = 0;
+            $to = '';
+
+            /** @var Account $account */
+            $account = null;
+            $addresses = [];
+            foreach ($tx['vout'] as $i => $out) {
+                foreach ($out['scriptPubKey']['addresses'] as $address) {
+                    $addresses[] = $address;
+                }
+            }
+
+            $accounts = $this->db->getAccounts($addresses);
+            foreach ($addresses as $i => $address) {
+                if ($account = $accounts[$address] ?? null) {
+                    $to = $address;
+                    $amount = Currency::showMinorCurrency($currency, $tx['vout'][$i]['value']);
+                    break;
+                }
+            }
+
+            if ($account) {
+                $extra = ['txid' => $tx['txid'], 'confirmations' => $tx['confirmations']];
+
+                $this->db->addOrUpdateTransaction($hash, $index, '', $to, $amount, '', $extra);
+                $balance = $this->node->getBalance($account->getName());
+                $account->setLastBalance(Currency::showMinorCurrency($currency, $balance));
+                $account->setLastBlock($index);
+            }
+        }
     }
 
     public function getName(): string
