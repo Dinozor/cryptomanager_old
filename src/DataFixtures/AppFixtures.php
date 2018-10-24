@@ -16,7 +16,7 @@ class AppFixtures extends Fixture
             'isLocked' => false,
             'isEnabled' => true,
             'currency' => 'ethereum',
-            'className' => 'App\\Service\\Node\\Ethereum',
+            'className' => 'App\\Service\\Node\\Ethereum\\EthereumAdapter',
         ],
         [
             'name' => 'gbtc',
@@ -24,7 +24,28 @@ class AppFixtures extends Fixture
             'isEnabled' => true,
             'currency' => 'bitcoin',
             'className' => 'App\\Service\\Node\\Bitcoin\\BitcoinAdapter',
-        ]
+        ],
+        [
+            'name' => 'gbch',
+            'isLocked' => false,
+            'isEnabled' => true,
+            'currency' => 'bitcoinCash',
+            'className' => 'App\\Service\\Node\\BitcoinCash\\BitcoinCashAdapter',
+        ],
+        [
+            'name' => 'gltc',
+            'isLocked' => false,
+            'isEnabled' => true,
+            'currency' => 'litecoin',
+            'className' => 'App\\Service\\Node\\Litecoin\\LitecoinAdapter',
+        ],
+        [
+            'name' => 'gzec',
+            'isLocked' => false,
+            'isEnabled' => true,
+            'currency' => 'zCash',
+            'className' => 'App\\Service\\Node\\ZCash\\ZCashAdapter',
+        ],
     ];
 
     public function load(ObjectManager $manager)
@@ -39,8 +60,8 @@ class AppFixtures extends Fixture
         $ethereum->setIsActive(true);
         $ethereum->setIsLocked(false);
         $ethereum->setName('Ethereum');
+        $ethereum->setMinor_unit(16);
         $ethereum->setSymbol('Ξ');
-
         $manager->persist($ethereum);
 
         $bitcoin = new Currency();
@@ -48,9 +69,45 @@ class AppFixtures extends Fixture
         $bitcoin->setIsActive(true);
         $bitcoin->setIsLocked(false);
         $bitcoin->setName('Bitcoin');
+        $bitcoin->setMinor_unit(8);
         $bitcoin->setSymbol('₿');
-
         $manager->persist($bitcoin);
+
+        $bitcoinCash = new Currency();
+        $bitcoinCash->setCode_a('bch');
+        $bitcoinCash->setIsActive(true);
+        $bitcoinCash->setIsLocked(false);
+        $bitcoinCash->setName('BitcoinCash');
+        $bitcoinCash->setMinor_unit(8);
+        $bitcoinCash->setSymbol('');
+        $manager->persist($bitcoinCash);
+
+        $bitcoinCash = new Currency();
+        $bitcoinCash->setCode_a('bch');
+        $bitcoinCash->setIsActive(true);
+        $bitcoinCash->setIsLocked(false);
+        $bitcoinCash->setName('BitcoinCash');
+        $bitcoinCash->setMinor_unit(8);
+        $bitcoinCash->setSymbol('');
+        $manager->persist($bitcoinCash);
+
+        $litecoun = new Currency();
+        $litecoun->setCode_a('ltc');
+        $litecoun->setIsActive(true);
+        $litecoun->setIsLocked(false);
+        $litecoun->setName('Litecoin');
+        $litecoun->setMinor_unit(8);
+        $litecoun->setSymbol('');
+        $manager->persist($litecoun);
+
+        $zCash = new Currency();
+        $zCash->setCode_a('zec');
+        $zCash->setIsActive(true);
+        $zCash->setIsLocked(false);
+        $zCash->setName('ZCash');
+        $zCash->setMinor_unit(8);
+        $zCash->setSymbol('');
+        $manager->persist($zCash);
 
         $manager->flush();
 
