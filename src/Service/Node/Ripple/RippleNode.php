@@ -6,7 +6,7 @@ use App\Service\NodeDataManager;
 
 class RippleNode
 {
-    private const URL = 'http://127.0.0.1:8545';
+    private const URL = 'https://data.ripple.com';
     private $rootWallet;
     private $dataManager;
 

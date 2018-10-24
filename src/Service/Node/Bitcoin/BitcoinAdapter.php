@@ -109,6 +109,7 @@ class BitcoinAdapter implements NodeAdapterInterface
             }
 
             $isComplete = true;
+            $blockIndex = 0;
             $limit = $data['filters']['limit'] ?? 10;
             $from = $data['filters']['from'] ?? 0;
 
@@ -121,12 +122,13 @@ class BitcoinAdapter implements NodeAdapterInterface
                 }
 
                 $amount = Currency::showMinorCurrency($currency, $tnx['amount']);
-                $this->db->addOrUpdateTransaction($tnx['blockhash'], $tnx['txid'], $tnx['blockindex'], $tnx['confirmations'], '', $tnx['address'], $amount, '');
+                $blockIndex = $tnx['blockindex'];
+                $this->db->addOrUpdateTransaction($tnx['blockhash'], $tnx['txid'], $blockIndex, $tnx['confirmations'], '', $tnx['address'], $amount, '');
             }
 
             if ($isComplete) {
                 $account->setLastBalance(Currency::showMinorCurrency($currency, $balance));
-                $account->setLastBalance($tnx['blockindex']);
+                $account->setLastBlock($blockIndex);
             }
 
             $result++;
