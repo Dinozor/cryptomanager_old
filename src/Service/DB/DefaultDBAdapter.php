@@ -174,16 +174,18 @@ class DefaultDBAdapter implements DBNodeAdapterInterface
         $this->accountRepository->findTopAccounts($limit, $lastBlock, $timeLastCheck, $offset);
     }
 
-    public function addOrUpdateTransaction(string $hash, string $block, string $fromAddress, string $toAddress, int $amount, $status, array $extra = []): ?bool
+    public function addOrUpdateTransaction(string $hash, string $txid, string $block, int $confirmations, string $fromAddress, string $toAddress, int $amount, $status, array $extra = []): ?bool
     {
         $isNew = null;
         if (!$transaction = $this->getTransaction($hash)) {
             $transaction = new Transaction();
+            $transaction->setTxid($txid);
             $this->persist($transaction);
             $isNew = true;
         } else {
             $isNew = false;
         }
+        $transaction->setConfirmations($confirmations);
         $transaction->setCurrency($this->currency);
         $transaction->setAmount($amount);
         $transaction->setBlock($block);

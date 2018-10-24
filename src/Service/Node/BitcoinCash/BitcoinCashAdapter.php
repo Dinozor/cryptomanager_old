@@ -88,8 +88,7 @@ class BitcoinCashAdapter implements NodeAdapterInterface
                 }
 
                 $amount = Currency::showMinorCurrency($currency, $tnx['amount']);
-                $extra = ['txid' => $tnx['txid'], 'confirmations' => $tnx['confirmations']];
-                $this->db->addOrUpdateTransaction($tnx['blockhash'], $tnx['blockindex'], '', $tnx['address'], $amount, '', $extra);
+                $this->db->addOrUpdateTransaction($tnx['blockhash'], $tnx['txid'], $tnx['blockindex'], $tnx['confirmations'], '', $tnx['address'], $amount, '');
             }
 
             if ($isComplete) {
@@ -145,9 +144,7 @@ class BitcoinCashAdapter implements NodeAdapterInterface
             }
 
             if ($account) {
-                $extra = ['txid' => $tx['txid'], 'confirmations' => $tx['confirmations']];
-
-                $this->db->addOrUpdateTransaction($hash, $index, '', $to, $amount, '', $extra);
+                $this->db->addOrUpdateTransaction($hash, $tx['txid'], $index, $tx['confirmations'], '', $to, $amount, '');
                 $balance = $this->node->getBalance($account->getName());
                 $account->setLastBalance(Currency::showMinorCurrency($currency, $balance));
                 $account->setLastBlock($index);

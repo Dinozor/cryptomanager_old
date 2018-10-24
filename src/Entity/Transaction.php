@@ -18,41 +18,61 @@ class Transaction
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @var string
      */
     private $hash;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @var string
+     */
+    private $txid;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     * @var string
      */
     private $fromAddress;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @var string
      */
     private $toAddress;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @var string
      */
     private $block;
 
     /**
+     * @ORM\Column(type="integer", options={"default":0})
+     * @var int
+     */
+    private $confirmations;
+
+    /**
      * @ORM\Column(type="datetimetz")
+     * @var \DateTimeInterface
      */
     private $timeCreated;
 
     /**
      * @ORM\Column(type="bigint")
+     * @var int
      */
     private $amount;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @var string
      */
     private $status;
 
     /**
      * @ORM\Column(type="json", nullable=true)
+     * @var array
      */
     private $extra = [];
 
@@ -64,9 +84,14 @@ class Transaction
 
     /**
      * @ORM\Column(type="datetimetz")
+     * @var \DateTimeInterface
      */
     private $timeUpdated;
 
+    /**
+     * Transaction constructor.
+     * @throws \Exception
+     */
     public function __construct()
     {
         $this->timeCreated = new \DateTimeImmutable();
@@ -86,6 +111,20 @@ class Transaction
     {
         $this->hash = $hash;
 
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTxid(): string
+    {
+        return $this->txid;
+    }
+
+    public function setTxid(string $txid): self
+    {
+        $this->txid = $txid;
         return $this;
     }
 
@@ -122,6 +161,20 @@ class Transaction
     {
         $this->block = $block;
 
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getConfirmations(): int
+    {
+        return $this->confirmations;
+    }
+
+    public function setConfirmations(int $confirmations): self
+    {
+        $this->confirmations = $confirmations;
         return $this;
     }
 
