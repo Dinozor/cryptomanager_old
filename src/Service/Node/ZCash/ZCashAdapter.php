@@ -26,15 +26,16 @@ class ZCashAdapter implements NodeAdapterInterface
         $total = 0;
         $txs = $this->node->listTransactions($account->getName());
 
-        foreach ($txs as $tnx) {
-            $tx = $this->node->getTransaction($tnx['txid']);
+        foreach ($txs as $tx) {
+            $amount = Currency::showMinorCurrency($account->getCurrency(), $tx['amount']);
             $result = $this->db->addOrUpdateTransaction(
-                $tnx['blockhash'],
-                $tnx['blockindex'],
-                $tnx['address'],
-                $tx['details'][0]['address'],
-                Currency::showMinorCurrency($account->getCurrency(), $tx['amount']),
-                ''
+                $tx['blockhash'],
+                $tx['txid'],
+                $tx['blockindex'],
+                $tx['confirmations'],
+                '',
+                $tx['address'],
+                $amount
             );
 
             if ($result != null) {
