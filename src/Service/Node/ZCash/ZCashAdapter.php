@@ -184,17 +184,17 @@ class ZCashAdapter implements NodeAdapterInterface
 
     public function getAccounts()
     {
-        return $this->node->listAccounts();
+        return $this->node->z_listAddresses();
     }
 
     public function getAccount(string $address)
     {
-        return $this->node->getAccount($address);
+        return $this->node->z_validateAddress($address);
     }
 
-    public function getBalance(string $name)
+    public function getBalance(string $address)
     {
-        return $this->node->getBalance($name);
+        return $this->node->z_getBalance($address);
     }
 
     public function getTransaction(string $txId)
@@ -225,6 +225,7 @@ class ZCashAdapter implements NodeAdapterInterface
 
     public function send(string $address, int $amount)
     {
-        return $this->node->sendToAddress($address, $amount);
+        $mainAddress = $this->db->getMainAddress($this->currency);
+        return $this->node->z_sendMany($address, $mainAddress, Currency::showCurrency($this->currency, $amount));
     }
 }

@@ -1509,17 +1509,18 @@ class ZCashNode extends BaseNode
      * Change from a taddr flows to a new taddr address, while change from zaddr returns to itself.
      * When sending coinbase UTXOs to a zaddr, change is not allowed. The entire value of the UTXO(s) must be consumed.
      * Before Sapling activates, the maximum number of zaddr outputs is 54 due to transaction size limits.
-     * <fromaddress> <amounts> [minconf=1] [fee=0.0001]
+     * <fromaddress> <toaddress> <amount> [minconf=1] [fee=0.0001]
      *
      * @param string $fromAddress
-     * @param array $amounts
+     * @param string $toAddress
+     * @param float $amount
      * @param int $minConf
      * @param float $fee
      * @return mixed
      */
-    public function z_sendMany(string $fromAddress, array $amounts, int $minConf = 1, float $fee = 0.0001)
+    public function z_sendMany(string $fromAddress, string $toAddress, float $amount, int $minConf = 1, float $fee = 0.0001)
     {
-        return $this->_call('z_sendmany', [$fromAddress, $amounts, $minConf, $fee]);
+        return $this->_call('z_sendmany', [$fromAddress, $toAddress, $amount, $minConf, $fee]);
     }
 
     /**
