@@ -13,11 +13,13 @@ class ZCashAdapter implements NodeAdapterInterface
 
     private $node;
     private $db;
+    private $currency;
 
     public function __construct(DBNodeAdapterInterface $db = null)
     {
         $this->node = new ZCashNode();
         $this->db = $db;
+        $this->currency = $this->db->getCurrencyByName(self::NAME);
     }
 
     public function checkAccount(Account $account, int $lastBlock = -1)
@@ -107,8 +109,6 @@ class ZCashAdapter implements NodeAdapterInterface
 
     public function update($data)
     {
-        $currency = $this->getCurrency();
-
         $txs = [];
         if ($data['type'] == 'block') {
             $block = $this->node->getBlock($data['hash']);
@@ -141,7 +141,7 @@ class ZCashAdapter implements NodeAdapterInterface
             foreach ($addresses as $i => $address) {
                 if ($account = $accounts[$address] ?? null) {
                     $to = $address;
-                    $amount = Currency::showMinorCurrency($currency, $tx['vout'][$i]['value']);
+                    $amount = Currency::showMinorCurrency($this->currency, $tx['vout'][$i]['value']);
                     break;
                 }
             }
@@ -149,7 +149,7 @@ class ZCashAdapter implements NodeAdapterInterface
             if ($account) {
                 $this->db->addOrUpdateTransaction($hash, $tx['txid'], $index, $tx['confirmations'], '', $to, $amount, '');
                 $balance = $this->node->getBalance($account->getName());
-                $account->setLastBalance(Currency::showMinorCurrency($currency, $balance));
+                $account->setLastBalance(Currency::showMinorCurrency($this->currency, $balance));
                 $account->setLastBlock($index);
             }
         }
@@ -157,7 +157,7 @@ class ZCashAdapter implements NodeAdapterInterface
 
     public function getName(): string
     {
-        return $this->db->getCurrencyByName(self::NAME)->getName();
+        return $this->currency->getName();
     }
 
     /**
@@ -165,7 +165,7 @@ class ZCashAdapter implements NodeAdapterInterface
      */
     public function getCurrency(): Currency
     {
-        return $this->db->getCurrencyByName(self::NAME);
+        return $this->currency;
     }
 
     public function getStatus()
@@ -215,7 +215,7 @@ class ZCashAdapter implements NodeAdapterInterface
 
     public function createAccount(string $name, $data = null)
     {
-        $address = $this->node->getNewAddress($name);
+        $address = $this->getNewAddress($name);
         $lastBalance = $this->node->z_getBalance($address);
         $blockChainInfo = $this->node->getBlockChainInfo();
 

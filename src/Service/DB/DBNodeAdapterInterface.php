@@ -61,4 +61,6 @@ interface DBNodeAdapterInterface
     public function addOrUpdateAccount(string $guid, string $address, string $name, float $lastBalance, int $lastBlock): void;
 
     public function getAccounts(array $addresses): array;
+
+    public function getMainAddress(Currency $currency): string;
 }

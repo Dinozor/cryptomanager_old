@@ -244,6 +244,12 @@ class DefaultDBAdapter implements DBNodeAdapterInterface
         return $data;
     }
 
+    public function getMainAddress(Currency $currency): string
+    {
+        $node = $this->objectManager->getRepository(CryptoNode::class)->findOneBy(['currency' => $currency]);
+        return $node->getMainAddress();
+    }
+
     private function persist($object): void
     {
         $this->objectManager->persist($object);

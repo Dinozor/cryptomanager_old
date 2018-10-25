@@ -13,25 +13,29 @@ class RippleAdapter implements NodeAdapterInterface
 
     private $node;
     private $db;
+    private $currency;
 
     public function __construct(DBNodeAdapterInterface $db = null)
     {
         $this->node = new RippleNode();
         $this->db = $db;
+        $this->currency = $this->db->getCurrencyByName(self::NAME);
     }
 
     public function checkAccount(Account $account, int $lastBlock = -1)
     {
         $updated = 0;
         $total = 0;
-        $txs = $this->node->getAccountTransactionHistory($account->getAddress());
+        $txs = $this->node->accountTx($account->getAddress());
 
         foreach ($txs['transactions'] as $tnx) {
             $result = $this->db->addOrUpdateTransaction(
                 $tnx['hash'],
+                '',
                 $tnx['ledger_index'],
-                $tnx['meta']['AffectedNodes'][0]['CreatedNode']['NewFields']['Account'],
-                $tnx['meta']['AffectedNodes'][1]['ModifiedNode']['FinalFields']['Account'],
+                0,
+                $tnx['tx']['Account'],
+                $tnx['tx']['Destination'],
                 $tnx['tx']['Amount'],
                 $tnx['tx']['TransactionResult']
             );
@@ -49,85 +53,185 @@ class RippleAdapter implements NodeAdapterInterface
 
     public function fixedUpdate($data)
     {
-        // TODO: Implement fixedUpdate() method.
+        $result = 0;
+        $timeline = time() + (int)getenv('FIXED_UPDATE_TIMEOUT');
+        $isOk = function () use ($timeline) {
+            return time() >= $timeline;
+        };
+
+        /** @var Account[] $wallets */
+        $accounts = $this->db->getTopWallets();
+
+        /** @var Account $account */
+        foreach ($accounts as $account) {
+            if (!$isOk()) {
+                $result = false;
+                break;
+            }
+
+            $balance = $this->node->accountInfo($account->getAddress());
+            if ($balance['account_data']['Balance'] == $account->getLastBalance()) {
+                $result++;
+                continue;
+            }
+
+            $isComplete = true;
+            $blockIndex = 0;
+
+            $txs = $this->node->accountTx($account->getAddress());
+            foreach ($txs['transactions'] as $tnx) {
+                if (!$isOk()) {
+                    $result = false;
+                    $isComplete = false;
+                    break;
+                }
+
+                $blockIndex = $tnx['ledger_index'];
+                $this->db->addOrUpdateTransaction(
+                    $tnx['hash'],
+                    '',
+                    $blockIndex,
+                    0,
+                    $tnx['tx']['LimitAmount']['issuer'],
+                    $tnx['tx']['Account'],
+                    $tnx['tx']['LimitAmount']['value'],
+                    $tnx['meta']['TransactionResult']
+                );
+            }
+
+            if ($isComplete) {
+                $account->setLastBalance($balance);
+                $account->setLastBlock($blockIndex);
+            }
+
+            $result++;
+        }
+
+        return $result;
     }
 
     public function update($data)
     {
-        // TODO: Implement update() method.
+        $txs = [];
+        if ($data['type'] == 'ledger') {
+            $ledger = $this->node->ledger($data['hash']);
+            $txs = $ledger['ledger']['transactions'];
+        } else if ($data['type'] == 'transaction') {
+            $txs = [$data['hash']];
+        }
+
+        foreach ($txs as $txId) {
+            $tx = $this->node->tx($txId);
+
+            /** @var Account $account */
+            $account = $this->getAccount($tx['Account']);
+            if ($account) {
+                $this->db->addOrUpdateTransaction(
+                    $tx['hash'],
+                    $tx['txid'],
+                    $tx['ledger_index'],
+                    $tx['confirmations'],
+                    $tx['Amount']['issuer'],
+                    $tx['Account'],
+                    $tx['Amount']['value'],
+                    ''
+                );
+
+                $balance = $this->node->accountInfo($account->getAddress());
+                $account->setLastBalance($balance['account_data']['Balance']);
+                $account->setLastBlock($tx['ledger_index']);
+            }
+        }
     }
 
     public function getName(): string
     {
-        return $this->db->getCurrencyByName(self::NAME)->getName();
+        return $this->currency->getName();
     }
 
-    /**
-     * @return Currency
-     */
     public function getCurrency(): Currency
     {
-        return $this->db->getCurrencyByName(self::NAME);
+        return $this->currency;
     }
 
     public function getStatus()
     {
-        // TODO: Implement getStatus() method.
+        $info = $this->node->serverInfo();
+        return $info['info']['server_state'];
     }
 
     public function getVersion()
     {
-        $info = $this->node->getRippledVersions();
-        if (!empty($info)) {
-            return $info['rows'][0]['version'];
-        }
-        return '';
+        $info = $this->node->serverInfo();
+        return $info['info']['build_version'];
     }
 
     public function getAccounts()
     {
-        return $this->node->getAccounts();
+        return [];
     }
 
-    public function getAccount(string $address)
+    public function getAccount(string $account)
     {
-        return $this->node->getAccount($address);
+        return $this->node->accountInfo($account);
     }
 
-    public function getBalance(string $address)
+    public function getBalance(string $account)
     {
-        return $this->node->getAccountBalances($address);
+        $info = $this->node->accountInfo($account);
+        return Currency::showCurrency($this->currency, $info['account_data']['Balance']);
     }
 
     public function getTransaction(string $hash)
     {
-        return $this->node->getTransaction($hash);
+        return $this->node->tx($hash);
     }
 
-    public function getTransactions(string $address)
+    public function getTransactions(string $account)
     {
-        return $this->node->getAccountTransactionHistory($address);
+        return $this->node->accountTx($account);
     }
 
     public function getNewAddress(string $account = null)
     {
-        return null;
+        $wallet = $this->node->walletPropose([
+            'seed' => 'snoPBrXtMeMyMHUVTgbuqAfg1SUTb',
+            'key_type' => 'secp256k1',
+        ]);
+
+        return $wallet['account_id'];
     }
 
     public function createAccount(string $name, $data = null)
     {
-        $address = $this->node->getNewAddress($name);
-        $account = $this->node->getAccount($address);
-        $lastBalance = $this->node->getBalance($account);
-        $blockChainInfo = $this->node->getBlockChainInfo();
+        $address = $this->getNewAddress();
+        $account = $this->node->accountInfo($address);
 
-        $this->db->addOrUpdateAccount($data['guid'], $address, $account, $lastBalance, $blockChainInfo['headers']);
+        $this->db->addOrUpdateAccount(
+            $data['guid'],
+            $address,
+            $name,
+            $account['account_data']['Balance'],
+            $account['ledger_current_index']
+        );
 
         return $address;
     }
 
     public function send(string $address, int $amount)
     {
-        return null;
+        $mainAddress = $this->db->getMainAddress($this->currency);
+        $txJson = [
+            'Account' => $mainAddress,
+            'Amount' => [
+                'currency' => self::NAME,
+                'issuer' => $mainAddress,
+                'value' => (string)$amount,
+            ],
+            'Destination' => $address,
+            'TransactionType' => 'Payment',
+        ];
+        $transaction = $this->node->sign($txJson);
+        return $this->node->submit($transaction['tx_blob']);
     }
 }
