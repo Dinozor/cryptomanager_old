@@ -46,6 +46,13 @@ class AppFixtures extends Fixture
             'currency' => 'zCash',
             'className' => 'App\\Service\\Node\\ZCash\\ZCashAdapter',
         ],
+        [
+            'name' => 'gxrp',
+            'isLocked' => false,
+            'isEnabled' => true,
+            'currency' => 'ripple',
+            'className' => 'App\\Service\\Node\\Ripple\\RippleAdapter',
+        ],
     ];
 
     public function load(ObjectManager $manager)
@@ -108,6 +115,15 @@ class AppFixtures extends Fixture
         $zCash->setMinor_unit(8);
         $zCash->setSymbol('');
         $manager->persist($zCash);
+
+        $ripple = new Currency();
+        $ripple->setCode_a('xrp');
+        $ripple->setIsActive(true);
+        $ripple->setIsLocked(false);
+        $ripple->setName('Ripple');
+        $ripple->setMinor_unit(8);
+        $ripple->setSymbol('');
+        $manager->persist($ripple);
 
         $manager->flush();
 
