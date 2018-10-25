@@ -69,9 +69,8 @@ class ZCashAdapter implements NodeAdapterInterface
                 break;
             }
 
-            $currency = $account->getCurrency();
             $balance = $this->node->getBalance($account->getName());
-            $accountBalance = Currency::showCurrency($currency, $account->getLastBalance());
+            $accountBalance = Currency::showCurrency($this->currency, $account->getLastBalance());
 
             if ($balance == $accountBalance) {
                 $result++;
@@ -91,13 +90,13 @@ class ZCashAdapter implements NodeAdapterInterface
                     break;
                 }
 
-                $amount = Currency::showMinorCurrency($currency, $tnx['amount']);
+                $amount = Currency::showMinorCurrency($this->currency, $tnx['amount']);
                 $blockIndex = $tnx['blockindex'];
                 $this->db->addOrUpdateTransaction($tnx['blockhash'], $tnx['txid'], $blockIndex, $tnx['confirmations'], '', $tnx['address'], $amount, '');
             }
 
             if ($isComplete) {
-                $account->setLastBalance(Currency::showMinorCurrency($currency, $balance));
+                $account->setLastBalance(Currency::showMinorCurrency($this->currency, $balance));
                 $account->setLastBlock($blockIndex);
             }
 
