@@ -29,7 +29,6 @@ class BitcoinCashAdapter implements NodeAdapterInterface
         $txs = $this->node->listTransactions($account->getName());
 
         foreach ($txs as $tx) {
-            $amount = Currency::showMinorCurrency($account->getCurrency(), $tx['amount']);
             $result = $this->db->addOrUpdateTransaction(
                 $tx['blockhash'],
                 $tx['txid'],
@@ -37,13 +36,16 @@ class BitcoinCashAdapter implements NodeAdapterInterface
                 $tx['confirmations'],
                 '',
                 $tx['address'],
-                $amount
+                Currency::showMinorCurrency($this->currency, $tx['amount'])
             );
 
-            if ($result != null) {
+            if ($result !== null) {
                 $total++;
             }
-            if ($result) {
+            if ($result === true) {
+                $balance = $this->node->getBalance($account->getName());
+                $account->setLastBalance(Currency::showMinorCurrency($this->currency, $balance));
+                $account->setLastBlock($tx['blockindex']);
                 $updated++;
             }
         }
@@ -56,7 +58,7 @@ class BitcoinCashAdapter implements NodeAdapterInterface
         $result = 0;
         $timeline = time() + (int)getenv('FIXED_UPDATE_TIMEOUT');
         $isOk = function () use ($timeline) {
-            return time() >= $timeline;
+            return time() <= $timeline;
         };
 
         /** @var Account[] $wallets */
