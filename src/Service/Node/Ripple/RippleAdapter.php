@@ -220,12 +220,11 @@ class RippleAdapter implements NodeAdapterInterface
 
     public function send(string $address, int $amount)
     {
-        $mainAddress = $this->db->getMainAddress($this->currency);
         $txJson = [
-            'Account' => $mainAddress,
+            'Account' => '',
             'Amount' => [
                 'currency' => self::NAME,
-                'issuer' => $mainAddress,
+                'issuer' => '',
                 'value' => (string)$amount,
             ],
             'Destination' => $address,

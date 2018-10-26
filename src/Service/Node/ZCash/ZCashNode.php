@@ -24,7 +24,7 @@ class ZCashNode extends BaseNode
      */
     public function getBestBlockHash()
     {
-        return $this->_call('getbestblockhash');
+        return $this->__call('getbestblockhash');
     }
 
     /**
@@ -41,7 +41,7 @@ class ZCashNode extends BaseNode
      */
     public function getBlock(string $hash, int $verbosity = 1)
     {
-        return $this->_call('getblock', [$hash, $verbosity]);
+        return $this->__call('getblock', [$hash, $verbosity]);
     }
 
     /**
@@ -53,7 +53,7 @@ class ZCashNode extends BaseNode
      */
     public function getBlockChainInfo()
     {
-        return $this->_call('getblockchaininfo');
+        return $this->__call('getblockchaininfo');
     }
 
     /**
@@ -63,7 +63,7 @@ class ZCashNode extends BaseNode
      */
     public function getBlockCount()
     {
-        return $this->_call('getblockcount');
+        return $this->__call('getblockcount');
     }
 
     /**
@@ -75,7 +75,7 @@ class ZCashNode extends BaseNode
      */
     public function getBlockHash(int $index)
     {
-        return $this->_call('getblockhash', [$index]);
+        return $this->__call('getblockhash', [$index]);
     }
 
     /**
@@ -89,7 +89,7 @@ class ZCashNode extends BaseNode
      */
     public function getBlockHeader(string $hash, bool $verbose = true)
     {
-        return $this->_call('getblockheader', [$hash, $verbose]);
+        return $this->__call('getblockheader', [$hash, $verbose]);
     }
 
     /**
@@ -100,7 +100,7 @@ class ZCashNode extends BaseNode
      */
     public function getChainTips()
     {
-        return $this->_call('getchaintips');
+        return $this->__call('getchaintips');
     }
 
     /**
@@ -110,7 +110,7 @@ class ZCashNode extends BaseNode
      */
     public function getDifficulty()
     {
-        return $this->_call('getdifficulty');
+        return $this->__call('getdifficulty');
     }
 
     /**
@@ -120,7 +120,7 @@ class ZCashNode extends BaseNode
      */
     public function getMemPoolInfo()
     {
-        return $this->_call('getmempoolinfo');
+        return $this->__call('getmempoolinfo');
     }
 
     /**
@@ -132,7 +132,7 @@ class ZCashNode extends BaseNode
      */
     public function getRawMemPool(bool $verbose = false)
     {
-        return $this->_call('getrawmempool', [$verbose]);
+        return $this->__call('getrawmempool', [$verbose]);
     }
 
     /**
@@ -146,7 +146,7 @@ class ZCashNode extends BaseNode
      */
     public function getTxOut(string $txId, int $n, bool $includeMemPool = false)
     {
-        return $this->_call('gettxout', [$txId, $n, $includeMemPool]);
+        return $this->__call('gettxout', [$txId, $n, $includeMemPool]);
     }
 
     /**
@@ -163,7 +163,7 @@ class ZCashNode extends BaseNode
      */
     public function getTxOutProof(array $txIds, string $blockHash = '')
     {
-        return $this->_call('gettxoutproof', [$txIds, $blockHash]);
+        return $this->__call('gettxoutproof', [$txIds, $blockHash]);
     }
 
     /**
@@ -174,7 +174,7 @@ class ZCashNode extends BaseNode
      */
     public function getTxOutSetInfo()
     {
-        return $this->_call('gettxoutsetinfo', []);
+        return $this->__call('gettxoutsetinfo', []);
     }
 
     /**
@@ -187,7 +187,7 @@ class ZCashNode extends BaseNode
      */
     public function verifyChain(int $checkLevel, int $numBlocks)
     {
-        return $this->_call('verifychain', [$checkLevel, $numBlocks]);
+        return $this->__call('verifychain', [$checkLevel, $numBlocks]);
     }
 
     /**
@@ -201,7 +201,7 @@ class ZCashNode extends BaseNode
      */
     public function verifyTxOutProof(string $proof)
     {
-        return $this->_call('verifytxoutproof', [$proof]);
+        return $this->__call('verifytxoutproof', [$proof]);
     }
 
     /**
@@ -211,7 +211,7 @@ class ZCashNode extends BaseNode
      */
     public function getInfo()
     {
-        return $this->_call('getinfo');
+        return $this->__call('getinfo');
     }
 
     /**
@@ -223,7 +223,7 @@ class ZCashNode extends BaseNode
      */
     public function help(string $command = '')
     {
-        return $this->_call('help', [$command]);
+        return $this->__call('help', [$command]);
     }
 
     /**
@@ -233,7 +233,7 @@ class ZCashNode extends BaseNode
      */
     public function stop()
     {
-        return $this->_call('stop');
+        return $this->__call('stop');
     }
 
     /**
@@ -257,7 +257,7 @@ class ZCashNode extends BaseNode
      */
     public function z_getPaymentDisclosure(string $txId, string $jsIndex, string $outputIndex, string $message = '')
     {
-        return $this->_call('z_getpaymentdisclosure', [$txId, $jsIndex, $outputIndex, $message]);
+        return $this->__call('z_getpaymentdisclosure', [$txId, $jsIndex, $outputIndex, $message]);
     }
 
     /**
@@ -278,7 +278,7 @@ class ZCashNode extends BaseNode
      */
     public function z_validatePaymentDisclosure(string $paymentDisclosure)
     {
-        return $this->_call('z_validatepaymentdisclosure', [$paymentDisclosure]);
+        return $this->__call('z_validatepaymentdisclosure', [$paymentDisclosure]);
     }
 
     /**
@@ -291,7 +291,7 @@ class ZCashNode extends BaseNode
      */
     public function generate(int $numBlocks)
     {
-        return $this->_call('generate', [$numBlocks]);
+        return $this->__call('generate', [$numBlocks]);
     }
 
     /**
@@ -303,7 +303,7 @@ class ZCashNode extends BaseNode
      */
     public function getGenerate()
     {
-        return $this->_call('getgenerate');
+        return $this->__call('getgenerate');
     }
 
     /**
@@ -318,7 +318,7 @@ class ZCashNode extends BaseNode
      */
     public function setGenerate(bool $generate, int $genProcLimit = -1)
     {
-        return $this->_call('setgenerate', [$generate, $genProcLimit]);
+        return $this->__call('setgenerate', [$generate, $genProcLimit]);
     }
 
     /**
@@ -331,7 +331,7 @@ class ZCashNode extends BaseNode
      */
     public function getBlockSubsidy(int $height)
     {
-        return $this->_call('getblocksubsidy', [$height]);
+        return $this->__call('getblocksubsidy', [$height]);
     }
 
     /**
@@ -345,7 +345,7 @@ class ZCashNode extends BaseNode
      */
     public function getBlockTemplate(array $jsonRequestObject)
     {
-        return $this->_call('getblocktemplate', [$jsonRequestObject]);
+        return $this->__call('getblocktemplate', [$jsonRequestObject]);
     }
 
     /**
@@ -356,7 +356,7 @@ class ZCashNode extends BaseNode
      */
     public function getLocalSolPs()
     {
-        return $this->_call('getlocalsolps');
+        return $this->__call('getlocalsolps');
     }
 
     /**
@@ -366,7 +366,7 @@ class ZCashNode extends BaseNode
      */
     public function getMiningInfo()
     {
-        return $this->_call('getmininginfo');
+        return $this->__call('getmininginfo');
     }
 
     /**
@@ -381,7 +381,7 @@ class ZCashNode extends BaseNode
      */
     public function getNetworkHashPs(int $blocks = 120, int $height = -1)
     {
-        return $this->_call('getnetworkhashps', [$blocks, $height]);
+        return $this->__call('getnetworkhashps', [$blocks, $height]);
     }
 
     /**
@@ -396,7 +396,7 @@ class ZCashNode extends BaseNode
      */
     public function getNetworkSolPs(int $blocks = 120, int $height = -1)
     {
-        return $this->_call('getnetworksolps', [$blocks, $height]);
+        return $this->__call('getnetworksolps', [$blocks, $height]);
     }
 
     /**
@@ -410,7 +410,7 @@ class ZCashNode extends BaseNode
      */
     public function prioritiseTransaction(string $txId, int $priorityDelta, int $feeDelta)
     {
-        return $this->_call('prioritisetransaction', [$txId, $priorityDelta, $feeDelta]);
+        return $this->__call('prioritisetransaction', [$txId, $priorityDelta, $feeDelta]);
     }
 
     /**
@@ -425,7 +425,7 @@ class ZCashNode extends BaseNode
      */
     public function submitBlock(string $hexData, array $jsonParametersObject)
     {
-        return $this->_call('submitblock', [$hexData, $jsonParametersObject]);
+        return $this->__call('submitblock', [$hexData, $jsonParametersObject]);
     }
 
     /**
@@ -439,7 +439,7 @@ class ZCashNode extends BaseNode
      */
     public function addNode(string $node, string $command)
     {
-        return $this->_call('addnode', [$node, $command]);
+        return $this->__call('addnode', [$node, $command]);
     }
 
     /**
@@ -449,7 +449,7 @@ class ZCashNode extends BaseNode
      */
     public function clearBanned()
     {
-        return $this->_call('clearbanned');
+        return $this->__call('clearbanned');
     }
 
     /**
@@ -461,7 +461,7 @@ class ZCashNode extends BaseNode
      */
     public function disconnectNode(string $node)
     {
-        return $this->_call('disconnectnode', [$node]);
+        return $this->__call('disconnectnode', [$node]);
     }
 
     /**
@@ -477,7 +477,7 @@ class ZCashNode extends BaseNode
      */
     public function getAddedNodeInfo(bool $dns, string $node = '')
     {
-        return $this->_call('getaddednodeinfo', [$dns, $node]);
+        return $this->__call('getaddednodeinfo', [$dns, $node]);
     }
 
     /**
@@ -487,7 +487,7 @@ class ZCashNode extends BaseNode
      */
     public function getConnectionCount()
     {
-        return $this->_call('getconnectioncount');
+        return $this->__call('getconnectioncount');
     }
 
     /**
@@ -498,7 +498,7 @@ class ZCashNode extends BaseNode
      */
     public function getDeprecationInfo()
     {
-        return $this->_call('getdeprecationinfo');
+        return $this->__call('getdeprecationinfo');
     }
 
     /**
@@ -509,7 +509,7 @@ class ZCashNode extends BaseNode
      */
     public function getNetTotals()
     {
-        return $this->_call('getnettotals');
+        return $this->__call('getnettotals');
     }
 
     /**
@@ -519,7 +519,7 @@ class ZCashNode extends BaseNode
      */
     public function getNetworkInfo()
     {
-        return $this->_call('getnetworkinfo', []);
+        return $this->__call('getnetworkinfo', []);
     }
 
     /**
@@ -529,7 +529,7 @@ class ZCashNode extends BaseNode
      */
     public function getPeerInfo()
     {
-        return $this->_call('getpeerinfo');
+        return $this->__call('getpeerinfo');
     }
 
     /**
@@ -539,7 +539,7 @@ class ZCashNode extends BaseNode
      */
     public function listBanned()
     {
-        return $this->_call('listbanned');
+        return $this->__call('listbanned');
     }
 
     /**
@@ -551,7 +551,7 @@ class ZCashNode extends BaseNode
      */
     public function ping()
     {
-        return $this->_call('ping', []);
+        return $this->__call('ping', []);
     }
 
     /**
@@ -566,7 +566,7 @@ class ZCashNode extends BaseNode
      */
     public function setBan(string $ip, string $command, int $banTime, bool $absolute)
     {
-        return $this->_call('setban', [$ip, $command, $banTime, $absolute]);
+        return $this->__call('setban', [$ip, $command, $banTime, $absolute]);
     }
 
     /**
@@ -584,7 +584,7 @@ class ZCashNode extends BaseNode
      */
     public function createRawTransaction(array $transactions, array $addresses, int $lockTime, int $expiryHeight)
     {
-        return $this->_call('createrawtransaction', [$transactions, $addresses, $lockTime, $expiryHeight]);
+        return $this->__call('createrawtransaction', [$transactions, $addresses, $lockTime, $expiryHeight]);
     }
 
     /**
@@ -596,7 +596,7 @@ class ZCashNode extends BaseNode
      */
     public function decodeRawTransaction(string $hex)
     {
-        return $this->_call('decoderawtransaction', [$hex]);
+        return $this->__call('decoderawtransaction', [$hex]);
     }
 
     /**
@@ -608,7 +608,7 @@ class ZCashNode extends BaseNode
      */
     public function decodeScript(string $hex)
     {
-        return $this->_call('decodescript', [$hex]);
+        return $this->__call('decodescript', [$hex]);
     }
 
     /**
@@ -623,7 +623,7 @@ class ZCashNode extends BaseNode
      */
     public function fundRawTransaction(string $hexString)
     {
-        return $this->_call('fundrawtransaction', [$hexString]);
+        return $this->__call('fundrawtransaction', [$hexString]);
     }
 
     /**
@@ -643,7 +643,7 @@ class ZCashNode extends BaseNode
      */
     public function getRawTransaction(string $txId, int $verbose = 0)
     {
-        return $this->_call('getrawtransaction', [$txId, $verbose]);
+        return $this->__call('getrawtransaction', [$txId, $verbose]);
     }
 
     /**
@@ -658,7 +658,7 @@ class ZCashNode extends BaseNode
      */
     public function sendRawTransaction(string $hexString, bool $allowHeightFees)
     {
-        return $this->_call('sendrawtransaction', [$hexString, $allowHeightFees]);
+        return $this->__call('sendrawtransaction', [$hexString, $allowHeightFees]);
     }
 
     /**
@@ -683,7 +683,7 @@ class ZCashNode extends BaseNode
      */
     public function signRawTransaction(string $hexString, array $prevTxs = [], array $privateKeys = [], string $sigHashType = 'ALL')
     {
-        return $this->_call('signrawtransaction', [$hexString, $prevTxs, $privateKeys, $sigHashType]);
+        return $this->__call('signrawtransaction', [$hexString, $prevTxs, $privateKeys, $sigHashType]);
     }
 
     /**
@@ -697,7 +697,7 @@ class ZCashNode extends BaseNode
      */
     public function createMultiSig(int $nRequired, array $keys)
     {
-        return $this->_call('createmultisig', [$nRequired, $keys]);
+        return $this->__call('createmultisig', [$nRequired, $keys]);
     }
 
     /**
@@ -711,7 +711,7 @@ class ZCashNode extends BaseNode
      */
     public function estimateFee(int $nBlocks)
     {
-        return $this->_call('estimatefee', [$nBlocks]);
+        return $this->__call('estimatefee', [$nBlocks]);
     }
 
     /**
@@ -725,7 +725,7 @@ class ZCashNode extends BaseNode
      */
     public function estimatePriority(int $nBlocks)
     {
-        return $this->_call('estimatepriority', [$nBlocks]);
+        return $this->__call('estimatepriority', [$nBlocks]);
     }
 
     /**
@@ -737,7 +737,7 @@ class ZCashNode extends BaseNode
      */
     public function validateAddress(string $ZCashAddress)
     {
-        return $this->_call('validateaddress', [$ZCashAddress]);
+        return $this->__call('validateaddress', [$ZCashAddress]);
     }
 
     /**
@@ -751,7 +751,7 @@ class ZCashNode extends BaseNode
      */
     public function verifyMessage(string $ZCashAddress, string $signature, string $message)
     {
-        return $this->_call('verifymessage', [$ZCashAddress, $signature, $message]);
+        return $this->__call('verifymessage', [$ZCashAddress, $signature, $message]);
     }
 
     /**
@@ -763,7 +763,7 @@ class ZCashNode extends BaseNode
      */
     public function z_validateAddress(string $zAddr)
     {
-        return $this->_call('z_validateaddress', [$zAddr]);
+        return $this->__call('z_validateaddress', [$zAddr]);
     }
 
     /**
@@ -779,7 +779,7 @@ class ZCashNode extends BaseNode
      */
     public function addMultiSigAddress(int $nRequired, array $keysObject, string $account)
     {
-        return $this->_call('addmultisigaddress', [$nRequired, $keysObject, $account]);
+        return $this->__call('addmultisigaddress', [$nRequired, $keysObject, $account]);
     }
 
     /**
@@ -791,7 +791,7 @@ class ZCashNode extends BaseNode
      */
     public function backupWallet(string $destination)
     {
-        return $this->_call('backupwallet', [$destination]);
+        return $this->__call('backupwallet', [$destination]);
     }
 
     /**
@@ -804,7 +804,7 @@ class ZCashNode extends BaseNode
      */
     public function dumpPrivKey(string $tAddr)
     {
-        return $this->_call('dumpprivkey', [$tAddr]);
+        return $this->__call('dumpprivkey', [$tAddr]);
     }
 
     /**
@@ -817,7 +817,7 @@ class ZCashNode extends BaseNode
      */
     public function dumpWallet(string $filename)
     {
-        return $this->_call('dumpwallet', [$filename]);
+        return $this->__call('dumpwallet', [$filename]);
     }
 
     /**
@@ -834,7 +834,7 @@ class ZCashNode extends BaseNode
      */
     public function encryptWallet(string $passPhrase)
     {
-        return $this->_call('encryptwallet', [$passPhrase]);
+        return $this->__call('encryptwallet', [$passPhrase]);
     }
 
     /**
@@ -847,7 +847,7 @@ class ZCashNode extends BaseNode
      */
     public function getAccount(string $ZCashAddress)
     {
-        return $this->_call('getaccount', [$ZCashAddress]);
+        return $this->__call('getaccount', [$ZCashAddress]);
     }
 
     /**
@@ -860,7 +860,7 @@ class ZCashNode extends BaseNode
      */
     public function getAccountAddress(string $account)
     {
-        return $this->_call('getaccountaddress', [$account]);
+        return $this->__call('getaccountaddress', [$account]);
     }
 
     /**
@@ -873,7 +873,7 @@ class ZCashNode extends BaseNode
      */
     public function getAddressesByAccount(string $account)
     {
-        return $this->_call('getaddressesbyaccount', [$account]);
+        return $this->__call('getaddressesbyaccount', [$account]);
     }
 
     /**
@@ -887,7 +887,7 @@ class ZCashNode extends BaseNode
      */
     public function getBalance(string $account = '', int $minConf = 1, bool $includeWatchOnly = false)
     {
-        return $this->_call('getbalance', [$account, $minConf, $includeWatchOnly]);
+        return $this->__call('getbalance', [$account, $minConf, $includeWatchOnly]);
     }
 
     /**
@@ -899,7 +899,7 @@ class ZCashNode extends BaseNode
      */
     public function getNewAddress(string $account = '')
     {
-        return $this->_call('getnewaddress', [$account]);
+        return $this->__call('getnewaddress', [$account]);
     }
 
     /**
@@ -910,7 +910,7 @@ class ZCashNode extends BaseNode
      */
     public function getRawChangeAddress()
     {
-        return $this->_call('getrawchangeaddress');
+        return $this->__call('getrawchangeaddress');
     }
 
     /**
@@ -925,7 +925,7 @@ class ZCashNode extends BaseNode
      */
     public function getReceivedByAccount(string $account, int $minConf)
     {
-        return $this->_call('getreceivedbyaccount', [$account, $minConf]);
+        return $this->__call('getreceivedbyaccount', [$account, $minConf]);
     }
 
     /**
@@ -939,7 +939,7 @@ class ZCashNode extends BaseNode
      */
     public function getReceivedByAddress(string $ZCashAddress, int $minConf)
     {
-        return $this->_call('getreceivedbyaddress', [$ZCashAddress, $minConf]);
+        return $this->__call('getreceivedbyaddress', [$ZCashAddress, $minConf]);
     }
 
     /**
@@ -952,7 +952,7 @@ class ZCashNode extends BaseNode
      */
     public function getTransaction(string $txId, bool $includeWatchOnly = false)
     {
-        return $this->_call('gettransaction', [$txId, $includeWatchOnly]);
+        return $this->__call('gettransaction', [$txId, $includeWatchOnly]);
     }
 
     /**
@@ -962,7 +962,7 @@ class ZCashNode extends BaseNode
      */
     public function getUnconfirmedBalance()
     {
-        return $this->_call('getunconfirmedbalance');
+        return $this->__call('getunconfirmedbalance');
     }
 
     /**
@@ -972,7 +972,7 @@ class ZCashNode extends BaseNode
      */
     public function getWalletInfo()
     {
-        return $this->_call('getwalletinfo');
+        return $this->__call('getwalletinfo');
     }
 
     /**
@@ -986,7 +986,7 @@ class ZCashNode extends BaseNode
      */
     public function importAddress(string $address, string $label = '', bool $rescan = true)
     {
-        return $this->_call('importaddress', [$address, $label, $rescan]);
+        return $this->__call('importaddress', [$address, $label, $rescan]);
     }
 
     /**
@@ -1000,7 +1000,7 @@ class ZCashNode extends BaseNode
      */
     public function importPrivKey(string $ZCashPrivKey, string $label = '', bool $rescan = true)
     {
-        return $this->_call('importprivkey', [$ZCashPrivKey, $label, $rescan]);
+        return $this->__call('importprivkey', [$ZCashPrivKey, $label, $rescan]);
     }
 
     /**
@@ -1012,7 +1012,7 @@ class ZCashNode extends BaseNode
      */
     public function importWallet(string $filename)
     {
-        return $this->_call('importwallet', [$filename]);
+        return $this->__call('importwallet', [$filename]);
     }
 
     /**
@@ -1024,7 +1024,7 @@ class ZCashNode extends BaseNode
      */
     public function keyPoolRefill(int $newSize = 100)
     {
-        return $this->_call('keypoolrefill', [$newSize]);
+        return $this->__call('keypoolrefill', [$newSize]);
     }
 
     /**
@@ -1038,7 +1038,7 @@ class ZCashNode extends BaseNode
      */
     public function listAccounts(int $minConf = 1, bool $includeWatchOnly = false)
     {
-        return $this->_call('listaccounts', [$minConf, $includeWatchOnly]);
+        return $this->__call('listaccounts', [$minConf, $includeWatchOnly]);
     }
 
     /**
@@ -1050,7 +1050,7 @@ class ZCashNode extends BaseNode
      */
     public function listAddressGroupings()
     {
-        return $this->_call('listaddressgroupings');
+        return $this->__call('listaddressgroupings');
     }
 
     /**
@@ -1061,7 +1061,7 @@ class ZCashNode extends BaseNode
      */
     public function listLockUnspent()
     {
-        return $this->_call('listlockunspent');
+        return $this->__call('listlockunspent');
     }
 
     /**
@@ -1075,7 +1075,7 @@ class ZCashNode extends BaseNode
      */
     public function listReceivedByAccount(int $minConf, bool $includeEmpty)
     {
-        return $this->_call('listreceivedbyaccount', [$minConf, $includeEmpty]);
+        return $this->__call('listreceivedbyaccount', [$minConf, $includeEmpty]);
     }
 
     /**
@@ -1089,7 +1089,7 @@ class ZCashNode extends BaseNode
      */
     public function listReceivedByAddress(int $minConf = 1, bool $includeEmpty = false, bool $includeWatchOnly = false)
     {
-        return $this->_call('listreceivedbyaddress', [$minConf, $includeEmpty, $includeWatchOnly]);
+        return $this->__call('listreceivedbyaddress', [$minConf, $includeEmpty, $includeWatchOnly]);
     }
 
     /**
@@ -1104,7 +1104,7 @@ class ZCashNode extends BaseNode
      */
     public function listSinceBlock(string $blockHash = '', int $targetConfirmations = 1, bool $includeWatchOnly = false)
     {
-        return $this->_call('listsinceblock', [$blockHash, $targetConfirmations, $includeWatchOnly]);
+        return $this->__call('listsinceblock', [$blockHash, $targetConfirmations, $includeWatchOnly]);
     }
 
     /**
@@ -1120,7 +1120,7 @@ class ZCashNode extends BaseNode
      */
     public function listTransactions(string $account, int $count = 10, int $from = 0, bool $includeWatchOnly = false)
     {
-        return $this->_call('listtransactions', [$account, $count, $from, $includeWatchOnly]);
+        return $this->__call('listtransactions', [$account, $count, $from, $includeWatchOnly]);
     }
 
     /**
@@ -1138,7 +1138,7 @@ class ZCashNode extends BaseNode
      */
     public function listUnspent(int $minConf = 1, int $maxConf = 9999999, array $addresses = [])
     {
-        return $this->_call('listunspent', [$minConf, $maxConf, $addresses]);
+        return $this->__call('listunspent', [$minConf, $maxConf, $addresses]);
     }
 
     /**
@@ -1156,7 +1156,7 @@ class ZCashNode extends BaseNode
      */
     public function lockUnspent(bool $unlock, array $transactions)
     {
-        return $this->_call('lockunspent', [$unlock, $transactions]);
+        return $this->__call('lockunspent', [$unlock, $transactions]);
     }
 
     /**
@@ -1173,7 +1173,7 @@ class ZCashNode extends BaseNode
      */
     public function move(string $fromAccount, string $toAccount, float $amount, int $minConf, string $comment)
     {
-        return $this->_call('move', [$fromAccount, $toAccount, $amount, $minConf, $comment]);
+        return $this->__call('move', [$fromAccount, $toAccount, $amount, $minConf, $comment]);
     }
 
     /**
@@ -1190,7 +1190,7 @@ class ZCashNode extends BaseNode
      */
     public function sendFrom(string $fromAccount, string $toZCashAddress, float $amount, int $minConf = 1, string $comment = '')
     {
-        return $this->_call('sendfrom', [$fromAccount, $toZCashAddress, $amount, $minConf, $comment]);
+        return $this->__call('sendfrom', [$fromAccount, $toZCashAddress, $amount, $minConf, $comment]);
     }
 
     /**
@@ -1206,7 +1206,7 @@ class ZCashNode extends BaseNode
      */
     public function sendMany(string $fromAccount, array $amounts, int $minConf = 1, string $comment = '', string $subtractFeeFromAmount = '')
     {
-        return $this->_call('sendmany', [$fromAccount, $amounts, $minConf, $comment, $subtractFeeFromAmount]);
+        return $this->__call('sendmany', [$fromAccount, $amounts, $minConf, $comment, $subtractFeeFromAmount]);
     }
 
     /**
@@ -1223,7 +1223,7 @@ class ZCashNode extends BaseNode
      */
     public function sendToAddress(string $ZCashAddress, float $amount, string $comment = '', string $commentTo = '', bool $subtractFeeFromAmount = false)
     {
-        return $this->_call('sendtoaddress', [$ZCashAddress, $amount, $comment, $commentTo, $subtractFeeFromAmount]);
+        return $this->__call('sendtoaddress', [$ZCashAddress, $amount, $comment, $commentTo, $subtractFeeFromAmount]);
     }
 
     /**
@@ -1237,7 +1237,7 @@ class ZCashNode extends BaseNode
      */
     public function setAccount(string $ZCashAddress, string $account)
     {
-        return $this->_call('setaccount', [$ZCashAddress, $account]);
+        return $this->__call('setaccount', [$ZCashAddress, $account]);
     }
 
     /**
@@ -1249,7 +1249,7 @@ class ZCashNode extends BaseNode
      */
     public function setTxFee(float $amount)
     {
-        return $this->_call('settxfee', [$amount]);
+        return $this->__call('settxfee', [$amount]);
     }
 
     /**
@@ -1262,7 +1262,7 @@ class ZCashNode extends BaseNode
      */
     public function signMessage(string $tAddr, string $message)
     {
-        return $this->_call('signmessage', [$tAddr, $message]);
+        return $this->__call('signmessage', [$tAddr, $message]);
     }
 
     /**
@@ -1275,7 +1275,7 @@ class ZCashNode extends BaseNode
      */
     public function z_exportKey(string $zAddr)
     {
-        return $this->_call('z_exportkey', [$zAddr]);
+        return $this->__call('z_exportkey', [$zAddr]);
     }
 
     /**
@@ -1288,7 +1288,7 @@ class ZCashNode extends BaseNode
      */
     public function z_exportViewingKey(string $zAddr)
     {
-        return $this->_call('z_exportviewingkey', [$zAddr]);
+        return $this->__call('z_exportviewingkey', [$zAddr]);
     }
 
     /**
@@ -1301,7 +1301,7 @@ class ZCashNode extends BaseNode
      */
     public function z_exportWallet(string $filename)
     {
-        return $this->_call('z_exportwallet', [$filename]);
+        return $this->__call('z_exportwallet', [$filename]);
     }
 
     /**
@@ -1317,7 +1317,7 @@ class ZCashNode extends BaseNode
      */
     public function z_getBalance(string $address, int $minConf = 1)
     {
-        return $this->_call('z_getbalance', [$address, $minConf]);
+        return $this->__call('z_getbalance', [$address, $minConf]);
     }
 
     /**
@@ -1330,7 +1330,7 @@ class ZCashNode extends BaseNode
      */
     public function z_getNewAddress(string $type = 'sprout')
     {
-        return $this->_call('z_getnewaddress', [$type]);
+        return $this->__call('z_getnewaddress', [$type]);
     }
 
     /**
@@ -1342,7 +1342,7 @@ class ZCashNode extends BaseNode
      */
     public function z_getOperationResult(array $operationId = [])
     {
-        return $this->_call('z_getoperationresult', [$operationId]);
+        return $this->__call('z_getoperationresult', [$operationId]);
     }
 
     /**
@@ -1355,7 +1355,7 @@ class ZCashNode extends BaseNode
      */
     public function z_getOperationStatus(array $operationId)
     {
-        return $this->_call('z_getoperationstatus', [$operationId]);
+        return $this->__call('z_getoperationstatus', [$operationId]);
     }
 
     /**
@@ -1370,7 +1370,7 @@ class ZCashNode extends BaseNode
      */
     public function z_getTotalBalance(int $minConf = 1, bool $includeWatchOnly = false)
     {
-        return $this->_call('z_gettotalbalance', [$minConf, $includeWatchOnly]);
+        return $this->__call('z_gettotalbalance', [$minConf, $includeWatchOnly]);
     }
 
     /**
@@ -1384,7 +1384,7 @@ class ZCashNode extends BaseNode
      */
     public function z_importKey(string $zKey, string $rescan = 'whenkeyisnew', int $startHeight = 0)
     {
-        return $this->_call('z_importkey', [$zKey, $rescan, $startHeight]);
+        return $this->__call('z_importkey', [$zKey, $rescan, $startHeight]);
     }
 
     /**
@@ -1398,7 +1398,7 @@ class ZCashNode extends BaseNode
      */
     public function z_importViewingKey(string $vKey, string $rescan = 'whenkeyisnew', int $startHeight = 0)
     {
-        return $this->_call('z_importviewingkey', [$vKey, $rescan, $startHeight]);
+        return $this->__call('z_importviewingkey', [$vKey, $rescan, $startHeight]);
     }
 
     /**
@@ -1410,7 +1410,7 @@ class ZCashNode extends BaseNode
      */
     public function z_importWallet(string $filename)
     {
-        return $this->_call('z_importwallet', [$filename]);
+        return $this->__call('z_importwallet', [$filename]);
     }
 
     /**
@@ -1422,7 +1422,7 @@ class ZCashNode extends BaseNode
      */
     public function z_listAddresses(bool $includeWatchOnly = false)
     {
-        return $this->_call('z_listaddresses', [$includeWatchOnly]);
+        return $this->__call('z_listaddresses', [$includeWatchOnly]);
     }
 
     /**
@@ -1434,7 +1434,7 @@ class ZCashNode extends BaseNode
      */
     public function z_listOperationIds(string $status = 'success')
     {
-        return $this->_call('z_listoperationids', [$status]);
+        return $this->__call('z_listoperationids', [$status]);
     }
 
     /**
@@ -1447,7 +1447,7 @@ class ZCashNode extends BaseNode
      */
     public function z_listReceivedByAddress(string $address, int $minConf = 1)
     {
-        return $this->_call('z_listreceivedbyaddress', [$address, $minConf]);
+        return $this->__call('z_listreceivedbyaddress', [$address, $minConf]);
     }
 
     /**
@@ -1466,7 +1466,7 @@ class ZCashNode extends BaseNode
      */
     public function z_listUnspent(int $minConf = 1, int $maxConf = 9999999, bool $includeWatchOnly = false, array $addresses = [])
     {
-        return $this->_call('z_listunspent', [$minConf, $maxConf, $includeWatchOnly, $addresses]);
+        return $this->__call('z_listunspent', [$minConf, $maxConf, $includeWatchOnly, $addresses]);
     }
 
     /**
@@ -1501,7 +1501,7 @@ class ZCashNode extends BaseNode
      */
     public function z_mergeToAddress(array $fromAddresses, string $toAddress, float $fee = 0.0001, int $transparentLimit = 50, int $shieldedLimit = 10, string $memo = '')
     {
-        return $this->_call('z_mergetoaddress', [$fromAddresses, $toAddress, $fee, $transparentLimit, $shieldedLimit, $memo]);
+        return $this->__call('z_mergetoaddress', [$fromAddresses, $toAddress, $fee, $transparentLimit, $shieldedLimit, $memo]);
     }
 
     /**
@@ -1520,7 +1520,7 @@ class ZCashNode extends BaseNode
      */
     public function z_sendMany(string $fromAddress, string $toAddress, float $amount, int $minConf = 1, float $fee = 0.0001)
     {
-        return $this->_call('z_sendmany', [$fromAddress, $toAddress, $amount, $minConf, $fee]);
+        return $this->__call('z_sendmany', [$fromAddress, $toAddress, $amount, $minConf, $fee]);
     }
 
     /**
@@ -1540,7 +1540,7 @@ class ZCashNode extends BaseNode
      */
     public function z_shieldCoinBase(string $fromAddress, string $toAddress, float $fee = 0.0001, int $limit = 50)
     {
-        return $this->_call('z_shieldcoinbase', [$fromAddress, $toAddress, $fee, $limit]);
+        return $this->__call('z_shieldcoinbase', [$fromAddress, $toAddress, $fee, $limit]);
     }
 
     /**
@@ -1551,7 +1551,7 @@ class ZCashNode extends BaseNode
      */
     public function zcBenchmark()
     {
-        return $this->_call('zcbenchmark');
+        return $this->__call('zcbenchmark');
     }
 
     /**
@@ -1570,7 +1570,7 @@ class ZCashNode extends BaseNode
      */
     public function zcRawJoinSplit()
     {
-        return $this->_call('zcrawjoinsplit');
+        return $this->__call('zcrawjoinsplit');
     }
 
     /**
@@ -1581,7 +1581,7 @@ class ZCashNode extends BaseNode
      */
     public function zcRawKeyGen()
     {
-        return $this->_call('zcrawkeygen');
+        return $this->__call('zcrawkeygen');
     }
 
     /**
@@ -1593,7 +1593,7 @@ class ZCashNode extends BaseNode
      */
     public function zcRawReceive()
     {
-        return $this->_call('zcrawreceive');
+        return $this->__call('zcrawreceive');
     }
 
     /**
@@ -1603,6 +1603,6 @@ class ZCashNode extends BaseNode
      */
     public function zcSampleJoinSplit()
     {
-        return $this->_call('zcsamplejoinsplit');
+        return $this->__call('zcsamplejoinsplit');
     }
 }

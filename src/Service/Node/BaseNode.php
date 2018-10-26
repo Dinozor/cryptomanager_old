@@ -35,7 +35,7 @@ abstract class BaseNode
         $this->proto = $proto;
     }
 
-    protected function _call(string $method, array $params = [])
+    public function __call(string $method, array $params = [])
     {
         // The ID should be unique for each call
         $this->id++;

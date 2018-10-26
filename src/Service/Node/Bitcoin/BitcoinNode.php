@@ -25,7 +25,7 @@ class BitcoinNode extends BaseNode
      */
     public function getBestBlockHash()
     {
-        return $this->_call('getbestblockhash');
+        return $this->__call('getbestblockhash');
     }
 
     /**
@@ -37,7 +37,7 @@ class BitcoinNode extends BaseNode
      */
     public function getBlock(string $hash)
     {
-        return $this->_call('getblock', [$hash]);
+        return $this->__call('getblock', [$hash]);
     }
 
     /**
@@ -48,7 +48,7 @@ class BitcoinNode extends BaseNode
      */
     public function getBlockChainInfo()
     {
-        return $this->_call('getblockchaininfo');
+        return $this->__call('getblockchaininfo');
     }
 
     /**
@@ -58,7 +58,7 @@ class BitcoinNode extends BaseNode
      */
     public function getBlockCount()
     {
-        return $this->_call('getblockcount');
+        return $this->__call('getblockcount');
     }
 
     /**
@@ -70,7 +70,7 @@ class BitcoinNode extends BaseNode
      */
     public function getBlockHash(int $index)
     {
-        return $this->_call('getblockhash', [$index]);
+        return $this->__call('getblockhash', [$index]);
     }
 
     /**
@@ -86,7 +86,7 @@ class BitcoinNode extends BaseNode
      */
     public function getBlockHeader(string $hash, bool $verbose = true)
     {
-        return $this->_call('getblockheader', [$hash, $verbose]);
+        return $this->__call('getblockheader', [$hash, $verbose]);
     }
 
     /**
@@ -97,7 +97,7 @@ class BitcoinNode extends BaseNode
      */
     public function getChainTips()
     {
-        return $this->_call('getchaintips');
+        return $this->__call('getchaintips');
     }
 
     /**
@@ -111,7 +111,7 @@ class BitcoinNode extends BaseNode
      */
     public function getChainTxStats(int $nBlocks = 1, string $blockHash = '')
     {
-        return $this->_call('getchaintxstats', [$nBlocks, $blockHash]);
+        return $this->__call('getchaintxstats', [$nBlocks, $blockHash]);
     }
 
     /**
@@ -121,7 +121,7 @@ class BitcoinNode extends BaseNode
      */
     public function getDifficulty()
     {
-        return $this->_call('getdifficulty');
+        return $this->__call('getdifficulty');
     }
 
     /**
@@ -134,7 +134,7 @@ class BitcoinNode extends BaseNode
      */
     public function getMemPoolAncestors(string $txId, bool $verbose = false)
     {
-        return $this->_call('getmempoolancestors', [$txId, $verbose]);
+        return $this->__call('getmempoolancestors', [$txId, $verbose]);
     }
 
     /**
@@ -147,7 +147,7 @@ class BitcoinNode extends BaseNode
      */
     public function getMemPoolDescendants(string $txId, bool $verbose = false)
     {
-        return $this->_call('getmempooldescendants', [$txId, $verbose]);
+        return $this->__call('getmempooldescendants', [$txId, $verbose]);
     }
 
     /**
@@ -159,7 +159,7 @@ class BitcoinNode extends BaseNode
      */
     public function getMemPoolEntry(string $txId)
     {
-        return $this->_call('getmempoolentry', [$txId]);
+        return $this->__call('getmempoolentry', [$txId]);
     }
 
     /**
@@ -169,7 +169,7 @@ class BitcoinNode extends BaseNode
      */
     public function getMemPoolInfo()
     {
-        return $this->_call('getmempoolinfo');
+        return $this->__call('getmempoolinfo');
     }
 
     /**
@@ -180,7 +180,7 @@ class BitcoinNode extends BaseNode
      */
     public function getRawMemPool()
     {
-        return $this->_call('getrawmempool');
+        return $this->__call('getrawmempool');
     }
 
     /**
@@ -194,7 +194,7 @@ class BitcoinNode extends BaseNode
      */
     public function getTxOut(string $txId, int $n, bool $includeMemPool = true)
     {
-        return $this->_call('gettxout', [$txId, $n, $includeMemPool]);
+        return $this->__call('gettxout', [$txId, $n, $includeMemPool]);
     }
 
     /**
@@ -212,7 +212,7 @@ class BitcoinNode extends BaseNode
      */
     public function getTxOutProof(array $txIds, string $blockHash)
     {
-        return $this->_call('gettxoutproof', [$txIds, $blockHash]);
+        return $this->__call('gettxoutproof', [$txIds, $blockHash]);
     }
 
     /**
@@ -222,7 +222,7 @@ class BitcoinNode extends BaseNode
      */
     public function getTxOutSetInfo()
     {
-        return $this->_call('gettxoutsetinfo');
+        return $this->__call('gettxoutsetinfo');
     }
 
     /**
@@ -236,7 +236,7 @@ class BitcoinNode extends BaseNode
      */
     public function preciousBlock(string $blockHash)
     {
-        return $this->_call('preciousblock', [$blockHash]);
+        return $this->__call('preciousblock', [$blockHash]);
     }
 
     /**
@@ -247,7 +247,7 @@ class BitcoinNode extends BaseNode
      */
     public function pruneBlockChain(int $height)
     {
-        return $this->_call('pruneblockchain', [$height]);
+        return $this->__call('pruneblockchain', [$height]);
     }
 
     /**
@@ -257,7 +257,7 @@ class BitcoinNode extends BaseNode
      */
     public function saveMemPool()
     {
-        return $this->_call('savemempool');
+        return $this->__call('savemempool');
     }
 
     /**
@@ -270,7 +270,7 @@ class BitcoinNode extends BaseNode
      */
     public function verifyChain(int $checkLevel = 3, int $nBlocks = 6)
     {
-        return $this->_call('verifychain', [$checkLevel, $nBlocks]);
+        return $this->__call('verifychain', [$checkLevel, $nBlocks]);
     }
 
     /**
@@ -284,7 +284,7 @@ class BitcoinNode extends BaseNode
      */
     public function verifyTxOutProof(string $proof)
     {
-        return $this->_call('verifytxoutproof', [$proof]);
+        return $this->__call('verifytxoutproof', [$proof]);
     }
 
     /**
@@ -296,7 +296,7 @@ class BitcoinNode extends BaseNode
      */
     public function getMemoryInfo(string $mode = '')
     {
-        return $this->_call('getmemoryinfo', [$mode]);
+        return $this->__call('getmemoryinfo', [$mode]);
     }
 
     /**
@@ -308,7 +308,7 @@ class BitcoinNode extends BaseNode
      */
     public function help(string $command = '')
     {
-        return $this->_call('help', [$command]);
+        return $this->__call('help', [$command]);
     }
 
     /**
@@ -318,7 +318,7 @@ class BitcoinNode extends BaseNode
      */
     public function stop()
     {
-        return $this->_call('stop');
+        return $this->__call('stop');
     }
 
     /**
@@ -328,7 +328,7 @@ class BitcoinNode extends BaseNode
      */
     public function upTime()
     {
-        return $this->_call('uptime');
+        return $this->__call('uptime');
     }
 
     /**
@@ -338,7 +338,7 @@ class BitcoinNode extends BaseNode
      */
     public function getGenerate()
     {
-        return $this->_call('getgenerate');
+        return $this->__call('getgenerate');
     }
 
     /**
@@ -353,7 +353,7 @@ class BitcoinNode extends BaseNode
      */
     public function generateToAddress(float $nBlocks, string $address, int $maxTries = 1000000)
     {
-        return $this->_call('generatetoaddress', [$nBlocks, $address, $maxTries]);
+        return $this->__call('generatetoaddress', [$nBlocks, $address, $maxTries]);
     }
 
     /**
@@ -366,7 +366,7 @@ class BitcoinNode extends BaseNode
      */
     public function getBlockTemplate(array $params = [])
     {
-        return $this->_call('getblocktemplate', [$params]);
+        return $this->__call('getblocktemplate', [$params]);
     }
 
     /**
@@ -386,7 +386,7 @@ class BitcoinNode extends BaseNode
      */
     public function getMiningInfo()
     {
-        return $this->_call('getmininginfo');
+        return $this->__call('getmininginfo');
     }
 
     /**
@@ -403,7 +403,7 @@ class BitcoinNode extends BaseNode
      */
     public function getNetworkHashPs(int $nBlocks = 120, int $height = -1)
     {
-        return $this->_call('getnetworkhashps', [$nBlocks, $height]);
+        return $this->__call('getnetworkhashps', [$nBlocks, $height]);
     }
 
     /**
@@ -415,7 +415,7 @@ class BitcoinNode extends BaseNode
      */
     public function invalidateBlock(string $hash)
     {
-        return $this->_call('invalidateblock', [$hash]);
+        return $this->__call('invalidateblock', [$hash]);
     }
 
     /**
@@ -429,7 +429,7 @@ class BitcoinNode extends BaseNode
      */
     public function prioritiseTransaction(string $txId, float $dummyValue = 0, int $feeDelta = 0)
     {
-        return $this->_call('prioritisetransaction', [$txId, $dummyValue, $feeDelta]);
+        return $this->__call('prioritisetransaction', [$txId, $dummyValue, $feeDelta]);
     }
 
     /**
@@ -442,7 +442,7 @@ class BitcoinNode extends BaseNode
      */
     public function submitBlock(string $hexData, $params = null)
     {
-        return $this->_call('submitblock', [$hexData, $params]);
+        return $this->__call('submitblock', [$hexData, $params]);
     }
 
     /**
@@ -457,7 +457,7 @@ class BitcoinNode extends BaseNode
      */
     public function addNode(string $node, string $action)
     {
-        return $this->_call('addnode', [$node, $action]);
+        return $this->__call('addnode', [$node, $action]);
     }
 
     /**
@@ -467,7 +467,7 @@ class BitcoinNode extends BaseNode
      */
     public function clearBanned()
     {
-        return $this->_call('clearbanned');
+        return $this->__call('clearbanned');
     }
 
     /**
@@ -484,7 +484,7 @@ class BitcoinNode extends BaseNode
      */
     public function disconnectNode(string $address, int $nodeId = null)
     {
-        return $this->_call('disconnectnode', [$address, $nodeId]);
+        return $this->__call('disconnectnode', [$address, $nodeId]);
     }
 
     /**
@@ -500,7 +500,7 @@ class BitcoinNode extends BaseNode
      */
     public function getAddedNodeInfo(string $node = '')
     {
-        return $this->_call('getaddednodeinfo', [$node]);
+        return $this->__call('getaddednodeinfo', [$node]);
     }
 
     /**
@@ -510,7 +510,7 @@ class BitcoinNode extends BaseNode
      */
     public function getConnectionCount()
     {
-        return $this->_call('getconnectioncount');
+        return $this->__call('getconnectioncount');
     }
 
     /**
@@ -521,7 +521,7 @@ class BitcoinNode extends BaseNode
      */
     public function getNetTotals()
     {
-        return $this->_call('getnettotals');
+        return $this->__call('getnettotals');
     }
 
     /**
@@ -531,7 +531,7 @@ class BitcoinNode extends BaseNode
      */
     public function getNetworkInfo()
     {
-        return $this->_call('getnetworkinfo');
+        return $this->__call('getnetworkinfo');
     }
 
     /**
@@ -542,7 +542,7 @@ class BitcoinNode extends BaseNode
      */
     public function getPeerInfo()
     {
-        return $this->_call('getpeerinfo');
+        return $this->__call('getpeerinfo');
     }
 
     /**
@@ -552,7 +552,7 @@ class BitcoinNode extends BaseNode
      */
     public function listBanned()
     {
-        return $this->_call('listbanned');
+        return $this->__call('listbanned');
     }
 
     /**
@@ -565,7 +565,7 @@ class BitcoinNode extends BaseNode
      */
     public function ping()
     {
-        return $this->_call('ping');
+        return $this->__call('ping');
     }
 
     /**
@@ -580,7 +580,7 @@ class BitcoinNode extends BaseNode
      */
     public function setBan(string $subNet, string $command, int $banTime, bool $absolute)
     {
-        return $this->_call('setban', [$subNet, $command, $banTime, $absolute]);
+        return $this->__call('setban', [$subNet, $command, $banTime, $absolute]);
     }
 
     /**
@@ -592,7 +592,7 @@ class BitcoinNode extends BaseNode
      */
     public function setNetworkActive(bool $status)
     {
-        return $this->_call('setnetworkactive', [$status]);
+        return $this->__call('setnetworkactive', [$status]);
     }
 
     /**
@@ -606,7 +606,7 @@ class BitcoinNode extends BaseNode
      */
     public function combineRawTransaction(array $txs)
     {
-        return $this->_call('combinerawtransaction', [$txs]);
+        return $this->__call('combinerawtransaction', [$txs]);
     }
 
     /**
@@ -619,7 +619,7 @@ class BitcoinNode extends BaseNode
      */
     public function createRawTransaction(array $transactions = [])
     {
-        return $this->_call('createrawtransaction', [$transactions]);
+        return $this->__call('createrawtransaction', [$transactions]);
     }
 
     /**
@@ -632,7 +632,7 @@ class BitcoinNode extends BaseNode
      */
     public function decodeRawTransaction(string $hex)
     {
-        return $this->_call('decoderawtransaction', [$hex]);
+        return $this->__call('decoderawtransaction', [$hex]);
     }
 
     /**
@@ -644,7 +644,7 @@ class BitcoinNode extends BaseNode
      */
     public function decodeScript(string $hex)
     {
-        return $this->_call('decodescript', [$hex]);
+        return $this->__call('decodescript', [$hex]);
     }
 
     /**
@@ -672,7 +672,7 @@ class BitcoinNode extends BaseNode
      */
     public function fundRawTransaction(string $hex, array $options = [])
     {
-        return $this->_call('fundrawtransaction', [$hex, $options]);
+        return $this->__call('fundrawtransaction', [$hex, $options]);
     }
 
     /**
@@ -686,7 +686,7 @@ class BitcoinNode extends BaseNode
      */
     public function getRawTransaction(string $txId, int $verbose = 0)
     {
-        return $this->_call('getrawtransaction', [$txId, $verbose]);
+        return $this->__call('getrawtransaction', [$txId, $verbose]);
     }
 
     /**
@@ -699,7 +699,7 @@ class BitcoinNode extends BaseNode
      */
     public function sendRawTransaction(string $hex)
     {
-        return $this->_call('sendrawtransaction', [$hex]);
+        return $this->__call('sendrawtransaction', [$hex]);
     }
 
     /**
@@ -714,7 +714,7 @@ class BitcoinNode extends BaseNode
      */
     public function signRawTransaction(string $hexString, array $data = [], array $privateKeys = [])
     {
-        return $this->_call('signrawtransaction', [$hexString, $data, $privateKeys]);
+        return $this->__call('signrawtransaction', [$hexString, $data, $privateKeys]);
     }
 
     /**
@@ -727,7 +727,7 @@ class BitcoinNode extends BaseNode
      */
     public function createMultiSig(int $nRequired, array $keys)
     {
-        return $this->_call('createmultisig', [$nRequired, $keys]);
+        return $this->__call('createmultisig', [$nRequired, $keys]);
     }
 
     /**
@@ -743,7 +743,7 @@ class BitcoinNode extends BaseNode
      */
     public function estimateFee(int $nBlocks)
     {
-        return $this->_call('estimatefee', [$nBlocks]);
+        return $this->__call('estimatefee', [$nBlocks]);
     }
 
     /**
@@ -760,7 +760,7 @@ class BitcoinNode extends BaseNode
      */
     public function estimateSmartFee(int $confTarget, string $estimateMode = 'CONSERVATIVE')
     {
-        return $this->_call('estimatesmartfee', [$confTarget, $estimateMode]);
+        return $this->__call('estimatesmartfee', [$confTarget, $estimateMode]);
     }
 
     /**
@@ -773,7 +773,7 @@ class BitcoinNode extends BaseNode
      */
     public function signMessageWithPrivKey(string $privKey, string $message)
     {
-        return $this->_call('signmessagewithprivkey', [$privKey, $message]);
+        return $this->__call('signmessagewithprivkey', [$privKey, $message]);
     }
 
     /**
@@ -785,7 +785,7 @@ class BitcoinNode extends BaseNode
      */
     public function validateAddress(string $bitcoinAddress)
     {
-        return $this->_call('validateaddress', [$bitcoinAddress]);
+        return $this->__call('validateaddress', [$bitcoinAddress]);
     }
 
     /**
@@ -799,7 +799,7 @@ class BitcoinNode extends BaseNode
      */
     public function verifyMessage(string $bitcoinAddress, string $signature, string $message)
     {
-        return $this->_call('verifymessage', [$bitcoinAddress, $signature, $message]);
+        return $this->__call('verifymessage', [$bitcoinAddress, $signature, $message]);
     }
 
     /**
@@ -817,7 +817,7 @@ class BitcoinNode extends BaseNode
      */
     public function abandonTransaction(string $txId)
     {
-        return $this->_call('abandontransaction', [$txId]);
+        return $this->__call('abandontransaction', [$txId]);
     }
 
     /**
@@ -828,7 +828,7 @@ class BitcoinNode extends BaseNode
      */
     public function abortRescan()
     {
-        return $this->_call('abortrescan');
+        return $this->__call('abortrescan');
     }
 
     /**
@@ -845,7 +845,7 @@ class BitcoinNode extends BaseNode
      */
     public function addMultiSigAddress(string $nRequired, array $keys, string $account = '')
     {
-        return $this->_call('addmultisigaddress', [$nRequired, $keys, $account]);
+        return $this->__call('addmultisigaddress', [$nRequired, $keys, $account]);
     }
 
     /**
@@ -858,7 +858,7 @@ class BitcoinNode extends BaseNode
      */
     public function backupWallet(string $destination)
     {
-        return $this->_call('backupwallet', [$destination]);
+        return $this->__call('backupwallet', [$destination]);
     }
 
     /**
@@ -876,7 +876,7 @@ class BitcoinNode extends BaseNode
      */
     public function bumpFee(string $txId)
     {
-        return $this->_call('bumpfee', [$txId]);
+        return $this->__call('bumpfee', [$txId]);
     }
 
     /**
@@ -888,7 +888,7 @@ class BitcoinNode extends BaseNode
      */
     public function dumpPrivKey(string $bitcoinAddress)
     {
-        return $this->_call('dumpprivkey', [$bitcoinAddress]);
+        return $this->__call('dumpprivkey', [$bitcoinAddress]);
     }
 
     /**
@@ -901,7 +901,7 @@ class BitcoinNode extends BaseNode
      */
     public function dumpWallet(string $filename)
     {
-        return $this->_call('dumpwallet', [$filename]);
+        return $this->__call('dumpwallet', [$filename]);
     }
 
     /**
@@ -913,7 +913,7 @@ class BitcoinNode extends BaseNode
      */
     public function encryptWallet(string $passPhrase)
     {
-        return $this->_call('encryptwallet', [$passPhrase]);
+        return $this->__call('encryptwallet', [$passPhrase]);
     }
 
     /**
@@ -925,7 +925,7 @@ class BitcoinNode extends BaseNode
      */
     public function getAccount(string $bitcoinAddress)
     {
-        return $this->_call('getaccount', [$bitcoinAddress]);
+        return $this->__call('getaccount', [$bitcoinAddress]);
     }
 
     /**
@@ -939,7 +939,7 @@ class BitcoinNode extends BaseNode
      */
     public function getAccountAddress(string $account)
     {
-        return $this->_call('getaccountaddress', [$account]);
+        return $this->__call('getaccountaddress', [$account]);
     }
 
     /**
@@ -951,7 +951,7 @@ class BitcoinNode extends BaseNode
      */
     public function getAddressesByAccount(string $account)
     {
-        return $this->_call('getaddressesbyaccount', [$account]);
+        return $this->__call('getaddressesbyaccount', [$account]);
     }
 
     /**
@@ -965,7 +965,7 @@ class BitcoinNode extends BaseNode
      */
     public function getBalance(string $account = '', int $minConf = 1)
     {
-        return $this->_call('getbalance', [$account, $minConf]);
+        return $this->__call('getbalance', [$account, $minConf]);
     }
 
     /**
@@ -979,7 +979,7 @@ class BitcoinNode extends BaseNode
      */
     public function getNewAddress(string $account = '')
     {
-        return $this->_call('getnewaddress', [$account]);
+        return $this->__call('getnewaddress', [$account]);
     }
 
     /**
@@ -993,7 +993,7 @@ class BitcoinNode extends BaseNode
      */
     public function getRawChangeAddress(string $account = '')
     {
-        return $this->_call('getrawchangeaddress', [$account]);
+        return $this->__call('getrawchangeaddress', [$account]);
     }
 
     /**
@@ -1009,7 +1009,7 @@ class BitcoinNode extends BaseNode
      */
     public function getReceivedByAccount(string $account, int $minConf = 1)
     {
-        return $this->_call('getreceivedbyaccount', [$account, $minConf]);
+        return $this->__call('getreceivedbyaccount', [$account, $minConf]);
     }
 
     /**
@@ -1027,7 +1027,7 @@ class BitcoinNode extends BaseNode
      */
     public function getReceivedByAddress(string $bitcoinAddress, int $minConf = 1)
     {
-        return $this->_call('getreceivedbyaddress', [$bitcoinAddress, $minConf]);
+        return $this->__call('getreceivedbyaddress', [$bitcoinAddress, $minConf]);
     }
 
     /**
@@ -1049,7 +1049,7 @@ class BitcoinNode extends BaseNode
      */
     public function getTransaction(string $txId)
     {
-        return $this->_call('gettransaction', [$txId]);
+        return $this->__call('gettransaction', [$txId]);
     }
 
     /**
@@ -1059,7 +1059,7 @@ class BitcoinNode extends BaseNode
      */
     public function getUnconfirmedBalance()
     {
-        return $this->_call('getunconfirmedbalance');
+        return $this->__call('getunconfirmedbalance');
     }
 
     /**
@@ -1069,7 +1069,7 @@ class BitcoinNode extends BaseNode
      */
     public function getWalletInfo()
     {
-        return $this->_call('getwalletinfo');
+        return $this->__call('getwalletinfo');
     }
 
     /**
@@ -1085,7 +1085,7 @@ class BitcoinNode extends BaseNode
      */
     public function importAddress(string $script, string $label = '', bool $rescan = true)
     {
-        return $this->_call('importaddress', [$script, $label, $rescan]);
+        return $this->__call('importaddress', [$script, $label, $rescan]);
     }
 
     /**
@@ -1100,7 +1100,7 @@ class BitcoinNode extends BaseNode
      */
     public function importMulti(array $requests)
     {
-        return $this->_call('importmulti', [$requests]);
+        return $this->__call('importmulti', [$requests]);
     }
 
     /**
@@ -1118,7 +1118,7 @@ class BitcoinNode extends BaseNode
      */
     public function importPrivKey(string $bitcoinPrivKey, string $label = '', bool $rescan = true)
     {
-        return $this->_call('importprivkey', [$bitcoinPrivKey, $label, $rescan]);
+        return $this->__call('importprivkey', [$bitcoinPrivKey, $label, $rescan]);
     }
 
     /**
@@ -1136,7 +1136,7 @@ class BitcoinNode extends BaseNode
      */
     public function importPrunedFunds(string $rawTransaction, string $txOutProof)
     {
-        return $this->_call('importprunedfunds', [$rawTransaction, $txOutProof]);
+        return $this->__call('importprunedfunds', [$rawTransaction, $txOutProof]);
     }
 
     /**
@@ -1152,7 +1152,7 @@ class BitcoinNode extends BaseNode
      */
     public function importPubKey(string $pubKey, string $label = '', bool $rescan = true)
     {
-        return $this->_call('importpubkey', [$pubKey, $label, $rescan]);
+        return $this->__call('importpubkey', [$pubKey, $label, $rescan]);
     }
 
     /**
@@ -1165,7 +1165,7 @@ class BitcoinNode extends BaseNode
      */
     public function importWallet(string $fileName)
     {
-        return $this->_call('importwallet', [$fileName]);
+        return $this->__call('importwallet', [$fileName]);
     }
 
     /**
@@ -1175,7 +1175,7 @@ class BitcoinNode extends BaseNode
      */
     public function keyPoolRefill()
     {
-        return $this->_call('keypoolrefill');
+        return $this->__call('keypoolrefill');
     }
 
     /**
@@ -1188,7 +1188,7 @@ class BitcoinNode extends BaseNode
      */
     public function listAccounts(int $minConf = 1)
     {
-        return $this->_call('listaccounts', [$minConf]);
+        return $this->__call('listaccounts', [$minConf]);
     }
 
     /**
@@ -1199,7 +1199,7 @@ class BitcoinNode extends BaseNode
      */
     public function listAddressGroupings()
     {
-        return $this->_call('listaddressgroupings');
+        return $this->__call('listaddressgroupings');
     }
 
     /**
@@ -1210,7 +1210,7 @@ class BitcoinNode extends BaseNode
      */
     public function listLockUnspent()
     {
-        return $this->_call('listlockunspent');
+        return $this->__call('listlockunspent');
     }
 
     /**
@@ -1226,7 +1226,7 @@ class BitcoinNode extends BaseNode
      */
     public function listReceivedByAccount(int $minConf = 1, bool $includeEmpty = false)
     {
-        return $this->_call('listreceivedbyaccount', [$minConf, $includeEmpty]);
+        return $this->__call('listreceivedbyaccount', [$minConf, $includeEmpty]);
     }
 
     /**
@@ -1245,7 +1245,7 @@ class BitcoinNode extends BaseNode
      */
     public function listReceivedByAddress(int $minConf = 1, bool $includeEmpty = false)
     {
-        return $this->_call('listreceivedbyaddress', [$minConf, $includeEmpty]);
+        return $this->__call('listreceivedbyaddress', [$minConf, $includeEmpty]);
     }
 
     /**
@@ -1261,7 +1261,7 @@ class BitcoinNode extends BaseNode
      */
     public function listSinceBlock(string $blockHash = '', string $targetConfirmations = '')
     {
-        return $this->_call('listsinceblock', [$blockHash, $targetConfirmations]);
+        return $this->__call('listsinceblock', [$blockHash, $targetConfirmations]);
     }
 
     /**
@@ -1277,7 +1277,7 @@ class BitcoinNode extends BaseNode
      */
     public function listTransactions(string $account = '*', int $count = 10, int $from = 0)
     {
-        return $this->_call('listtransactions', [$account, $count, $from]);
+        return $this->__call('listtransactions', [$account, $count, $from]);
     }
 
     /**
@@ -1291,7 +1291,7 @@ class BitcoinNode extends BaseNode
      */
     public function listUnspent(int $minConf = 1, int $maxConf = 999999)
     {
-        return $this->_call('listunspent', [$minConf, $maxConf]);
+        return $this->__call('listunspent', [$minConf, $maxConf]);
     }
 
     /**
@@ -1301,7 +1301,7 @@ class BitcoinNode extends BaseNode
      */
     public function listWallets()
     {
-        return $this->_call('listwallets');
+        return $this->__call('listwallets');
     }
 
     /**
@@ -1315,7 +1315,7 @@ class BitcoinNode extends BaseNode
      */
     public function lockUnspent($unlock, array $arrayOfObjects = [])
     {
-        return $this->_call('lockunspent', [$unlock, $arrayOfObjects]);
+        return $this->__call('lockunspent', [$unlock, $arrayOfObjects]);
     }
 
     /**
@@ -1331,7 +1331,7 @@ class BitcoinNode extends BaseNode
      */
     public function move(string $fromAccount, string $toAccount, float $amount, int $minConf = 1, string $comment = '')
     {
-        return $this->_call('move', [$fromAccount, $toAccount, $amount, $minConf, $comment]);
+        return $this->__call('move', [$fromAccount, $toAccount, $amount, $minConf, $comment]);
     }
 
     /**
@@ -1346,7 +1346,7 @@ class BitcoinNode extends BaseNode
      */
     public function removePrunedFunds(string $txId)
     {
-        return $this->_call('removeprunedfunds', [$txId]);
+        return $this->__call('removeprunedfunds', [$txId]);
     }
 
     /**
@@ -1359,7 +1359,7 @@ class BitcoinNode extends BaseNode
      */
     public function rescanBlockChain(int $startHeight, int $stopHeight)
     {
-        return $this->_call('rescanblockchain', [$startHeight, $stopHeight]);
+        return $this->__call('rescanblockchain', [$startHeight, $stopHeight]);
     }
 
     /**
@@ -1379,7 +1379,7 @@ class BitcoinNode extends BaseNode
      */
     public function sendFrom(string $fromAccount, string $toBitcoinAddress, float $amount, int $minConf = 1, string $comment = '', string $commentTo = '')
     {
-        return $this->_call('sendfrom', [$fromAccount, $toBitcoinAddress, $amount, $minConf, $comment, $commentTo]);
+        return $this->__call('sendfrom', [$fromAccount, $toBitcoinAddress, $amount, $minConf, $comment, $commentTo]);
     }
 
     /**
@@ -1392,7 +1392,7 @@ class BitcoinNode extends BaseNode
      */
     public function sendMany(string $fromAccount, array $amounts)
     {
-        return $this->_call('sendmany', [$fromAccount, $amounts]);
+        return $this->__call('sendmany', [$fromAccount, $amounts]);
     }
 
     /**
@@ -1408,7 +1408,7 @@ class BitcoinNode extends BaseNode
      */
     public function sendToAddress(string $bitcoinAddress, float $amount, string $comment = '', string $commentTo = '')
     {
-        return $this->_call('sendtoaddress', [$bitcoinAddress, $amount, $comment, $commentTo]);
+        return $this->__call('sendtoaddress', [$bitcoinAddress, $amount, $comment, $commentTo]);
     }
 
     /**
@@ -1423,7 +1423,7 @@ class BitcoinNode extends BaseNode
      */
     public function setAccount(string $bitcoinAddress, string $account)
     {
-        return $this->_call('setaccount', [$bitcoinAddress, $account]);
+        return $this->__call('setaccount', [$bitcoinAddress, $account]);
     }
 
     /**
@@ -1435,7 +1435,7 @@ class BitcoinNode extends BaseNode
      */
     public function setTxFee(float $amount)
     {
-        return $this->_call('settxfee', [$amount]);
+        return $this->__call('settxfee', [$amount]);
     }
 
     /**
@@ -1448,7 +1448,7 @@ class BitcoinNode extends BaseNode
      */
     public function signMessage(string $bitcoinAddress, string $message)
     {
-        return $this->_call('signmessage', [$bitcoinAddress, $message]);
+        return $this->__call('signmessage', [$bitcoinAddress, $message]);
     }
 
     /**
@@ -1461,7 +1461,7 @@ class BitcoinNode extends BaseNode
      */
     public function walletLock()
     {
-        return $this->_call('walletlock');
+        return $this->__call('walletlock');
     }
 
     /**
@@ -1474,7 +1474,7 @@ class BitcoinNode extends BaseNode
      */
     public function walletPassPhrase(string $passPhrase, int $timeout)
     {
-        return $this->_call('walletpassphrase', [$passPhrase, $timeout]);
+        return $this->__call('walletpassphrase', [$passPhrase, $timeout]);
     }
 
     /**
@@ -1487,6 +1487,6 @@ class BitcoinNode extends BaseNode
      */
     public function walletPassPhraseChange(string $oldPassPhrase, string $newPassPhrase)
     {
-        return $this->_call('walletpassphrasechange', [$oldPassPhrase, $newPassPhrase]);
+        return $this->__call('walletpassphrasechange', [$oldPassPhrase, $newPassPhrase]);
     }
 }
