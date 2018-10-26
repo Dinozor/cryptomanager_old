@@ -93,6 +93,7 @@ class RippleNode extends BaseNode
     {
         $txJson['Account'] = $this->rootWallet;
         $txJson['Amount']['issuer'] = $this->rootWallet;
+
         return $this->__call('sign', [$txJson, $secret, $seedHex, $passPhrase, $keyType, $offline, $buildPath, $feeMultMax, $feeDivMax]);
     }
 
@@ -100,17 +101,10 @@ class RippleNode extends BaseNode
      * The submit method applies a transaction and sends it to the network
      * to be confirmed and included in future ledgers.
      *
-     * This command has two modes:
-     *
      * Submit-only mode takes a signed, serialized transaction as a binary blob,
      * and submits it to the network as-is. Since signed transaction objects are
      * immutable, no part of the transaction can be modified or automatically
      * filled in after submission.
-     *
-     * Sign-and-submit mode takes a JSON-formatted Transaction object,
-     * completes and signs the transaction in the same manner as the sign method,
-     * and then submits the signed transaction. We recommend only using this mode
-     * for testing and development.
      *
      * To send a transaction as robustly as possible, you should construct and sign it
      * in advance, persist it somewhere that you can access even after a power outage,
@@ -128,6 +122,45 @@ class RippleNode extends BaseNode
     public function submit(string $txBlob, bool $failHard = false)
     {
         return $this->__call('submit', [$txBlob, $failHard]);
+    }
+
+    /**
+     * The submit method applies a transaction and sends it to the network
+     * to be confirmed and included in future ledgers.
+     *
+     * Sign-and-submit mode takes a JSON-formatted Transaction object, completes
+     * and signs the transaction in the same manner as the sign method, and then
+     * submits the signed transaction. We recommend only using this mode for testing
+     * and development.
+     *
+     * To send a transaction as robustly as possible, you should construct and sign
+     * it in advance, persist it somewhere that you can access even after a power
+     * outage, then submit it as a tx_blob. After submission, monitor the network
+     * with the tx method command to see if the transaction was successfully applied;
+     * if a restart or other problem occurs, you can safely re-submit the tx_blob
+     * transaction: it won't be applied twice since it has the same sequence number
+     * as the old transaction.
+     * <tx_json> [secret] [seed] [seed_hex] [passphrase] [key_type=secp256k1] [fail_hard=false] [offline=false] [build_path=false] [fee_mult_max=10] [fee_div_max=1]
+     *
+     * @param array $txJson
+     * @param string $secret
+     * @param string $seed
+     * @param string $seedHex
+     * @param string $passPhrase
+     * @param string $keyType
+     * @param bool $failHard
+     * @param bool $offline
+     * @param bool $buildPath
+     * @param int $feeMultMax
+     * @param int $feeDivMax
+     * @return mixed
+     */
+    public function signAndSubmit(array $txJson, string $secret = '', string $seed = '', string $seedHex = '', string $passPhrase = '', string $keyType = 'secp256k1', bool $failHard = false, bool $offline = false, bool $buildPath = false, int $feeMultMax = 10, int $feeDivMax = 1)
+    {
+        $txJson['Account'] = $this->rootWallet;
+        $txJson['Amount']['issuer'] = $this->rootWallet;
+
+        return $this->__call('submit', [$txJson, $secret, $seed, $seedHex, $passPhrase, $keyType, $failHard, $offline, $buildPath, $feeMultMax, $feeDivMax]);
     }
 
     /**

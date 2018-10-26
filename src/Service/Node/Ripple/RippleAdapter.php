@@ -195,7 +195,7 @@ class RippleAdapter implements NodeAdapterInterface
     public function getNewAddress(string $account = null)
     {
         $wallet = $this->node->walletPropose([
-            'seed' => 'snoPBrXtMeMyMHUVTgbuqAfg1SUTb',
+            'seed' => getenv('RIPPLE_SEED'),
             'key_type' => 'secp256k1',
         ]);
 
@@ -230,7 +230,6 @@ class RippleAdapter implements NodeAdapterInterface
             'Destination' => $address,
             'TransactionType' => 'Payment',
         ];
-        $transaction = $this->node->sign($txJson);
-        return $this->node->submit($transaction['tx_blob']);
+        return $this->node->signAndSubmit($txJson);
     }
 }
