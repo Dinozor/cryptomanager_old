@@ -26,7 +26,7 @@ abstract class BaseNode
     private $host;
     private $port;
 
-    public function __construct($username, $password, $host = '127.0.0.1', $port = 18332, $proto = 'http')
+    public function __construct($username = '', $password = '', $host = '127.0.0.1', $port = 18332, $proto = 'http')
     {
         $this->username = $username;
         $this->password = $password;
@@ -48,9 +48,9 @@ abstract class BaseNode
             'id' => $this->id,
         ]);
 
-        $url = "{$this->proto}://{$this->username}:{$this->password}@{$this->host}:{$this->port}";
-        $ch = curl_init();
+        $url = $this->getUrl();
 
+        $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $request);
@@ -86,5 +86,17 @@ abstract class BaseNode
             return $data['error']['message'];
         }
         return $data['result'] ?? '';
+    }
+
+    private function getUrl(): string {
+        $url = "{$this->proto}://";
+        if (!empty($this->username) && !empty($this->password)) {
+            $url .= "{$this->username}:{$this->password}@";
+        }
+        $url .= $this->host;
+        if (!empty($this->port)) {
+            $url .= ":{$this->port}";
+        }
+        return $url;
     }
 }
