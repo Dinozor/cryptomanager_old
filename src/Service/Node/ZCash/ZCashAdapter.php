@@ -225,7 +225,6 @@ class ZCashAdapter implements NodeAdapterInterface
 
     public function send(string $address, int $amount)
     {
-        $mainAddress = $this->db->getMainAddress($this->currency);
-        return $this->node->z_sendMany($address, $mainAddress, Currency::showCurrency($this->currency, $amount));
+        return $this->node->z_sendMany($address, Currency::showCurrency($this->currency, $amount));
     }
 }

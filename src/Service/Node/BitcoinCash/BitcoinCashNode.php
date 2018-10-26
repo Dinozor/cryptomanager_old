@@ -953,7 +953,7 @@ class BitcoinCashNode extends BaseNode
      */
     public function getBalance(string $account = '', int $minConf = 1, bool $includeWatchOnly = false)
     {
-        return $this->__call('getbalance', [$account, $minConf]);
+        return $this->__call('getbalance', [$account, $minConf, $includeWatchOnly]);
     }
 
     /**
@@ -1231,7 +1231,7 @@ class BitcoinCashNode extends BaseNode
      */
     public function listTransactions(string $account, int $count = 10, int $from = 0, bool $includeWatchOnly = false)
     {
-        return $this->__call('listtransactions', [$account, $count, $from]);
+        return $this->__call('listtransactions', [$account, $count, $from, $includeWatchOnly]);
     }
 
     /**
@@ -1247,7 +1247,7 @@ class BitcoinCashNode extends BaseNode
      */
     public function listUnspent(int $minConf = 1, int $maxConf = 999999, array $addresses = [])
     {
-        return $this->__call('listunspent', [$minConf, $maxConf]);
+        return $this->__call('listunspent', [$minConf, $maxConf, $addresses]);
     }
 
     /**
