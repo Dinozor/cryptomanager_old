@@ -124,8 +124,6 @@ class BitcoinCashAdapter implements NodeAdapterInterface
                 continue;
             }
 
-            $hash = $tx['blockhash'];
-            $index = 0;
             $amount = 0;
             $to = '';
 
@@ -148,10 +146,10 @@ class BitcoinCashAdapter implements NodeAdapterInterface
             }
 
             if ($account) {
-                $this->db->addOrUpdateTransaction($hash, $tx['txid'], $index, $tx['confirmations'], '', $to, $amount, '');
+                $this->db->addOrUpdateTransaction($tx['blockhash'], $tx['txid'], $tx['locktime'], $tx['confirmations'], '', $to, $amount, '');
                 $balance = $this->node->getBalance($account->getName());
                 $account->setLastBalance(Currency::showMinorCurrency($this->currency, $balance));
-                $account->setLastBlock($index);
+                $account->setLastBlock($tx['locktime']);
             }
         }
     }
