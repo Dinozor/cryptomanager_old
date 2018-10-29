@@ -17,8 +17,8 @@ build:
   - sed -i -e "s|\$DATABASE_URL|$DATABASE_URL1|g" ".env"
   - ls -al
   - cat .env
-  - bin/console doctrine:database:create --if-not-exists --verbose
-  - bin/console doctrine:migrations:migrate --verbose
+  - php bin/console doctrine:database:create --if-not-exists --verbose
+  - php bin/console doctrine:migrations:migrate --verbose
 
 deploy_dev:
   stage: deploy
