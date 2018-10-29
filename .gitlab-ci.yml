@@ -19,8 +19,6 @@ deploy_dev:
   stage: deploy
   script:
   - echo "Deploy to dev server"
-  - ls -al
-  - cat .env
   environment:
     name: dev
     url: http://it09.dev.mb.org/
