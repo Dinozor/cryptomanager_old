@@ -9,7 +9,6 @@ stages:
   - deploy
 
 before_script:
-  script:
   - echo "Building the app"
   - composer install --no-interaction --no-progress
   - sed -i -e "s|\$DATABASE_URL|$DB_URL|g" ".env"
