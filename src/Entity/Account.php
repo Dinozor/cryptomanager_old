@@ -18,6 +18,7 @@ class Account
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @var string
      */
     private $name;
 
@@ -27,9 +28,17 @@ class Account
     private $globalUser;
 
     /**
+     * 0 - temporary, 1 - current, 2 - deprecated
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $type;
+
+    /**
+     * 0 - top priority, 10 - usually lowest
+     * @ORM\Column(type="integer", nullable=false, options={"default":10})
+     * @var int
+     */
+    private $priority;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -78,12 +87,16 @@ class Account
      */
     private $password;
 
+    /**
+     * @throws \Exception
+     */
     public function __construct()
     {
         $dateTime = new \DateTimeImmutable();
         $this->timeCreated = $dateTime;
         $this->timeUpdated = $dateTime;
         $this->lastBalance = 0;
+        $this->priority = 10;
     }
 
     public function getId(): ?int
@@ -123,6 +136,18 @@ class Account
     public function setType(?string $type): self
     {
         $this->type = $type;
+
+        return $this;
+    }
+
+    public function getPriority(): int
+    {
+        return $this->priority;
+    }
+
+    public function setPriority(int $priority): self
+    {
+        $this->priority = $priority;
 
         return $this;
     }

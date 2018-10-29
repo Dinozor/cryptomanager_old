@@ -171,7 +171,7 @@ class DefaultDBAdapter implements DBNodeAdapterInterface
 
     public function getTopWallets(int $limit = 100, int $lastBlock = -1, ?\DateTimeInterface $timeLastCheck = null, int $offset = 0)
     {
-        $this->accountRepository->findTopAccounts($limit, $lastBlock, $timeLastCheck, $offset);
+        return $this->accountRepository->findTopAccounts($this->currency, $limit, $lastBlock, $timeLastCheck, $offset);
     }
 
     public function addOrUpdateTransaction(string $hash, string $txid, string $block, int $confirmations, string $fromAddress, string $toAddress, int $amount, string $status = '', array $extra = []): ?bool
