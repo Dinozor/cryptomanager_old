@@ -208,25 +208,39 @@ class DefaultDBAdapter implements DBNodeAdapterInterface
      */
     public function addOrUpdateAccount(string $guid, string $address, string $name, float $lastBalance, int $lastBlock): void
     {
-        $account = $this->accountRepository->findOneBy([
-            'globalUser' => $this->getGlobalUser($guid),
-            'currency' => $this->currency,
-        ]);
+        $user = null;
 
-        if (!$account) {
+        try {
+            $user = $this->getGlobalUser($guid);
+        } catch (\Exception $err) {
+            $user = new GlobalUser();
+            $user->setGuid($guid);
+            $this->persist($user);
+        } finally {
+            $account = $this->accountRepository->findOneBy([
+                'globalUser' => $user,
+                'currency' => $this->currency,
+            ]);
+        }
+
+        if ($account == null) {
             $account = new Account();
             $account
+                ->setGlobalUser($user)
                 ->setCurrency($this->currency)
-                ->setName($name)
-                ->setGlobalUser($this->getGlobalUser($guid))
-                ->setTimeCreated(new \DateTimeImmutable());
+                ->setName($user->getGuid())
+                ->setType('1')
+                ->setPriority(10)
+                ->setTimeCreated(new \DateTimeImmutable())
+                ->setBlockWhenCreated($lastBalance);
         }
 
         $account
             ->setAddress($address)
             ->setLastBalance($lastBalance)
             ->setLastBlock($lastBlock)
-            ->setTimeUpdated(new \DateTimeImmutable());
+            ->setTimeUpdated(new \DateTimeImmutable())
+            ->setTimeLastChecked(new \DateTimeImmutable());
 
         $this->persist($account);
     }
