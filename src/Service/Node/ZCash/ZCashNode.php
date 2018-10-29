@@ -12,7 +12,7 @@ class ZCashNode extends BaseNode
 
     public function __construct(NodeDataManager $dataManager = null, ?string $rootWallet = null, $settings = null)
     {
-        parent::__construct('test', '123456');
+        parent::__construct(getenv('ZCASH_HOST'));
         $this->dataManager = $dataManager;
         $this->rootWallet = $rootWallet;
     }

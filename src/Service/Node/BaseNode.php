@@ -18,21 +18,12 @@ abstract class BaseNode
     ];
 
     private $id = 0;
+    private $host;
     protected $response;
 
-    private $username;
-    private $password;
-    private $proto;
-    private $host;
-    private $port;
-
-    public function __construct($username = '', $password = '', $host = '127.0.0.1', $port = 18332, $proto = 'http')
+    public function __construct($host)
     {
-        $this->username = $username;
-        $this->password = $password;
         $this->host = $host;
-        $this->port = $port;
-        $this->proto = $proto;
     }
 
     public function __call(string $method, array $params = [])
@@ -48,10 +39,8 @@ abstract class BaseNode
             'id' => $this->id,
         ]);
 
-        $url = $this->getUrl();
-
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_URL, $this->host);
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $request);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: text/plain'));
@@ -66,7 +55,7 @@ abstract class BaseNode
             return 'Response Http Error - ' . self::HTTP_ERRORS[$httpCode];
         }
         if (0 < curl_errno($ch)) {
-            return 'Unable to connect to ' . $url . '. Error: ' . curl_error($ch);
+            return 'Unable to connect to ' . $this->host . '. Error: ' . curl_error($ch);
         }
         curl_close($ch);
 
@@ -86,17 +75,5 @@ abstract class BaseNode
             return $data['error']['message'];
         }
         return $data['result'] ?? '';
-    }
-
-    private function getUrl(): string {
-        $url = "{$this->proto}://";
-        if (!empty($this->username) && !empty($this->password)) {
-            $url .= "{$this->username}:{$this->password}@";
-        }
-        $url .= $this->host;
-        if (!empty($this->port)) {
-            $url .= ":{$this->port}";
-        }
-        return $url;
     }
 }

@@ -12,7 +12,7 @@ class RippleNode extends BaseNode
 
     public function __construct(NodeDataManager $dataManager = null, ?string $rootWallet = null, $settings = null)
     {
-        parent::__construct('', '', 'https://data.ripple.com');
+        parent::__construct(getenv('RIPPLE_HOST'));
         $this->dataManager = $dataManager;
         $this->rootWallet = $rootWallet;
     }
@@ -21,7 +21,7 @@ class RippleNode extends BaseNode
      * The account_info command retrieves information about an account,
      * its activity, and its XRP balance. All information retrieved is
      * relative to a particular version of the ledger.
-     * <account> [strict=false] [ledger_hash] [ledger_index] [queue=false] [signer_lists=false]
+     * <account> [strict=true] [ledger_hash] [ledger_index=validated] [queue=false] [signer_lists=false]
      *
      * @param string $account
      * @param bool $strict
@@ -31,9 +31,21 @@ class RippleNode extends BaseNode
      * @param bool $signerLists
      * @return mixed
      */
-    public function accountInfo(string $account, bool $strict = false, string $ledgerHash = '', string $ledgerIndex = '', bool $queue = false, bool $signerLists = false)
+    public function accountInfo(string $account,
+                                bool $strict = true,
+                                string $ledgerHash = '',
+                                string $ledgerIndex = 'validated',
+                                bool $queue = false,
+                                bool $signerLists = false)
     {
-        return $this->__call('account_info', [$account, $strict, $ledgerHash, $ledgerIndex, $queue, $signerLists]);
+        return $this->__call('account_info', [[
+            'account' => $account,
+            'strict' => $strict,
+            'ledger_hash' => $ledgerHash,
+            'ledger_index' => $ledgerIndex,
+            'queue' => $queue,
+            'signer_lists' => $signerLists,
+        ]]);
     }
 
     /**
@@ -52,9 +64,27 @@ class RippleNode extends BaseNode
      * @param string $marker
      * @return mixed|string
      */
-    public function accountTx(string $account, int $ledgerIndexMin = -1, int $ledgerIndexMax = -1, string $ledgerHash = '', string $ledgerIndex = '', bool $binary = false, bool $forward = false, int $limit = 10, string $marker = '')
+    public function accountTx(string $account,
+                              int $ledgerIndexMin = -1,
+                              int $ledgerIndexMax = -1,
+                              string $ledgerHash = '',
+                              string $ledgerIndex = '',
+                              bool $binary = false,
+                              bool $forward = false,
+                              int $limit = 10,
+                              string $marker = '')
     {
-        return $this->__call('account_tx', [$account, $ledgerIndexMin, $ledgerIndexMax, $ledgerHash, $ledgerIndex, $binary, $forward, $limit, $marker]);
+        return $this->__call('account_tx', [[
+            'account' => $account,
+            'ledger_index_max' => $ledgerIndexMin,
+            'ledger_index_min' => $ledgerIndexMax,
+            'ledger_hash' => $ledgerHash,
+            'ledger_index' => $ledgerIndex,
+            'binary' => $binary,
+            'forward' => $forward,
+            'limit' => $limit,
+            'marker' => $marker,
+        ]]);
     }
 
     /**
@@ -67,7 +97,10 @@ class RippleNode extends BaseNode
      */
     public function tx(string $transaction, bool $binary = false)
     {
-        return $this->__call('tx', [$transaction, $binary]);
+        return $this->__call('tx', [[
+            'transaction' => $transaction,
+            'binary' => $binary,
+        ]]);
     }
 
     /**
@@ -89,12 +122,30 @@ class RippleNode extends BaseNode
      * @param int $feeDivMax
      * @return mixed
      */
-    public function sign(array $txJson, string $secret = '', string $seedHex = '', string $passPhrase = '', string $keyType = 'secp256k1', bool $offline = false, bool $buildPath = false, int $feeMultMax = 100, int $feeDivMax = 1)
+    public function sign(array $txJson,
+                         string $secret = '',
+                         string $seedHex = '',
+                         string $passPhrase = '',
+                         string $keyType = 'secp256k1',
+                         bool $offline = false,
+                         bool $buildPath = false,
+                         int $feeMultMax = 100,
+                         int $feeDivMax = 1)
     {
         $txJson['Account'] = $this->rootWallet;
         $txJson['Amount']['issuer'] = $this->rootWallet;
 
-        return $this->__call('sign', [$txJson, $secret, $seedHex, $passPhrase, $keyType, $offline, $buildPath, $feeMultMax, $feeDivMax]);
+        return $this->__call('sign', [[
+            'tx_json' => $txJson,
+            'secret' => $secret,
+            'seed_hex' => $seedHex,
+            'passphrase' => $passPhrase,
+            'key_type' => $keyType,
+            'offline' => $offline,
+            'build_path' => $buildPath,
+            'fee_mult_max' => $feeMultMax,
+            'fee_div_max' => $feeDivMax,
+        ]]);
     }
 
     /**
@@ -121,7 +172,10 @@ class RippleNode extends BaseNode
      */
     public function submit(string $txBlob, bool $failHard = false)
     {
-        return $this->__call('submit', [$txBlob, $failHard]);
+        return $this->__call('submit', [[
+            'tx_blob' => $txBlob,
+            'fail_hard' => $failHard,
+        ]]);
     }
 
     /**
@@ -155,12 +209,34 @@ class RippleNode extends BaseNode
      * @param int $feeDivMax
      * @return mixed
      */
-    public function signAndSubmit(array $txJson, string $secret = '', string $seed = '', string $seedHex = '', string $passPhrase = '', string $keyType = 'secp256k1', bool $failHard = false, bool $offline = false, bool $buildPath = false, int $feeMultMax = 10, int $feeDivMax = 1)
+    public function signAndSubmit(array $txJson,
+                                  string $secret = '',
+                                  string $seed = '',
+                                  string $seedHex = '',
+                                  string $passPhrase = '',
+                                  string $keyType = 'secp256k1',
+                                  bool $failHard = false,
+                                  bool $offline = false,
+                                  bool $buildPath = false,
+                                  int $feeMultMax = 10,
+                                  int $feeDivMax = 1)
     {
         $txJson['Account'] = $this->rootWallet;
         $txJson['Amount']['issuer'] = $this->rootWallet;
 
-        return $this->__call('submit', [$txJson, $secret, $seed, $seedHex, $passPhrase, $keyType, $failHard, $offline, $buildPath, $feeMultMax, $feeDivMax]);
+        return $this->__call('submit', [[
+            'tx_json' => $txJson,
+            'secret' => $secret,
+            'seed' => $seed,
+            'seed_hex' => $seedHex,
+            'passphrase' => $passPhrase,
+            'key_type' => $keyType,
+            'fail_hard' => $failHard,
+            'offline' => $offline,
+            'build_path' => $buildPath,
+            'fee_mult_max' => $feeMultMax,
+            'fee_div_max' => $feeDivMax
+        ]]);
     }
 
     /**
@@ -178,9 +254,27 @@ class RippleNode extends BaseNode
      * @param bool $queue
      * @return mixed|string
      */
-    public function ledger(string $ledgerHash = '', string $ledgerIndex = '', bool $full = false, bool $accounts = false, bool $transactions = true, bool $expand = false, bool $ownerFunds = false, bool $binary = false, bool $queue = false)
+    public function ledger(string $ledgerHash = '',
+                           string $ledgerIndex = '',
+                           bool $full = false,
+                           bool $accounts = false,
+                           bool $transactions = true,
+                           bool $expand = false,
+                           bool $ownerFunds = false,
+                           bool $binary = false,
+                           bool $queue = false)
     {
-        return $this->__call('ledger', [$ledgerHash, $ledgerIndex, $full, $accounts, $transactions, $expand, $ownerFunds, $binary, $queue]);
+        return $this->__call('ledger', [[
+            'ledger_hash' => $ledgerHash,
+            'ledger_index' => $ledgerIndex,
+            'full' => $full,
+            'accounts' => $accounts,
+            'transactions' => $transactions,
+            'expand' => $expand,
+            'owner_funds' => $ownerFunds,
+            'binary' => $binary,
+            'queue' => $queue,
+        ]]);
     }
 
     /**
@@ -202,7 +296,7 @@ class RippleNode extends BaseNode
      */
     public function walletPropose(array $data)
     {
-        return $this->__call('wallet_propose', $data);
+        return $this->__call('wallet_propose', [$data]);
     }
 
     /**

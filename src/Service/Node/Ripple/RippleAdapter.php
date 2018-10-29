@@ -29,21 +29,25 @@ class RippleAdapter implements NodeAdapterInterface
         $txs = $this->node->accountTx($account->getAddress());
 
         foreach ($txs['transactions'] as $tnx) {
+            $amount = \is_string($tnx['tx']['Amount']) ? $tnx['tx']['Amount'] : $tnx['tx']['Amount']['value'];
             $result = $this->db->addOrUpdateTransaction(
-                $tnx['hash'],
+                $tnx['tx']['hash'],
                 '',
-                $tnx['ledger_index'],
+                $tnx['tx']['ledger_index'],
                 0,
                 $tnx['tx']['Account'],
                 $tnx['tx']['Destination'],
-                $tnx['tx']['Amount'],
-                $tnx['tx']['TransactionResult']
+                Currency::showMinorCurrency($this->currency, $amount),
+                $tnx['meta']['TransactionResult']
             );
 
             if ($result != null) {
                 $total++;
             }
             if ($result) {
+                $balance = $this->node->accountInfo($account->getAddress());
+                $account->setLastBalance($balance['account_data']['Balance']);
+                $account->setLastBlock($tnx['tx']['ledger_index']);
                 $updated++;
             }
         }
@@ -56,7 +60,7 @@ class RippleAdapter implements NodeAdapterInterface
         $result = 0;
         $timeline = time() + (int)getenv('FIXED_UPDATE_TIMEOUT');
         $isOk = function () use ($timeline) {
-            return time() >= $timeline;
+            return time() <= $timeline;
         };
 
         /** @var Account[] $wallets */
@@ -86,21 +90,21 @@ class RippleAdapter implements NodeAdapterInterface
                     break;
                 }
 
-                $blockIndex = $tnx['ledger_index'];
+                $blockIndex = $tnx['tx']['ledger_index'];
                 $this->db->addOrUpdateTransaction(
-                    $tnx['hash'],
+                    $tnx['tx']['hash'],
                     '',
                     $blockIndex,
                     0,
                     $tnx['tx']['LimitAmount']['issuer'],
                     $tnx['tx']['Account'],
-                    $tnx['tx']['LimitAmount']['value'],
+                    $tnx['tx']['Amount']['value'],
                     $tnx['meta']['TransactionResult']
                 );
             }
 
             if ($isComplete) {
-                $account->setLastBalance($balance);
+                $account->setLastBalance($balance['account_data']['Balance']);
                 $account->setLastBlock($blockIndex);
             }
 

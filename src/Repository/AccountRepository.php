@@ -30,23 +30,23 @@ class AccountRepository extends ServiceEntityRepository
      */
     public function findTopAccounts(Currency $currency, int $limit = 100, int $lastBlock = -1, ?\DateTimeInterface $timeLastCheck = null, int $offset = 0): array
     {
-        $qb = $this->createQueryBuilder('a')
+        $query = $this->createQueryBuilder('a')
             ->where('a.currency = :currency')
             ->setParameter('currency', $currency);
 
         if ($timeLastCheck) {
-            $qb->andWhere('a.timeLastChecked < :timeLastCheck')
+            $query->andWhere('a.timeLastChecked < :timeLastCheck')
                 ->setParameter('lastTimeCheck', $timeLastCheck);
         }
         if ($lastBlock > -1) {
-            $qb->andWhere('a.lastBlock > :lastBlock')
+            $query->andWhere('a.lastBlock > :lastBlock')
                 ->setParameter('lastBlock', $lastBlock);
         }
         if ($offset > 0) {
-            $qb->setFirstResult($offset);
+            $query->setFirstResult($offset);
         }
 
-        return $this->createQueryBuilder('a')
+        return $query
             ->orderBy('a.type', 'ASC') // 0 - temporary, 1 - current, 2 - deprecated
             ->addOrderBy('a.priority', 'ASC') //0 - top priority, 10 - usually lowest
             ->setMaxResults($limit)
