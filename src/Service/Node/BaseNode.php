@@ -43,7 +43,7 @@ abstract class BaseNode
         curl_setopt($ch, CURLOPT_URL, $this->host);
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $request);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: text/plain'));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-type: text/plain']);
         curl_setopt($ch, CURLOPT_ENCODING, 'gzip,deflate');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt_array($ch, [CURLOPT_CONNECTTIMEOUT => 8, CURLOPT_TIMEOUT => 8]);
