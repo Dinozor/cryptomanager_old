@@ -4,6 +4,7 @@ cache:
 
 variables:
   DATABASE_URL: "mysql://db_user@db_password/db_name"
+  CI_DEBUG_TRACE: "true"
 
 stages:
   - build
