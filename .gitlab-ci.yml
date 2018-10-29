@@ -14,7 +14,7 @@ build:
   script:
   - echo "Building the app"
   - composer install --no-interaction --no-progress
-  - sed -i -e "s|\$DATABASE_URL|$DATABASE_URL|g" ".env"
+  - sed -i -e "s|\$DATABASE_URL|$DB_URL|g" ".env"
   - ls -al
   - cat .env
   - php bin/console doctrine:database:create --if-not-exists --verbose
