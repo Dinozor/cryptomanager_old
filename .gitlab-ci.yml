@@ -4,7 +4,6 @@ cache:
 
 variables:
   DATABASE_URL: "mysql://db_user@db_password/db_name"
-  CI_DEBUG_TRACE: "true"
 
 stages:
   - build
@@ -15,11 +14,7 @@ build:
   script:
   - echo "Building the app"
   - composer install --no-interaction --no-progress
-  - "sed -i -e 's/$$DATABASE_URL/$DATABASE_URL1/g' .env"
-  - echo $DATABASE_URL1
-  - "echo $DATABASE_URL1"
-  - echo $$DATABASE_URL1
-  - "echo $$DATABASE_URL1"
+  - sed -i -e 's/$DATABASE_URL/"$DATABASE_URL1"/g' .env
   - ls -al
   - cat .env
   - bin/console doctrine:database:create --if-not-exists --verbose
