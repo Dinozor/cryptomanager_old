@@ -15,7 +15,7 @@ build:
   - echo "Building the app"
   - composer install --no-interaction --no-progress
   - sed -i -e 's/$$DATABASE_URL/$DATABASE_URL/g' .env
-  - ll
+  - ls -al
   - cat .env
   - bin/console doctrine:database:create --if-not-exists --verbose
   - bin/console doctrine:migrations:migrate --verbose
@@ -24,7 +24,7 @@ deploy_dev:
   stage: deploy
   script:
   - echo "Deploy to dev server"
-  - ll
+  - ls -al
   - cat .env
   environment:
     name: dev
