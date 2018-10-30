@@ -4,53 +4,60 @@ namespace App\Controller\API;
 
 use App\Entity\Currency;
 use App\Entity\GlobalUser;
-use App\Entity\User;
+use App\Service\NodeManager;
 use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\NonUniqueResultException;
-use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 
 class APICryptoController extends Controller
 {
     /**
-     * @Route("/wallet", name="api_wallet")
+     * @param string $currencyCode
+     * @param string $guid
+     * @param NodeManager $nodeManager
+     * @return JsonResponse
+     * @throws NonUniqueResultException
+     * @throws \Exception
+     * @Route("/wallet/create/{currencyCode}/{guid}", name="api_wallet_create")
      */
-    public function index()
+    public function createWallet(string $currencyCode, string $guid, NodeManager $nodeManager): JsonResponse
     {
+        $address = '';
+        if ($nodeLoader = $nodeManager->loadNodeAdapter($currencyCode)) {
+            $address = $nodeLoader->createAccount($guid, ['guid' => $guid]);
+        }
+
         return $this->json([
-            'message' => 'Welcome to your new controller!',
-            'path' => 'src/Controller/APIWalletController.php',
+            'code' => 0,
+            'message' => 'Wallet created',
+            'wallet' => ['address' => $address],
         ]);
     }
 
     /**
-     * @param string $guid
-     * @param string $currency_code
-     * @param KeyStoreManager $keyStoreManager
-     * @return \Symfony\Component\HttpFoundation\JsonResponse
-     * @throws EntityNotFoundException
+     * @Route("/wallet/transactions/{currency}/{wallet}", name="api_wallet_get")
+     * @param string $currency
+     * @param string $wallet
+     * @param NodeManager $nodeManager
+     * @return JsonResponse
      * @throws NonUniqueResultException
-     * @throws \Exception
-     * @Route("/wallet/create/{currency_code}/{guid}", name="api_wallet_create")
      */
-//    public function createWallet($guid, $currency_code, KeyStoreManager $keyStoreManager)
-//    {
-//        $currency = $this->getCurrency($currency_code);
-//        $user = $this->getGlobalUser($guid, true);
-//
-//        $address = $keyStoreManager->createWallet($user, $currency);
-//
-//        return $this->json([
-//            'code' => 0,
-//            'message' => 'Wallet created',
-//            'wallet' => [
-//                'currency' => $currency->getCode_a(),
-//                'address' => $address
-//            ]
-//        ]);
-//    }
+    public function getTransactions(string $currency, string $wallet, NodeManager $nodeManager): JsonResponse
+    {
+        $txs = [];
+        if ($nodeLoader = $nodeManager->loadNodeAdapter($currency)) {
+            $account = $nodeLoader->getAccount($wallet);
+            $txs = $nodeLoader->getTransactions($account);
+        }
+
+        return $this->json([
+            'code' => 0,
+            'message' => 'Transactions',
+            'transactions' => $txs,
+        ]);
+    }
 
     /**
      * @param string $guid
@@ -117,11 +124,11 @@ class APICryptoController extends Controller
 
     /**
      * @param string $currency
-     * @return Currency|null
+     * @return Currency
      * @throws EntityNotFoundException
      * @throws NonUniqueResultException
      */
-//    private function getCurrency(string $currency)
+//    private function getCurrency(string $currency): Currency
 //    {
 //        $cur = $this->getDoctrine()->getRepository(Currency::class)->findByCodeAInsensitive($currency);
 //        if (!$cur) {
@@ -133,13 +140,11 @@ class APICryptoController extends Controller
     /**
      * @param string $guid
      * @param bool $create
-     * @return GlobalUser|null|object
+     * @return GlobalUser
      */
-//    private function getGlobalUser(string $guid, bool $create = false)
+//    private function getGlobalUser(string $guid, bool $create = false): GlobalUser
 //    {
-//        $user = $this->getDoctrine()->getRepository(GlobalUser::class)->findOneBy([
-//            'guid' => $guid
-//        ]);
+//        $user = $this->getDoctrine()->getRepository(GlobalUser::class)->findOneBy(['guid' => $guid]);
 //        if ($user) {
 //            return $user;
 //        }
