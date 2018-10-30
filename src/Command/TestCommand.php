@@ -2,6 +2,8 @@
 
 namespace App\Command;
 
+use App\Service\Node\Bitcoin\BitcoinNode;
+use App\Service\Node\Litecoin\LitecoinNode;
 use App\Service\NodeManager;
 use JsonRpc\Client;
 use App\Service\Node\EthereumNode;
@@ -36,6 +38,15 @@ class TestCommand extends Command
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        $io = new SymfonyStyle($input, $output);
+        $btc = new LitecoinNode();
+        $tx = $btc->help('addmultisigaddress');
+//        $tx = $btc->getAccount('2MxKktz3bhgFBbFA7WC5isGqR3axkHjQNjK');
+        echo $tx;
+    }
+
+    protected function execute2(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
         $this->nodeManager->loadNodeAdapter('eth');

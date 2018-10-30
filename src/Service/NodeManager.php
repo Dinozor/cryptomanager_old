@@ -49,17 +49,16 @@ class NodeManager
     }
 
     /**
-     * @param string $currency
+     * @param string $codeA
      * @return NodeAdapterInterface|null
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function loadNodeAdapter(string $currency)
+    public function loadNodeAdapter(string $codeA): ?NodeAdapterInterface
     {
-        /** @var Currency $currency_obj */
-        $currency_obj = $this->objectManager->getRepository(Currency::class)->findOneBy([
-            'code_a' => $currency
-        ]);
-        if ($currency_obj) {
-            return $this->getNodeAdapter($currency_obj);
+        /** @var Currency $currency */
+        $currency = $this->objectManager->getRepository(Currency::class)->findOneBy(['code_a' => strtolower($codeA)]);
+        if ($currency) {
+            return $this->getNodeAdapter($currency);
         }
         return null;
     }

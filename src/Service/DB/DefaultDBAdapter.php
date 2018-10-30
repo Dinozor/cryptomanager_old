@@ -124,9 +124,18 @@ class DefaultDBAdapter implements DBNodeAdapterInterface
         // TODO: Implement getTransactionsForGUID() method.
     }
 
+    /**
+     * @param string $guid
+     * @return GlobalUser
+     * @throws \Exception
+     */
     public function getGlobalUser(string $guid): GlobalUser
     {
-        // TODO: Implement getGlobalUser() method.
+        $user = $this->objectManager->getRepository(GlobalUser::class)->findOneBy(['guid' => $guid]);
+        if ($user == null) {
+            throw new \Exception("User with GUID: '{$guid}' not found");
+        }
+        return $user;
     }
 
     public function getNodeSettings()
@@ -162,19 +171,22 @@ class DefaultDBAdapter implements DBNodeAdapterInterface
 
     public function getTopWallets(int $limit = 100, int $lastBlock = -1, ?\DateTimeInterface $timeLastCheck = null, int $offset = 0)
     {
-        $this->accountRepository->findTopAccounts($limit, $lastBlock, $timeLastCheck, $offset);
+        return $this->accountRepository->findTopAccounts($this->currency, $limit, $lastBlock, $timeLastCheck, $offset);
     }
 
-    public function addOrUpdateTransaction(string $hash, string $block, string $fromAddress, string $toAddress, int $amount, $status): ?bool
+    public function addOrUpdateTransaction(string $hash, string $txid, string $block, int $confirmations, string $fromAddress, string $toAddress, int $amount, string $status = '', array $extra = []): ?bool
     {
         $isNew = null;
         if (!$transaction = $this->getTransaction($hash)) {
             $transaction = new Transaction();
+            $transaction->setTxid($txid);
             $this->persist($transaction);
             $isNew = true;
         } else {
             $isNew = false;
         }
+        $transaction->setConfirmations($confirmations);
+        $transaction->setCurrency($this->currency);
         $transaction->setAmount($amount);
         $transaction->setBlock($block);
         $transaction->setFromAddress($fromAddress);
@@ -182,10 +194,72 @@ class DefaultDBAdapter implements DBNodeAdapterInterface
         $transaction->setToAddress($toAddress);
         $transaction->setTimeUpdated(new \DateTimeImmutable());
         $transaction->setStatus($status);
+        $transaction->setExtra($extra);
         return $isNew;
     }
 
-    private function persist($object) {
+    /**
+     * @param string $guid
+     * @param string $address
+     * @param string $name
+     * @param float $lastBalance
+     * @param int $lastBlock
+     * @throws \Exception
+     */
+    public function addOrUpdateAccount(string $guid, string $address, string $name, float $lastBalance, int $lastBlock): void
+    {
+        $user = null;
+
+        try {
+            $user = $this->getGlobalUser($guid);
+        } catch (\Exception $err) {
+            $user = new GlobalUser();
+            $user->setGuid($guid);
+            $this->persist($user);
+        } finally {
+            $account = $this->accountRepository->findOneBy([
+                'globalUser' => $user,
+                'currency' => $this->currency,
+            ]);
+        }
+
+        if ($account == null) {
+            $account = new Account();
+            $account
+                ->setGlobalUser($user)
+                ->setCurrency($this->currency)
+                ->setName($user->getGuid())
+                ->setType('1')
+                ->setPriority(10)
+                ->setTimeCreated(new \DateTimeImmutable())
+                ->setBlockWhenCreated($lastBalance);
+        }
+
+        $account
+            ->setAddress($address)
+            ->setLastBalance($lastBalance)
+            ->setLastBlock($lastBlock)
+            ->setTimeUpdated(new \DateTimeImmutable())
+            ->setTimeLastChecked(new \DateTimeImmutable());
+
+        $this->persist($account);
+    }
+
+    public function getAccounts(array $addresses): array
+    {
+        $result = $this->objectManager
+            ->getRepository(Account::class)
+            ->findBy(['address' => $addresses]);
+
+        $data = [];
+        foreach ($result as $item) {
+            $data[$item->getAddress()] = $item;
+        }
+        return $data;
+    }
+
+    private function persist($object): void
+    {
         $this->objectManager->persist($object);
     }
 
