@@ -30,6 +30,7 @@ class LitecoinAdapter implements NodeAdapterInterface
         $data = ['currency' => self::NAME, 'transactions' => []];
 
         foreach ($txs as $tx) {
+            $amount = Currency::showMinorCurrency($this->currency, $tx['amount']);
             $result = $this->db->addOrUpdateTransaction(
                 $tx['blockhash'],
                 $tx['txid'],
@@ -37,7 +38,7 @@ class LitecoinAdapter implements NodeAdapterInterface
                 $tx['confirmations'],
                 '',
                 $tx['address'],
-                Currency::showMinorCurrency($this->currency, $tx['amount'])
+                $amount
             );
 
             if ($result !== null) {
@@ -50,7 +51,7 @@ class LitecoinAdapter implements NodeAdapterInterface
                 $updated++;
 
                 $data['transactions'][] = [
-                    'amount' => Currency::showMinorCurrency($this->currency, $tx['amount']),
+                    'amount' => $amount,
                     'confirmations' => $tx['confirmations'],
                     'guid' => $account->getGlobalUser()->getGuid(),
                     'address' => $tx['address'],
@@ -69,6 +70,8 @@ class LitecoinAdapter implements NodeAdapterInterface
         $isOk = function () use ($timeline) {
             return time() <= $timeline;
         };
+
+        $content = ['currency' => self::NAME, 'transactions' => []];
 
         /** @var Account[] $wallets */
         $accounts = $this->db->getTopWallets();
@@ -104,6 +107,13 @@ class LitecoinAdapter implements NodeAdapterInterface
                 $amount = Currency::showMinorCurrency($this->currency, $tnx['amount']);
                 $blockIndex = $tnx['blockindex'];
                 $this->db->addOrUpdateTransaction($tnx['blockhash'], $tnx['txid'], $blockIndex, $tnx['confirmations'], '', $tnx['address'], $amount, '');
+
+                $content['transactions'][] = [
+                    'amount' => $amount,
+                    'confirmations' => $tnx['confirmations'],
+                    'guid' => $account->getGlobalUser()->getGuid(),
+                    'address' => $tnx['address'],
+                ];
             }
 
             if ($isComplete) {
@@ -114,11 +124,14 @@ class LitecoinAdapter implements NodeAdapterInterface
             $result++;
         }
 
+        $this->notify($content);
+
         return $result;
     }
 
     public function update($data)
     {
+        $content = ['currency' => self::NAME, 'transactions' => []];
         $txs = [];
         if ($data['type'] == 'block') {
             $block = $this->node->getBlock($data['hash']);
@@ -159,8 +172,17 @@ class LitecoinAdapter implements NodeAdapterInterface
                 $balance = $this->node->getBalance($account->getName());
                 $account->setLastBalance(Currency::showMinorCurrency($this->currency, $balance));
                 $account->setLastBlock($tx['locktime']);
+
+                $content['transactions'][] = [
+                    'amount' => $amount,
+                    'confirmations' => $tx['confirmations'],
+                    'guid' => $account->getGlobalUser()->getGuid(),
+                    'address' => $to,
+                ];
             }
         }
+
+        $this->notify($content);
     }
 
     public function getName(): string
