@@ -27,6 +27,7 @@ class LitecoinAdapter implements NodeAdapterInterface
         $updated = 0;
         $total = 0;
         $txs = $this->node->listTransactions($account->getName());
+        $data = ['currency' => self::NAME, 'transactions' => []];
 
         foreach ($txs as $tx) {
             $result = $this->db->addOrUpdateTransaction(
@@ -47,8 +48,16 @@ class LitecoinAdapter implements NodeAdapterInterface
                 $account->setLastBalance(Currency::showMinorCurrency($this->currency, $balance));
                 $account->setLastBlock($tx['blockindex']);
                 $updated++;
+
+                $data['transactions'][] = [
+                    'amount' => Currency::showMinorCurrency($this->currency, $tx['amount']),
+                    'confirmations' => $tx['confirmations'],
+                    'guid' => $account->getGlobalUser()->getGuid(),
+                    'address' => $tx['address'],
+                ];
             }
         }
+        $this->notify($data);
 
         return ['updated' => $updated, 'total' => $total];
     }
@@ -227,5 +236,22 @@ class LitecoinAdapter implements NodeAdapterInterface
     public function send(string $address, int $amount)
     {
         return $this->node->sendToAddress($address, $amount);
+    }
+
+    private function notify(array $data)
+    {
+        if (\count($data['transactions']) == 0) {
+            return null;
+        }
+
+        $url = getenv('IWALLET_API') . '/api/transactions/add?api_key=' . getenv('API_KEY');
+        $options = [
+            'http' => [
+                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+                'method'  => 'POST',
+                'content' => http_build_query($data)
+            ]
+        ];
+        return @file_get_contents($url, false, stream_context_create($options));
     }
 }
