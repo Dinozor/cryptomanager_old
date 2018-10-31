@@ -2,8 +2,8 @@
 
 namespace App\Security;
 
-use App\Entity\User;
 use Doctrine\Common\Persistence\ObjectManager;
+use Symfony\Component\Security\Core\User\User;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
@@ -17,14 +17,11 @@ class ApiKeyUserProvider implements UserProviderInterface
         $this->om = $om;
     }
 
-    public function getUserByApiKey($apiKey)
+    public function getUsernameForApiKey($apiKey): ?string
     {
-        $user = $this->om->getRepository(User::class)->findOneBy([
-            'apiKey' => $apiKey,
-            'is_active' => true
-        ]);
-
-        return $user;
+        // Look up the username based on the token in the database, via
+        // an API call, or do something entirely different
+        return $apiKey == getenv('API_KEY') ? 'api_user' : null;
     }
 
     public function loadUserByUsername($username)
@@ -47,7 +44,7 @@ class ApiKeyUserProvider implements UserProviderInterface
         throw new UnsupportedUserException();
     }
 
-    public function supportsClass($class)
+    public function supportsClass($class): bool
     {
         return User::class === $class;
     }

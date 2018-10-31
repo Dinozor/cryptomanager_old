@@ -15,11 +15,9 @@ use Symfony\Component\Security\Http\Authentication\SimplePreAuthenticatorInterfa
 
 class ApiKeyAuthenticator implements SimplePreAuthenticatorInterface
 {
-    public function createToken(Request $request, $providerKey)
+    public function createToken(Request $request, $providerKey): PreAuthenticatedToken
     {
         $apiKey = $request->query->get('apikey');
-
-        // $apiKey = $request->headers->get('apikey');
 
         if (!$apiKey) {
             throw new BadCredentialsException();
@@ -32,26 +30,26 @@ class ApiKeyAuthenticator implements SimplePreAuthenticatorInterface
         );
     }
 
-    public function supportsToken(TokenInterface $token, $providerKey)
+    public function supportsToken(TokenInterface $token, $providerKey): bool
     {
         return $token instanceof PreAuthenticatedToken && $token->getProviderKey() === $providerKey;
     }
 
-    public function authenticateToken(TokenInterface $token, UserProviderInterface $userProvider, $providerKey)
+    public function authenticateToken(TokenInterface $token, UserProviderInterface $userProvider, $providerKey): PreAuthenticatedToken
     {
         if (!$userProvider instanceof ApiKeyUserProvider) {
             throw new \InvalidArgumentException(
                 sprintf(
                     'The user provider must be an instance of ApiKeyUserProvider (%s was given).',
-                    get_class($userProvider)
+                    \get_class($userProvider)
                 )
             );
         }
 
         $apiKey = $token->getCredentials();
-        $user = $userProvider->getUserByApiKey($apiKey);
+        $username = $userProvider->getUsernameForApiKey($apiKey);
 
-        if (!$user) {
+        if (!$username) {
             // CAUTION: this message will be returned to the client
             // (so don't put any un-trusted messages / error strings here)
             throw new CustomUserMessageAuthenticationException(
@@ -59,6 +57,7 @@ class ApiKeyAuthenticator implements SimplePreAuthenticatorInterface
             );
         }
 
+        $user = $userProvider->loadUserByUsername($username);
         return new PreAuthenticatedToken(
             $user,
             $apiKey,
@@ -67,7 +66,7 @@ class ApiKeyAuthenticator implements SimplePreAuthenticatorInterface
         );
     }
 
-    public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
+    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): Response
     {
         return new Response(
         // this contains information about *why* authentication failed
