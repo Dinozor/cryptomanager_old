@@ -62,7 +62,7 @@ class APICryptoController extends Controller
     }
 
     /**
-     * @Route("/wallet/updates", methods={"POST"}, name="api_wallet_update")
+     * @Route("/wallet/update", methods={"POST"}, name="api_wallet_update")
      * @param Request $request
      * @return JsonResponse
      */
