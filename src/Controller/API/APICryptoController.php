@@ -16,7 +16,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 class APICryptoController extends Controller
 {
     /**
-     * @Route("/api/wallet/create/{currencyCode}/{guid}", name="api_wallet_create")
+     * @Route("/wallet/create/{currencyCode}/{guid}", name="api_wallet_create")
      * @param string $currencyCode
      * @param string $guid
      * @param NodeManager $nodeManager
@@ -39,7 +39,7 @@ class APICryptoController extends Controller
     }
 
     /**
-     * @Route("/api/wallet/transactions/{currency}/{wallet}", name="api_wallet_transactions")
+     * @Route("/wallet/transactions/{currency}/{wallet}", name="api_wallet_transactions")
      * @param string $currency
      * @param string $wallet
      * @param NodeManager $nodeManager
@@ -62,7 +62,7 @@ class APICryptoController extends Controller
     }
 
     /**
-     * @Route("/wallet/update", methods={"POST"}, name="api_wallet_get")
+     * @Route("/wallet/updates", methods={"POST"}, name="api_wallet_update")
      * @param Request $request
      * @return JsonResponse
      */
