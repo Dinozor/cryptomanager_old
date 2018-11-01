@@ -6,6 +6,7 @@ use App\Entity\Account;
 use App\Entity\Currency;
 use App\Service\DB\DBNodeAdapterInterface;
 use App\Service\Node\NodeAdapterInterface;
+use App\Service\Notifier;
 
 class RippleAdapter implements NodeAdapterInterface
 {
@@ -14,10 +15,12 @@ class RippleAdapter implements NodeAdapterInterface
     private $node;
     private $db;
     private $currency;
+    private $notifier;
 
     public function __construct(DBNodeAdapterInterface $db = null)
     {
         $this->node = new RippleNode();
+        $this->notifier = new Notifier(self::NAME);
         $this->db = $db;
         $this->currency = $this->db->getCurrencyByName(self::NAME);
     }
@@ -27,9 +30,11 @@ class RippleAdapter implements NodeAdapterInterface
         $updated = 0;
         $total = 0;
         $txs = $this->node->accountTx($account->getAddress());
+        $transactions = [];
 
         foreach ($txs['transactions'] as $tnx) {
             $amount = \is_string($tnx['tx']['Amount']) ? $tnx['tx']['Amount'] : $tnx['tx']['Amount']['value'];
+            $amount = Currency::showMinorCurrency($this->currency, $amount);
             $result = $this->db->addOrUpdateTransaction(
                 $tnx['tx']['hash'],
                 '',
@@ -37,7 +42,7 @@ class RippleAdapter implements NodeAdapterInterface
                 0,
                 $tnx['tx']['Account'],
                 $tnx['tx']['Destination'],
-                Currency::showMinorCurrency($this->currency, $amount),
+                $amount,
                 $tnx['meta']['TransactionResult']
             );
 
@@ -49,14 +54,24 @@ class RippleAdapter implements NodeAdapterInterface
                 $account->setLastBalance($balance['account_data']['Balance']);
                 $account->setLastBlock($tnx['tx']['ledger_index']);
                 $updated++;
+
+                $transactions[] = [
+                    'amount' => $amount,
+                    'confirmations' => 0,
+                    'guid' => $account->getGlobalUser()->getGuid(),
+                    'address' =>  $tnx['tx']['Destination'],
+                ];
             }
         }
+
+        $this->notifier->notify($transactions);
 
         return ['updated' => $updated, 'total' => $total];
     }
 
     public function fixedUpdate($data)
     {
+        $transactions = [];
         $result = 0;
         $timeline = time() + (int)getenv('FIXED_UPDATE_TIMEOUT');
         $isOk = function () use ($timeline) {
@@ -101,6 +116,13 @@ class RippleAdapter implements NodeAdapterInterface
                     $tnx['tx']['Amount']['value'],
                     $tnx['meta']['TransactionResult']
                 );
+
+                $transactions[] = [
+                    'amount' => $tnx['tx']['Amount']['value'],
+                    'confirmations' => 0,
+                    'guid' => $account->getGlobalUser()->getGuid(),
+                    'address' => $tnx['tx']['Account'],
+                ];
             }
 
             if ($isComplete) {
@@ -111,11 +133,14 @@ class RippleAdapter implements NodeAdapterInterface
             $result++;
         }
 
+        $this->notifier->notify($transactions);
+
         return $result;
     }
 
     public function update($data)
     {
+        $transactions = [];
         $txs = [];
         if ($data['type'] == 'ledger') {
             $ledger = $this->node->ledger($data['hash']);
@@ -144,8 +169,17 @@ class RippleAdapter implements NodeAdapterInterface
                 $balance = $this->node->accountInfo($account->getAddress());
                 $account->setLastBalance($balance['account_data']['Balance']);
                 $account->setLastBlock($tx['ledger_index']);
+
+                $transactions[] = [
+                    'amount' => $tx['Amount']['value'],
+                    'confirmations' => $tx['confirmations'],
+                    'guid' => $account->getGlobalUser()->getGuid(),
+                    'address' => $tx['Account'],
+                ];
             }
         }
+
+        $this->notifier->notify($transactions);
     }
 
     public function getName(): string
