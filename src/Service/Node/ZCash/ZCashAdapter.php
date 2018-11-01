@@ -6,6 +6,7 @@ use App\Entity\Account;
 use App\Entity\Currency;
 use App\Service\DB\DBNodeAdapterInterface;
 use App\Service\Node\NodeAdapterInterface;
+use App\Service\Notifier;
 
 class ZCashAdapter implements NodeAdapterInterface
 {
@@ -14,10 +15,12 @@ class ZCashAdapter implements NodeAdapterInterface
     private $node;
     private $db;
     private $currency;
+    private $notifier;
 
     public function __construct(DBNodeAdapterInterface $db = null)
     {
         $this->node = new ZCashNode();
+        $this->notifier = new Notifier(self::NAME);
         $this->db = $db;
         $this->currency = $this->db->getCurrencyByName(self::NAME);
     }
@@ -27,8 +30,10 @@ class ZCashAdapter implements NodeAdapterInterface
         $updated = 0;
         $total = 0;
         $txs = $this->node->listTransactions($account->getName());
+        $transactions = [];
 
         foreach ($txs as $tx) {
+            $amount = Currency::showMinorCurrency($this->currency, $tx['amount']);
             $result = $this->db->addOrUpdateTransaction(
                 $tx['blockhash'],
                 $tx['txid'],
@@ -36,7 +41,7 @@ class ZCashAdapter implements NodeAdapterInterface
                 $tx['confirmations'],
                 '',
                 $tx['address'],
-                Currency::showMinorCurrency($this->currency, $tx['amount'])
+                $amount
             );
 
             if ($result !== null) {
@@ -47,14 +52,24 @@ class ZCashAdapter implements NodeAdapterInterface
                 $account->setLastBalance(Currency::showMinorCurrency($this->currency, $balance));
                 $account->setLastBlock($tx['blockindex']);
                 $updated++;
+
+                $transactions[] = [
+                    'amount' => $amount,
+                    'confirmations' => $tx['confirmations'],
+                    'guid' => $account->getGlobalUser()->getGuid(),
+                    'address' => $tx['address'],
+                ];
             }
         }
+
+        $this->notifier->notify($transactions);
 
         return ['updated' => $updated, 'total' => $total];
     }
 
     public function fixedUpdate($data)
     {
+        $transactions = [];
         $result = 0;
         $timeline = time() + (int)getenv('FIXED_UPDATE_TIMEOUT');
         $isOk = function () use ($timeline) {
@@ -95,6 +110,13 @@ class ZCashAdapter implements NodeAdapterInterface
                 $amount = Currency::showMinorCurrency($this->currency, $tnx['amount']);
                 $blockIndex = $tnx['blockindex'];
                 $this->db->addOrUpdateTransaction($tnx['blockhash'], $tnx['txid'], $blockIndex, $tnx['confirmations'], '', $tnx['address'], $amount, '');
+
+                $transactions[] = [
+                    'amount' => $amount,
+                    'confirmations' => $tnx['confirmations'],
+                    'guid' => $account->getGlobalUser()->getGuid(),
+                    'address' => $tnx['address'],
+                ];
             }
 
             if ($isComplete) {
@@ -105,11 +127,14 @@ class ZCashAdapter implements NodeAdapterInterface
             $result++;
         }
 
+        $this->notifier->notify($transactions);
+
         return $result;
     }
 
     public function update($data)
     {
+        $transactions = [];
         $txs = [];
         if ($data['type'] == 'block') {
             $block = $this->node->getBlock($data['hash']);
@@ -150,8 +175,17 @@ class ZCashAdapter implements NodeAdapterInterface
                 $balance = $this->node->getBalance($account->getName());
                 $account->setLastBalance(Currency::showMinorCurrency($this->currency, $balance));
                 $account->setLastBlock($tx['locktime']);
+
+                $transactions[] = [
+                    'amount' => $amount,
+                    'confirmations' => $tx['confirmations'],
+                    'guid' => $account->getGlobalUser()->getGuid(),
+                    'address' => $to,
+                ];
             }
         }
+
+        $this->notifier->notify($transactions);
     }
 
     public function getName(): string

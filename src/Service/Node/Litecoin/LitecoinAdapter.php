@@ -6,6 +6,7 @@ use App\Entity\Account;
 use App\Entity\Currency;
 use App\Service\DB\DBNodeAdapterInterface;
 use App\Service\Node\NodeAdapterInterface;
+use App\Service\Notifier;
 
 class LitecoinAdapter implements NodeAdapterInterface
 {
@@ -14,10 +15,12 @@ class LitecoinAdapter implements NodeAdapterInterface
     private $node;
     private $db;
     private $currency;
+    private $notifier;
 
     public function __construct(DBNodeAdapterInterface $db = null)
     {
         $this->node = new LitecoinNode();
+        $this->notifier = new Notifier(self::NAME);
         $this->db = $db;
         $this->currency = $this->db->getCurrencyByName(self::NAME);
     }
@@ -27,7 +30,7 @@ class LitecoinAdapter implements NodeAdapterInterface
         $updated = 0;
         $total = 0;
         $txs = $this->node->listTransactions($account->getName());
-        $data = ['currency' => self::NAME, 'transactions' => []];
+        $transactions = [];
 
         foreach ($txs as $tx) {
             $amount = Currency::showMinorCurrency($this->currency, $tx['amount']);
@@ -50,7 +53,7 @@ class LitecoinAdapter implements NodeAdapterInterface
                 $account->setLastBlock($tx['blockindex']);
                 $updated++;
 
-                $data['transactions'][] = [
+                $transactions[] = [
                     'amount' => $amount,
                     'confirmations' => $tx['confirmations'],
                     'guid' => $account->getGlobalUser()->getGuid(),
@@ -58,20 +61,20 @@ class LitecoinAdapter implements NodeAdapterInterface
                 ];
             }
         }
-        $this->notify($data);
+
+        $this->notifier->notify($transactions);
 
         return ['updated' => $updated, 'total' => $total];
     }
 
     public function fixedUpdate($data)
     {
+        $transactions = [];
         $result = 0;
         $timeline = time() + (int)getenv('FIXED_UPDATE_TIMEOUT');
         $isOk = function () use ($timeline) {
             return time() <= $timeline;
         };
-
-        $content = ['currency' => self::NAME, 'transactions' => []];
 
         /** @var Account[] $wallets */
         $accounts = $this->db->getTopWallets();
@@ -108,7 +111,7 @@ class LitecoinAdapter implements NodeAdapterInterface
                 $blockIndex = $tnx['blockindex'];
                 $this->db->addOrUpdateTransaction($tnx['blockhash'], $tnx['txid'], $blockIndex, $tnx['confirmations'], '', $tnx['address'], $amount, '');
 
-                $content['transactions'][] = [
+                $transactions[] = [
                     'amount' => $amount,
                     'confirmations' => $tnx['confirmations'],
                     'guid' => $account->getGlobalUser()->getGuid(),
@@ -124,14 +127,14 @@ class LitecoinAdapter implements NodeAdapterInterface
             $result++;
         }
 
-        $this->notify($content);
+        $this->notifier->notify($transactions);
 
         return $result;
     }
 
     public function update($data)
     {
-        $content = ['currency' => self::NAME, 'transactions' => []];
+        $transactions = [];
         $txs = [];
         if ($data['type'] == 'block') {
             $block = $this->node->getBlock($data['hash']);
@@ -173,7 +176,7 @@ class LitecoinAdapter implements NodeAdapterInterface
                 $account->setLastBalance(Currency::showMinorCurrency($this->currency, $balance));
                 $account->setLastBlock($tx['locktime']);
 
-                $content['transactions'][] = [
+                $transactions[] = [
                     'amount' => $amount,
                     'confirmations' => $tx['confirmations'],
                     'guid' => $account->getGlobalUser()->getGuid(),
@@ -182,7 +185,7 @@ class LitecoinAdapter implements NodeAdapterInterface
             }
         }
 
-        $this->notify($content);
+        $this->notifier->notify($transactions);
     }
 
     public function getName(): string
@@ -258,22 +261,5 @@ class LitecoinAdapter implements NodeAdapterInterface
     public function send(string $address, int $amount)
     {
         return $this->node->sendToAddress($address, $amount);
-    }
-
-    private function notify(array $data)
-    {
-        if (\count($data['transactions']) == 0) {
-            return null;
-        }
-
-        $url = getenv('IWALLET_API') . '/api/transactions/add?api_key=' . getenv('API_KEY');
-        $options = [
-            'http' => [
-                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-                'method'  => 'POST',
-                'content' => http_build_query($data)
-            ]
-        ];
-        return @file_get_contents($url, false, stream_context_create($options));
     }
 }

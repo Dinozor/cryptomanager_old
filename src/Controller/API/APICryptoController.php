@@ -2,25 +2,27 @@
 
 namespace App\Controller\API;
 
+use App\Entity\Account;
 use App\Entity\Currency;
 use App\Entity\GlobalUser;
 use App\Service\NodeManager;
 use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\NonUniqueResultException;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 class APICryptoController extends Controller
 {
     /**
+     * @Route("/api/wallet/create/{currencyCode}/{guid}", name="api_wallet_create")
      * @param string $currencyCode
      * @param string $guid
      * @param NodeManager $nodeManager
      * @return JsonResponse
      * @throws NonUniqueResultException
      * @throws \Exception
-     * @Route("/wallet/create/{currencyCode}/{guid}", name="api_wallet_create")
      */
     public function createWallet(string $currencyCode, string $guid, NodeManager $nodeManager): JsonResponse
     {
@@ -37,7 +39,7 @@ class APICryptoController extends Controller
     }
 
     /**
-     * @Route("/wallet/transactions/{currency}/{wallet}", name="api_wallet_get")
+     * @Route("/api/wallet/transactions/{currency}/{wallet}", name="api_wallet_transactions")
      * @param string $currency
      * @param string $wallet
      * @param NodeManager $nodeManager
@@ -57,6 +59,33 @@ class APICryptoController extends Controller
             'message' => 'Transactions',
             'transactions' => $txs,
         ]);
+    }
+
+    /**
+     * @Route("/api/wallet/update", methods={"POST"}, name="api_wallet_update")
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function walletUpdate(Request $request): JsonResponse
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $isSuccess = false;
+        $account = $em->getRepository(Account::class)->findOneBy(['address' => $request->request->get('address')]);
+        if ($account && $request->request->has('priority')) {
+            $account->setPriority($request->request->get('priority'));
+            $isSuccess = true;
+        }
+        if ($account && $request->request->has('type')) {
+            $account->setType($request->request->get('type'));
+            $isSuccess = true;
+        }
+        if ($account) {
+            $em->persist($account);
+            $em->flush();
+        }
+
+        return $this->json(['success' => $isSuccess]);
     }
 
     /**
