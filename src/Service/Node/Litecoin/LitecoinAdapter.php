@@ -266,14 +266,12 @@ class LitecoinAdapter implements NodeAdapterInterface
             return null;
         }
 
-        $url = getenv('IWALLET_API') . '/api/transactions/add?api_key=' . getenv('API_KEY');
-        $options = [
-            'http' => [
-                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-                'method'  => 'POST',
-                'content' => http_build_query($data)
-            ]
-        ];
+        $url = getenv('IWALLET_API') . '/api/cryptomanager/transactions/add?api_key=' . getenv('API_KEY');
+        $options = ['http' => [
+            'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+            'method'  => 'POST',
+            'content' => http_build_query($data)
+        ]];
         return @file_get_contents($url, false, stream_context_create($options));
     }
 }
