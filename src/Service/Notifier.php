@@ -4,21 +4,28 @@ namespace App\Service;
 
 class Notifier
 {
-    private $currencyCode;
-
-    public function __construct(string $currency)
-    {
-        $this->currencyCode = $currency;
-    }
-
-    public function notify(array $transactions)
+    public function notifyAccount(string $currency, int $balance, array $transactions)
     {
         if (\count($transactions) == 0) {
             return null;
         }
 
-        $data = ['currency' => $this->currencyCode, 'transactions' => $transactions];
+        $url = getenv('IWALLET_API') . '/api/cryptomanager/account/update?api_key=' . getenv('API_KEY');
+        return $this->makeRequest($url, [
+            'currency' => $currency,
+            'balance' => $balance,
+            'transactions' => $transactions,
+        ]);
+    }
+
+    public function notifyTransactions(array $transactions)
+    {
         $url = getenv('IWALLET_API') . '/api/cryptomanager/transactions/add?api_key=' . getenv('API_KEY');
+        return $this->makeRequest($url, $transactions);
+    }
+
+    private function makeRequest(string $url, array $data)
+    {
         $options = ['http' => [
             'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
             'method'  => 'POST',
