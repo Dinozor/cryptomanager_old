@@ -54,8 +54,6 @@ class LitecoinAdapter implements NodeAdapterInterface
                 $transactions[] = [
                     'amount' => $amount,
                     'confirmations' => $tx['confirmations'],
-                    'guid' => $account->getGlobalUser()->getGuid(),
-                    'address' => $tx['address'],
                 ];
             }
         }
@@ -66,6 +64,7 @@ class LitecoinAdapter implements NodeAdapterInterface
 
         $this->notifier->notifyAccount(
             self::NAME,
+            $account->getGlobalUser()->getGuid(),
             Currency::showMinorCurrency($this->currency, $balance),
             $transactions
         );

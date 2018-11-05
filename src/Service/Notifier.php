@@ -4,7 +4,7 @@ namespace App\Service;
 
 class Notifier
 {
-    public function notifyAccount(string $currency, int $balance, array $transactions)
+    public function notifyAccount(string $currency, string $guid, int $balance, array $transactions)
     {
         if (\count($transactions) == 0) {
             return null;
@@ -14,6 +14,7 @@ class Notifier
         return $this->makeRequest($url, [
             'currency' => $currency,
             'balance' => $balance,
+            'guid' => $guid,
             'transactions' => $transactions,
         ]);
     }
