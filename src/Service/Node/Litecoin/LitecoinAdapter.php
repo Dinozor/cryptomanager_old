@@ -119,13 +119,13 @@ class LitecoinAdapter implements NodeAdapterInterface
                 if (!isset($transactions[$tnx['address']])) {
                     $transactions[$tnx['address']] = [
                         'currency' => self::NAME,
-                        'balance' => $balance,
+                        'balance' => Currency::showMinorCurrency($this->currency, $balance),
                         'guid' => $account->getGlobalUser()->getGuid(),
                         'address' => $tnx['address'],
                         'transactions' => [],
                     ];
                 }
-                $transactions[$tnx['address']]['transactions'] = [
+                $transactions[$tnx['address']]['transactions'][] = [
                     'amount' => $amount,
                     'confirmations' => $tnx['confirmations'],
                 ];
@@ -191,13 +191,13 @@ class LitecoinAdapter implements NodeAdapterInterface
                 if (!isset($transactions[$to])) {
                     $transactions[$to] = [
                         'currency' => self::NAME,
-                        'balance' => $balance,
+                        'balance' => Currency::showMinorCurrency($this->currency, $balance),
                         'guid' => $account->getGlobalUser()->getGuid(),
                         'address' => $to,
                         'transactions' => [],
                     ];
                 }
-                $transactions[$to]['transactions'] = [
+                $transactions[$to]['transactions'][] = [
                     'amount' => $amount,
                     'confirmations' => $tx['confirmations'],
                 ];
