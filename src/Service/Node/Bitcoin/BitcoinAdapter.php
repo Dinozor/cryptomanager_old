@@ -20,7 +20,7 @@ class BitcoinAdapter implements NodeAdapterInterface
     public function __construct(DBNodeAdapterInterface $db = null)
     {
         $this->node = new BitcoinNode();
-        $this->notifier = new Notifier(self::NAME);
+        $this->notifier = new Notifier();
         $this->db = $db;
         $this->currency = $this->db->getCurrencyByName(self::NAME);
     }
@@ -35,15 +35,17 @@ class BitcoinAdapter implements NodeAdapterInterface
     {
         $updated = 0;
         $total = 0;
+        $blockIndex = 0;
         $txs = $this->node->listTransactions($account->getName());
         $transactions = [];
 
         foreach ($txs as $tx) {
             $amount = Currency::showMinorCurrency($this->currency, $tx['amount']);
+            $blockIndex = $tx['blockindex'];
             $result = $this->db->addOrUpdateTransaction(
                 $tx['blockhash'],
                 $tx['txid'],
-                $tx['blockindex'],
+                $blockIndex,
                 $tx['confirmations'],
                 '',
                 $tx['address'],
@@ -54,50 +56,32 @@ class BitcoinAdapter implements NodeAdapterInterface
                 $total++;
             }
             if ($result === true) {
-                $balance = $this->node->getBalance($account->getName());
-                $account->setLastBalance(Currency::showMinorCurrency($this->currency, $balance));
-                $account->setLastBlock($tx['blockindex']);
                 $updated++;
-
                 $transactions[] = [
                     'amount' => $amount,
                     'confirmations' => $tx['confirmations'],
-                    'guid' => $account->getGlobalUser()->getGuid(),
-                    'address' => $tx['address'],
                 ];
             }
         }
 
-        $this->notifier->notify($transactions);
+        $balance = $this->node->getBalance($account->getName());
+        $account->setLastBalance(Currency::showMinorCurrency($this->currency, $balance));
+        $account->setLastBlock($blockIndex);
+
+        $this->notifier->notifyAccount(
+            self::NAME,
+            $account->getGlobalUser()->getGuid(),
+            Currency::showMinorCurrency($this->currency, $balance),
+            $transactions
+        );
 
         return ['updated' => $updated, 'total' => $total];
     }
 
     /**
-     * This method is called automatically by CRON once each specific amount
-     * of time (1 min). FixedUpdate is limited by time execution.
-     * Method should get specific count of accounts/wallets so they could be
-     * updated in specific amount of time.
-     * Be sure to check specific constant amount of wallets and try to
-     * not exceed max method execution time (less than 1 min)
-     *
-     * Note: database cleaning of extra account and other stuff that are related
-     * to node should be done here.
-     * You can use data and settings to store temporary variables (like time
-     * since last cleaning) and decide when you should execute such methods
-     * Later there will be separate method to call and queue to tell system,
-     * that node needs maintenance. And system will call it when it has time
-     *
-     * Note: please check lastBlock and current active block of node.
-     * Maybe you do not need to check transactions account each block
-     *
-     * @param array $data As input there are going to be statisctics data about node,
-     * that could be used to decide how much and what accounts should be rechecked
-     * @return bool|int If you method is not finished or needs more time for execution it should
-     * return FALSE to show, that there is a problem with checking
-     * If method succeeded - it should return amount of addresses/account it was
-     * able to check. Data used for statistic and to count
-     * how much and how good the node is holding
+     * @inheritdoc
+     * @param $data
+     * @return bool|int
      */
     public function fixedUpdate($data)
     {
@@ -143,11 +127,18 @@ class BitcoinAdapter implements NodeAdapterInterface
                 $blockIndex = $tnx['blockindex'];
                 $this->db->addOrUpdateTransaction($tnx['blockhash'], $tnx['txid'], $blockIndex, $tnx['confirmations'], '', $tnx['address'], $amount, '');
 
-                $transactions[] = [
+                if (!isset($transactions[$tnx['address']])) {
+                    $transactions[$tnx['address']] = [
+                        'currency' => self::NAME,
+                        'balance' => Currency::showMinorCurrency($this->currency, $balance),
+                        'guid' => $account->getGlobalUser()->getGuid(),
+                        'address' => $tnx['address'],
+                        'transactions' => [],
+                    ];
+                }
+                $transactions[$tnx['address']]['transactions'][] = [
                     'amount' => $amount,
                     'confirmations' => $tnx['confirmations'],
-                    'guid' => $account->getGlobalUser()->getGuid(),
-                    'address' => $tnx['address'],
                 ];
             }
 
@@ -159,16 +150,15 @@ class BitcoinAdapter implements NodeAdapterInterface
             $result++;
         }
 
-        $this->notifier->notify($transactions);
+        $this->notifier->notifyTransactions($transactions);
 
         return $result;
     }
 
     /**
-     * This method is called automatically by nodes and NOT crontab
-     * when specific event occurs like new transaction or block
-     *
+     * @inheritdoc
      * @param $data
+     * @return mixed|void
      */
     public function update($data)
     {
@@ -214,16 +204,23 @@ class BitcoinAdapter implements NodeAdapterInterface
                 $account->setLastBalance(Currency::showMinorCurrency($this->currency, $balance));
                 $account->setLastBlock($tx['locktime']);
 
-                $transactions[] = [
+                if (!isset($transactions[$to])) {
+                    $transactions[$to] = [
+                        'currency' => self::NAME,
+                        'balance' => Currency::showMinorCurrency($this->currency, $balance),
+                        'guid' => $account->getGlobalUser()->getGuid(),
+                        'address' => $to,
+                        'transactions' => [],
+                    ];
+                }
+                $transactions[$to]['transactions'][] = [
                     'amount' => $amount,
                     'confirmations' => $tx['confirmations'],
-                    'guid' => $account->getGlobalUser()->getGuid(),
-                    'address' => $to,
                 ];
             }
         }
 
-        $this->notifier->notify($transactions);
+        $this->notifier->notifyTransactions($transactions);
     }
 
     public function getName(): string
