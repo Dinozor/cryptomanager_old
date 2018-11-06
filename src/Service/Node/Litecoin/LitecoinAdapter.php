@@ -39,7 +39,7 @@ class LitecoinAdapter implements NodeAdapterInterface
             $result = $this->db->addOrUpdateTransaction(
                 $tx['blockhash'],
                 $tx['txid'],
-                $tx['blockindex'],
+                $blockIndex,
                 $tx['confirmations'],
                 '',
                 $tx['address'],
