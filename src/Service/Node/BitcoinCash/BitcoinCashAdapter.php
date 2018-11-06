@@ -20,7 +20,7 @@ class BitcoinCashAdapter implements NodeAdapterInterface
     public function __construct(DBNodeAdapterInterface $db = null)
     {
         $this->node = new BitcoinCashNode();
-        $this->notifier = new Notifier(self::NAME);
+        $this->notifier = new Notifier();
         $this->db = $db;
         $this->currency = $this->db->getCurrencyByName(self::NAME);
     }
@@ -29,15 +29,17 @@ class BitcoinCashAdapter implements NodeAdapterInterface
     {
         $updated = 0;
         $total = 0;
+        $blockIndex = 0;
         $txs = $this->node->listTransactions($account->getName());
         $transactions = [];
 
         foreach ($txs as $tx) {
             $amount = Currency::showMinorCurrency($this->currency, $tx['amount']);
+            $blockIndex = $tx['blockindex'];
             $result = $this->db->addOrUpdateTransaction(
                 $tx['blockhash'],
                 $tx['txid'],
-                $tx['blockindex'],
+                $blockIndex,
                 $tx['confirmations'],
                 '',
                 $tx['address'],
@@ -48,21 +50,24 @@ class BitcoinCashAdapter implements NodeAdapterInterface
                 $total++;
             }
             if ($result === true) {
-                $balance = $this->node->getBalance($account->getName());
-                $account->setLastBalance(Currency::showMinorCurrency($this->currency, $balance));
-                $account->setLastBlock($tx['blockindex']);
                 $updated++;
-
                 $transactions[] = [
                     'amount' => $amount,
                     'confirmations' => $tx['confirmations'],
-                    'guid' => $account->getGlobalUser()->getGuid(),
-                    'address' => $tx['address'],
                 ];
             }
         }
 
-        $this->notifier->notify($transactions);
+        $balance = $this->node->getBalance($account->getName());
+        $account->setLastBalance(Currency::showMinorCurrency($this->currency, $balance));
+        $account->setLastBlock($blockIndex);
+
+        $this->notifier->notifyAccount(
+            self::NAME,
+            $account->getGlobalUser()->getGuid(),
+            Currency::showMinorCurrency($this->currency, $balance),
+            $transactions
+        );
 
         return ['updated' => $updated, 'total' => $total];
     }
@@ -111,11 +116,18 @@ class BitcoinCashAdapter implements NodeAdapterInterface
                 $blockIndex = $tnx['blockindex'];
                 $this->db->addOrUpdateTransaction($tnx['blockhash'], $tnx['txid'], $blockIndex, $tnx['confirmations'], '', $tnx['address'], $amount, '');
 
-                $transactions[] = [
+                if (!isset($transactions[$tnx['address']])) {
+                    $transactions[$tnx['address']] = [
+                        'currency' => self::NAME,
+                        'balance' => Currency::showMinorCurrency($this->currency, $balance),
+                        'guid' => $account->getGlobalUser()->getGuid(),
+                        'address' => $tnx['address'],
+                        'transactions' => [],
+                    ];
+                }
+                $transactions[$tnx['address']]['transactions'][] = [
                     'amount' => $amount,
                     'confirmations' => $tnx['confirmations'],
-                    'guid' => $account->getGlobalUser()->getGuid(),
-                    'address' => $tnx['address'],
                 ];
             }
 
@@ -127,7 +139,7 @@ class BitcoinCashAdapter implements NodeAdapterInterface
             $result++;
         }
 
-        $this->notifier->notify($transactions);
+        $this->notifier->notifyTransactions($transactions);
 
         return $result;
     }
@@ -176,16 +188,23 @@ class BitcoinCashAdapter implements NodeAdapterInterface
                 $account->setLastBalance(Currency::showMinorCurrency($this->currency, $balance));
                 $account->setLastBlock($tx['locktime']);
 
-                $transactions[] = [
+                if (!isset($transactions[$to])) {
+                    $transactions[$to] = [
+                        'currency' => self::NAME,
+                        'balance' => Currency::showMinorCurrency($this->currency, $balance),
+                        'guid' => $account->getGlobalUser()->getGuid(),
+                        'address' => $to,
+                        'transactions' => [],
+                    ];
+                }
+                $transactions[$to]['transactions'][] = [
                     'amount' => $amount,
                     'confirmations' => $tx['confirmations'],
-                    'guid' => $account->getGlobalUser()->getGuid(),
-                    'address' => $to,
                 ];
             }
         }
 
-        $this->notifier->notify($transactions);
+        $this->notifier->notifyTransactions($transactions);
     }
 
     public function getName(): string
