@@ -20,7 +20,7 @@ class RippleAdapter implements NodeAdapterInterface
     public function __construct(DBNodeAdapterInterface $db = null)
     {
         $this->node = new RippleNode();
-        $this->notifier = new Notifier(self::NAME);
+        $this->notifier = new Notifier();
         $this->db = $db;
         $this->currency = $this->db->getCurrencyByName(self::NAME);
     }
@@ -29,16 +29,18 @@ class RippleAdapter implements NodeAdapterInterface
     {
         $updated = 0;
         $total = 0;
+        $blockIndex = 0;
         $txs = $this->node->accountTx($account->getAddress());
         $transactions = [];
 
         foreach ($txs['transactions'] as $tnx) {
             $amount = \is_string($tnx['tx']['Amount']) ? $tnx['tx']['Amount'] : $tnx['tx']['Amount']['value'];
             $amount = Currency::showMinorCurrency($this->currency, $amount);
+            $blockIndex = $tnx['tx']['ledger_index'];
             $result = $this->db->addOrUpdateTransaction(
                 $tnx['tx']['hash'],
                 '',
-                $tnx['tx']['ledger_index'],
+                $blockIndex,
                 0,
                 $tnx['tx']['Account'],
                 $tnx['tx']['Destination'],
@@ -50,21 +52,21 @@ class RippleAdapter implements NodeAdapterInterface
                 $total++;
             }
             if ($result) {
-                $balance = $this->node->accountInfo($account->getAddress());
-                $account->setLastBalance($balance['account_data']['Balance']);
-                $account->setLastBlock($tnx['tx']['ledger_index']);
                 $updated++;
-
-                $transactions[] = [
-                    'amount' => $amount,
-                    'confirmations' => 0,
-                    'guid' => $account->getGlobalUser()->getGuid(),
-                    'address' =>  $tnx['tx']['Destination'],
-                ];
+                $transactions[] = ['amount' => $amount, 'confirmations' => 0];
             }
         }
 
-        $this->notifier->notify($transactions);
+        $balance = $this->node->accountInfo($account->getAddress());
+        $account->setLastBalance($balance['account_data']['Balance']);
+        $account->setLastBlock($blockIndex);
+
+        $this->notifier->notifyAccount(
+            self::NAME,
+            $account->getGlobalUser()->getGuid(),
+            Currency::showMinorCurrency($this->currency, $balance),
+            $transactions
+        );
 
         return ['updated' => $updated, 'total' => $total];
     }
@@ -117,11 +119,18 @@ class RippleAdapter implements NodeAdapterInterface
                     $tnx['meta']['TransactionResult']
                 );
 
-                $transactions[] = [
+                if (!isset($transactions[$tnx['tx']['Account']])) {
+                    $transactions[$tnx['tx']['Account']] = [
+                        'currency' => self::NAME,
+                        'balance' => Currency::showMinorCurrency($this->currency, $balance),
+                        'guid' => $account->getGlobalUser()->getGuid(),
+                        'address' => $tnx['tx']['Account'],
+                        'transactions' => [],
+                    ];
+                }
+                $transactions[$tnx['tx']['Account']]['transactions'][] = [
                     'amount' => $tnx['tx']['Amount']['value'],
                     'confirmations' => 0,
-                    'guid' => $account->getGlobalUser()->getGuid(),
-                    'address' => $tnx['tx']['Account'],
                 ];
             }
 
@@ -133,7 +142,7 @@ class RippleAdapter implements NodeAdapterInterface
             $result++;
         }
 
-        $this->notifier->notify($transactions);
+        $this->notifier->notifyTransactions($transactions);
 
         return $result;
     }
@@ -170,16 +179,23 @@ class RippleAdapter implements NodeAdapterInterface
                 $account->setLastBalance($balance['account_data']['Balance']);
                 $account->setLastBlock($tx['ledger_index']);
 
-                $transactions[] = [
+                if (!isset($transactions[$tx['Account']])) {
+                    $transactions[$tx['Account']] = [
+                        'currency' => self::NAME,
+                        'balance' => Currency::showMinorCurrency($this->currency, $balance),
+                        'guid' => $account->getGlobalUser()->getGuid(),
+                        'address' => $tx['Account'],
+                        'transactions' => [],
+                    ];
+                }
+                $transactions[$tx['Account']]['transactions'][] = [
                     'amount' => $tx['Amount']['value'],
                     'confirmations' => $tx['confirmations'],
-                    'guid' => $account->getGlobalUser()->getGuid(),
-                    'address' => $tx['Account'],
                 ];
             }
         }
 
-        $this->notifier->notify($transactions);
+        $this->notifier->notifyTransactions($transactions);
     }
 
     public function getName(): string
