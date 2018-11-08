@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 
-pwd > wallet_dir.txt
-php /../../../../../bin/console node:update ltc wallet $1
+pwd > /tmp/block_dir.txt
+php /../Users/1/Desktop/Work/cryptomanager/bin/console node:update ltc wallet $1
+read -p "Press any key..."
