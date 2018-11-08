@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 
-php ./../../../../../bin/console node:update ltc block $1
+pwd > block_dir.txt
+php /../../../../../bin/console node:update ltc block $1
