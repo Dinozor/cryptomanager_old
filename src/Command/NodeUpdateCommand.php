@@ -27,6 +27,7 @@ class NodeUpdateCommand extends Command
             ->addArgument('currency', InputArgument::REQUIRED, 'Currency code a')
             ->addArgument('type', InputArgument::REQUIRED, 'Type of event "block", "wallet"')
             ->addArgument('hash', InputArgument::REQUIRED, 'Hash')
+            ->addArgument('extra', InputArgument::OPTIONAL, 'Additional parameters')
         ;
     }
 
@@ -40,10 +41,15 @@ class NodeUpdateCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $this->nodeManager->loadNodeAdapter($input->getArgument('currency'))->update([
+        $data = [
             'hash' => $input->getArgument('hash'),
             'type' => $input->getArgument('type'),
-        ]);
+        ];
+        if ($input->hasArgument('extra')) {
+            $data['extra'] = $input->getArgument('extra');
+        }
+
+        $this->nodeManager->loadNodeAdapter($input->getArgument('currency'))->update($data);
 
         $io->success('Done');
     }
