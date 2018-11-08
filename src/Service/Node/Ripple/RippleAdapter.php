@@ -99,7 +99,10 @@ class RippleAdapter implements NodeAdapterInterface
             $isComplete = true;
             $blockIndex = 0;
 
-            $txs = $this->node->accountTx($account->getAddress());
+            $min = $data['filters']['min'] ?? -1;
+            $max = $data['filters']['max'] ?? -1;
+
+            $txs = $this->node->accountTx($account->getAddress(), $min, $max);
             foreach ($txs['transactions'] as $tnx) {
                 if (!$isOk()) {
                     $result = false;
