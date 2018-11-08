@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-php ./../../../../../bin/console node:update ltc transaction $1
+php ./../../../../../bin/console node:update ltc wallet $1
