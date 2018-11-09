@@ -1,4 +1,5 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-pwd >> /tmp/ltc_dir.txt
-php /../../../../../bin/console node:update ltc wallet $1
+echo $1 >> /tmp/ltc_transactions.txt
+SOURCE="${BASH_SOURCE[0]}"
+php $SOURCE/../../../../../bin/console node:update ltc wallet $1
