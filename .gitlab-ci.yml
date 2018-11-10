@@ -21,7 +21,7 @@ deploy_dev:
   - echo "Deploy to dev server"
   environment:
     name: dev
-    url: http://it09.dev.mb.org/
+    url: https://it09.dev.mb.org/
   only:
   - develop
   - master
