@@ -166,7 +166,7 @@ class BitcoinAdapter implements NodeAdapterInterface
         $txs = [];
         if ($data['type'] == 'block') {
             $block = $this->node->getBlock($data['hash']);
-            $txs = $block['tx'];
+            $txs = $block == 'Block not found' ? [] : $block['tx'];
         } else if ($data['type'] == 'wallet') {
             $txs = [$data['hash']];
         }
@@ -184,7 +184,7 @@ class BitcoinAdapter implements NodeAdapterInterface
             $account = null;
             $addresses = [];
             foreach ($tx['vout'] as $i => $out) {
-                foreach ($out['scriptPubKey']['addresses'] as $address) {
+                foreach ($out['scriptPubKey']['addresses'] ?? [] as $address) {
                     $addresses[] = $address;
                 }
             }
