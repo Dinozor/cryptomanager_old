@@ -114,7 +114,8 @@ class LitecoinAdapter implements NodeAdapterInterface
 
                 $amount = Currency::showMinorCurrency($this->currency, $tnx['amount']);
                 $blockIndex = $tnx['blockindex'];
-                $this->db->addOrUpdateTransaction($tnx['blockhash'], $tnx['txid'], $blockIndex, $tnx['confirmations'], '', $tnx['address'], $amount, '');
+                $tx = $this->node->getRawTransaction($tnx['txid'], 1);
+                $this->db->addOrUpdateTransaction($tx['hash'], $tnx['txid'], $blockIndex, $tnx['confirmations'], '', $tnx['address'], $amount, '');
 
                 if (!isset($transactions[$tnx['address']])) {
                     $transactions[$tnx['address']] = [
@@ -183,7 +184,7 @@ class LitecoinAdapter implements NodeAdapterInterface
             }
 
             if ($account) {
-                $this->db->addOrUpdateTransaction($tx['blockhash'], $tx['txid'], $tx['locktime'], $tx['confirmations'], '', $to, $amount, '');
+                $this->db->addOrUpdateTransaction($tx['hash'], $tx['txid'], $tx['locktime'], $tx['confirmations'], '', $to, $amount, '');
                 $balance = $this->node->getBalance($account->getName());
                 $account->setLastBalance(Currency::showMinorCurrency($this->currency, $balance));
                 $account->setLastBlock($tx['locktime']);
