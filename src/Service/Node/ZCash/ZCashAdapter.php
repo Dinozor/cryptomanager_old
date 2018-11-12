@@ -169,7 +169,7 @@ class ZCashAdapter implements NodeAdapterInterface
             $account = null;
             $addresses = [];
             foreach ($tx['vout'] as $i => $out) {
-                foreach ($out['scriptPubKey']['addresses'] as $address) {
+                foreach ($out['scriptPubKey']['addresses'] ?? [] as $address) {
                     $addresses[] = $address;
                 }
             }
