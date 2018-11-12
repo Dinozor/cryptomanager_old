@@ -92,12 +92,12 @@ class LitecoinAdapter implements NodeAdapterInterface
             }
 
             $balance = $this->node->getBalance($account->getName());
-            $accountBalance = Currency::showCurrency($this->currency, $account->getLastBalance());
+//            $accountBalance = Currency::showCurrency($this->currency, $account->getLastBalance());
 
-            if ($balance == $accountBalance) {
+            /*if ($balance == $accountBalance) {
                 $result++;
                 continue;
-            }
+            }*/
 
             $isComplete = true;
             $blockIndex = 0;
