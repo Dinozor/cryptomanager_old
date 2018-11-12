@@ -151,7 +151,7 @@ class ZCashAdapter implements NodeAdapterInterface
         $txs = [];
         if ($data['type'] == 'block') {
             $block = $this->node->getBlock($data['hash']);
-            $txs = $block['tx'];
+            $txs = $block == 'Block not found' ? [] : $block['tx'];
         } else if ($data['type'] == 'wallet') {
             $txs = [$data['hash']];
         }
