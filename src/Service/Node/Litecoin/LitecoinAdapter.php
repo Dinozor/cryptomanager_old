@@ -184,7 +184,7 @@ class LitecoinAdapter implements NodeAdapterInterface
             }
 
             if ($account) {
-                $this->db->addOrUpdateTransaction($tx['hash'], $tx['txid'], $tx['locktime'], $tx['confirmations'], '', $to, $amount, '');
+                $this->db->addOrUpdateTransaction($tx['hash'], $tx['txid'], $tx['locktime'], $tx['confirmations'] ?? 0, '', $to, $amount, '');
                 $balance = $this->node->getBalance($account->getName());
                 $account->setLastBalance(Currency::showMinorCurrency($this->currency, $balance));
                 $account->setLastBlock($tx['locktime']);
@@ -200,7 +200,7 @@ class LitecoinAdapter implements NodeAdapterInterface
                 }
                 $transactions[$to]['transactions'][] = [
                     'amount' => $amount,
-                    'confirmations' => $tx['confirmations'],
+                    'confirmations' => $tx['confirmations'] ?? 0,
                 ];
             }
         }
