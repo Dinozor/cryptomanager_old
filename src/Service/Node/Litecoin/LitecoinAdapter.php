@@ -126,7 +126,7 @@ class LitecoinAdapter implements NodeAdapterInterface
                         'transactions' => [],
                     ];
                 }
-                $transactions[$tnx['address']]['transactions'][] = [
+                $transactions[$tnx['address']]['transactions'][$tx['hash']] = [
                     'hash' => $tx['hash'],
                     'amount' => $amount,
                     'confirmations' => $tnx['confirmations'],
@@ -199,7 +199,7 @@ class LitecoinAdapter implements NodeAdapterInterface
                         'transactions' => [],
                     ];
                 }
-                $transactions[$to]['transactions'][] = [
+                $transactions[$to]['transactions'][$tx['hash']] = [
                     'hash' => $tx['hash'],
                     'amount' => $amount,
                     'confirmations' => $tx['confirmations'] ?? 0,
