@@ -115,7 +115,7 @@ class DefaultDBAdapter implements DBNodeAdapterInterface
     {
         return $this->transactionRepository->findOneBy([
             'currency' => $this->currency,
-            'hash' => $txn_hash
+            'txid' => $txn_hash
         ]);
     }
 
@@ -174,27 +174,40 @@ class DefaultDBAdapter implements DBNodeAdapterInterface
         return $this->accountRepository->findTopAccounts($this->currency, $limit, $lastBlock, $timeLastCheck, $offset);
     }
 
+    /**
+     * @param string $hash
+     * @param string $txid
+     * @param string $block
+     * @param int $confirmations
+     * @param string $fromAddress
+     * @param string $toAddress
+     * @param int $amount
+     * @param string $status
+     * @param array $extra
+     * @return bool|null
+     * @throws \Exception
+     */
     public function addOrUpdateTransaction(string $hash, string $txid, string $block, int $confirmations, string $fromAddress, string $toAddress, int $amount, string $status = '', array $extra = []): ?bool
     {
         $isNew = null;
-        if (!$transaction = $this->getTransaction($hash)) {
+        if (!$transaction = $this->getTransaction($txid)) {
             $transaction = new Transaction();
-            $transaction->setTxid($txid);
+            $transaction->setTxid($txid)->setHash($hash);
             $this->persist($transaction);
             $isNew = true;
         } else {
             $isNew = false;
         }
-        $transaction->setConfirmations($confirmations);
-        $transaction->setCurrency($this->currency);
-        $transaction->setAmount($amount);
-        $transaction->setBlock($block);
-        $transaction->setFromAddress($fromAddress);
-        $transaction->setHash($hash);
-        $transaction->setToAddress($toAddress);
-        $transaction->setTimeUpdated(new \DateTimeImmutable());
-        $transaction->setStatus($status);
-        $transaction->setExtra($extra);
+        $transaction
+            ->setConfirmations($confirmations)
+            ->setCurrency($this->currency)
+            ->setAmount($amount)
+            ->setBlock($block)
+            ->setFromAddress($fromAddress)
+            ->setToAddress($toAddress)
+            ->setTimeUpdated(new \DateTimeImmutable())
+            ->setStatus($status)
+            ->setExtra($extra);
         return $isNew;
     }
 
