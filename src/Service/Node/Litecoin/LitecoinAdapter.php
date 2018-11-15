@@ -122,6 +122,7 @@ class LitecoinAdapter implements NodeAdapterInterface
                         'currency' => self::NAME,
                         'balance' => Currency::showMinorCurrency($this->currency, $balance),
                         'guid' => $account->getGlobalUser()->getGuid(),
+                        'type' => $account->getType(),
                         'address' => $tnx['address'],
                         'transactions' => [],
                     ];
@@ -196,6 +197,7 @@ class LitecoinAdapter implements NodeAdapterInterface
                         'currency' => self::NAME,
                         'balance' => Currency::showMinorCurrency($this->currency, $balance),
                         'guid' => $account->getGlobalUser()->getGuid(),
+                        'type' => $account->getType(),
                         'address' => $to,
                         'transactions' => [],
                     ];
