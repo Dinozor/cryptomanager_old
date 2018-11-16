@@ -153,18 +153,18 @@ class LitecoinAdapter implements NodeAdapterInterface
 
     public function update($data)
     {
-        $transactions = [];
-        $txs = [];
+        $backendTransactions = [];
+        $transactionIds = [];
         if ($data['type'] == 'block') {
             $block = $this->node->getBlock($data['hash']);
-            $txs = $block == 'Block not found' ? [] : $block['tx'];
+            $transactionIds = $block == 'Block not found' ? [] : $block['tx'];
         } else if ($data['type'] == 'wallet') {
-            $txs = [$data['hash']];
+            $transactionIds = [$data['hash']];
         }
 
-        foreach ($txs as $txId) {
-            $tx = $this->node->getRawTransaction($txId, 1);
-            if (\is_string($tx)) {
+        foreach ($transactionIds as $transactionId) {
+            $rawTransaction = $this->node->getRawTransaction($transactionId, 1);
+            if (\is_string($rawTransaction)) {
                 continue;
             }
 
@@ -174,7 +174,7 @@ class LitecoinAdapter implements NodeAdapterInterface
             /** @var Account $account */
             $account = null;
             $addresses = [];
-            foreach ($tx['vout'] as $i => $out) {
+            foreach ($rawTransaction['vout'] as $i => $out) {
                 foreach ($out['scriptPubKey']['addresses'] ?? [] as $address) {
                     $addresses[] = $address;
                 }
@@ -184,19 +184,19 @@ class LitecoinAdapter implements NodeAdapterInterface
             foreach ($addresses as $i => $address) {
                 if ($account = $accounts[$address] ?? null) {
                     $to = $address;
-                    $amount = Currency::showMinorCurrency($this->currency, $tx['vout'][$i]['value']);
+                    $amount = Currency::showMinorCurrency($this->currency, $rawTransaction['vout'][$i]['value']);
                     break;
                 }
             }
 
             if ($account) {
-                $this->db->addOrUpdateTransaction($tx['hash'], $tx['txid'], $tx['locktime'], $tx['confirmations'] ?? 0, '', $to, $amount, '');
+                $this->db->addOrUpdateTransaction($rawTransaction['hash'], $rawTransaction['txid'], $rawTransaction['locktime'], $rawTransaction['confirmations'] ?? 0, '', $to, $amount, '');
                 $balance = $this->node->getBalance($account->getName());
                 $account->setLastBalance(Currency::showMinorCurrency($this->currency, $balance));
-                $account->setLastBlock($tx['locktime']);
+                $account->setLastBlock($rawTransaction['locktime']);
 
-                if (!isset($transactions[$to])) {
-                    $transactions[$to] = [
+                if (!isset($backendTransactions[$to])) {
+                    $backendTransactions[$to] = [
                         'currency' => self::NAME,
                         'balance' => Currency::showMinorCurrency($this->currency, $balance),
                         'guid' => $account->getGlobalUser()->getGuid(),
@@ -205,16 +205,16 @@ class LitecoinAdapter implements NodeAdapterInterface
                         'transactions' => [],
                     ];
                 }
-                $transactions[$to]['transactions'][$tx['txid']] = [
-                    'txid' => $tx['txid'],
-                    'hash' => $tx['hash'],
+                $backendTransactions[$to]['transactions'][$rawTransaction['txid']] = [
+                    'txid' => $rawTransaction['txid'],
+                    'hash' => $rawTransaction['hash'],
                     'amount' => $amount,
-                    'confirmations' => $tx['confirmations'] ?? 0,
+                    'confirmations' => $rawTransaction['confirmations'] ?? 0,
                 ];
             }
         }
 
-        $this->notifier->notifyTransactions($transactions);
+        $this->notifier->notifyTransactions($backendTransactions);
     }
 
     public function getName(): string
