@@ -30,19 +30,23 @@ class LitecoinAdapter implements NodeAdapterInterface
         $updated = 0;
         $total = 0;
         $blockIndex = 0;
-        $txs = $this->node->listTransactions($account->getName());
-        $transactions = [];
+        $transactions = $this->node->listTransactions($account->getName());
+        $backendTransactions = [];
 
-        foreach ($txs as $tx) {
-            $amount = Currency::showMinorCurrency($this->currency, $tx['amount']);
-            $blockIndex = $tx['blockindex'];
+        foreach ($transactions as $transaction) {
+            $rawTransaction = $this->node->getRawTransaction($transaction['txid'], 1);
+            $amount = Currency::showMinorCurrency($this->currency, $transaction['amount']);
+            if ($blockIndex < $rawTransaction['locktime']) {
+                $blockIndex = $rawTransaction['locktime'];
+            }
+
             $result = $this->db->addOrUpdateTransaction(
-                $tx['blockhash'],
-                $tx['txid'],
-                $blockIndex,
-                $tx['confirmations'],
+                $transaction['blockhash'],
+                $transaction['txid'],
+                $rawTransaction['locktime'],
+                $transaction['confirmations'],
                 '',
-                $tx['address'],
+                $transaction['address'],
                 $amount
             );
 
@@ -51,22 +55,24 @@ class LitecoinAdapter implements NodeAdapterInterface
             }
             if ($result === true) {
                 $updated++;
-                $transactions[] = [
+                $backendTransactions[] = [
                     'amount' => $amount,
-                    'confirmations' => $tx['confirmations'],
+                    'confirmations' => $transaction['confirmations'],
                 ];
             }
         }
 
         $balance = $this->node->getBalance($account->getName());
         $account->setLastBalance(Currency::showMinorCurrency($this->currency, $balance));
-        $account->setLastBlock($blockIndex);
+        if ($blockIndex > $account->getLastBlock()) {
+            $account->setLastBlock($blockIndex);
+        }
 
         $this->notifier->notifyAccount(
             self::NAME,
             $account->getGlobalUser()->getGuid(),
             Currency::showMinorCurrency($this->currency, $balance),
-            $transactions
+            $backendTransactions
         );
 
         return ['updated' => $updated, 'total' => $total];
