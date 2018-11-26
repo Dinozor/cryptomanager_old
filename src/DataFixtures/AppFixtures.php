@@ -98,14 +98,14 @@ class AppFixtures extends Fixture
         $bitcoinCash->setSymbol('');
         $manager->persist($bitcoinCash);
 
-        $litecoun = new Currency();
-        $litecoun->setCode_a('ltc');
-        $litecoun->setIsActive(true);
-        $litecoun->setIsLocked(false);
-        $litecoun->setName('Litecoin');
-        $litecoun->setMinor_unit(8);
-        $litecoun->setSymbol('');
-        $manager->persist($litecoun);
+        $litecoin = new Currency();
+        $litecoin->setCode_a('ltc');
+        $litecoin->setIsActive(true);
+        $litecoin->setIsLocked(false);
+        $litecoin->setName('Litecoin');
+        $litecoin->setMinor_unit(8);
+        $litecoin->setSymbol('');
+        $manager->persist($litecoin);
 
         $zCash = new Currency();
         $zCash->setCode_a('zec');

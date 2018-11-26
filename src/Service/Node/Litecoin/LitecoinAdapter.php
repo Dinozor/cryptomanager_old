@@ -30,19 +30,23 @@ class LitecoinAdapter implements NodeAdapterInterface
         $updated = 0;
         $total = 0;
         $blockIndex = 0;
-        $txs = $this->node->listTransactions($account->getName());
-        $transactions = [];
+        $transactions = $this->node->listTransactions($account->getName());
+        $backendTransactions = [];
 
-        foreach ($txs as $tx) {
-            $amount = Currency::showMinorCurrency($this->currency, $tx['amount']);
-            $blockIndex = $tx['blockindex'];
+        foreach ($transactions as $transaction) {
+            $rawTransaction = $this->node->getRawTransaction($transaction['txid'], 1);
+            $amount = Currency::showMinorCurrency($this->currency, $transaction['amount']);
+            if ($blockIndex < $rawTransaction['locktime']) {
+                $blockIndex = $rawTransaction['locktime'];
+            }
+
             $result = $this->db->addOrUpdateTransaction(
-                $tx['blockhash'],
-                $tx['txid'],
-                $blockIndex,
-                $tx['confirmations'],
+                $transaction['blockhash'],
+                $transaction['txid'],
+                $rawTransaction['locktime'],
+                $transaction['confirmations'],
                 '',
-                $tx['address'],
+                $transaction['address'],
                 $amount
             );
 
@@ -51,22 +55,24 @@ class LitecoinAdapter implements NodeAdapterInterface
             }
             if ($result === true) {
                 $updated++;
-                $transactions[] = [
+                $backendTransactions[] = [
                     'amount' => $amount,
-                    'confirmations' => $tx['confirmations'],
+                    'confirmations' => $transaction['confirmations'],
                 ];
             }
         }
 
         $balance = $this->node->getBalance($account->getName());
         $account->setLastBalance(Currency::showMinorCurrency($this->currency, $balance));
-        $account->setLastBlock($blockIndex);
+        if ($blockIndex > $account->getLastBlock()) {
+            $account->setLastBlock($blockIndex);
+        }
 
         $this->notifier->notifyAccount(
             self::NAME,
             $account->getGlobalUser()->getGuid(),
             Currency::showMinorCurrency($this->currency, $balance),
-            $transactions
+            $backendTransactions
         );
 
         return ['updated' => $updated, 'total' => $total];
@@ -74,7 +80,7 @@ class LitecoinAdapter implements NodeAdapterInterface
 
     public function fixedUpdate($data)
     {
-        $transactions = [];
+        $backendTransactions = [];
         $result = 0;
         $timeline = time() + (int)getenv('FIXED_UPDATE_TIMEOUT');
         $isOk = function () use ($timeline) {
@@ -92,9 +98,8 @@ class LitecoinAdapter implements NodeAdapterInterface
             }
 
             $balance = $this->node->getBalance($account->getName());
-//            $accountBalance = Currency::showCurrency($this->currency, $account->getLastBalance());
-
-            /*if ($balance == $accountBalance) {
+            /*$accountBalance = Currency::showCurrency($this->currency, $account->getLastBalance());
+            if ($balance == $accountBalance) {
                 $result++;
                 continue;
             }*/
@@ -104,62 +109,68 @@ class LitecoinAdapter implements NodeAdapterInterface
             $limit = $data['filters']['limit'] ?? 10;
             $from = $data['filters']['from'] ?? 0;
 
-            $txs = $this->node->listTransactions($account->getName(), $limit, $from);
-            foreach ($txs as $tnx) {
+            $transactions = $this->node->listTransactions($account->getName(), $limit, $from);
+            foreach ($transactions as $transaction) {
                 if (!$isOk()) {
                     $result = false;
                     $isComplete = false;
                     break;
                 }
 
-                $amount = Currency::showMinorCurrency($this->currency, $tnx['amount']);
-                $blockIndex = $tnx['blockindex'];
-                $tx = $this->node->getRawTransaction($tnx['txid'], 1);
-                $this->db->addOrUpdateTransaction($tx['hash'], $tnx['txid'], $blockIndex, $tnx['confirmations'], '', $tnx['address'], $amount, '');
+                $amount = Currency::showMinorCurrency($this->currency, $transaction['amount']);
+                $rawTransaction = $this->node->getRawTransaction($transaction['txid'], 1);
+                $this->db->addOrUpdateTransaction($rawTransaction['hash'], $transaction['txid'], $rawTransaction['locktime'], $transaction['confirmations'], '', $transaction['address'], $amount, '');
 
-                if (!isset($transactions[$tnx['address']])) {
-                    $transactions[$tnx['address']] = [
+                if ($blockIndex < $rawTransaction['locktime']) {
+                    $blockIndex = $rawTransaction['locktime'];
+                }
+                if (!isset($backendTransactions[$transaction['address']])) {
+                    $backendTransactions[$transaction['address']] = [
                         'currency' => self::NAME,
                         'balance' => Currency::showMinorCurrency($this->currency, $balance),
                         'guid' => $account->getGlobalUser()->getGuid(),
-                        'address' => $tnx['address'],
+                        'type' => $account->getType(),
+                        'address' => $transaction['address'],
                         'transactions' => [],
                     ];
                 }
-                $transactions[$tnx['address']]['transactions'][$tx['txid']] = [
-                    'txid' => $tx['txid'],
+                $backendTransactions[$transaction['address']]['transactions'][$transaction['txid']] = [
+                    'txid' => $transaction['txid'],
+                    'hash' => $rawTransaction['hash'],
                     'amount' => $amount,
-                    'confirmations' => $tnx['confirmations'],
+                    'confirmations' => $transaction['confirmations'],
                 ];
             }
 
             if ($isComplete) {
                 $account->setLastBalance(Currency::showMinorCurrency($this->currency, $balance));
-                $account->setLastBlock($blockIndex);
+                if ($blockIndex) {
+                    $account->setLastBlock($blockIndex);
+                }
             }
 
             $result++;
         }
 
-        $this->notifier->notifyTransactions($transactions);
+        $this->notifier->notifyTransactions($backendTransactions);
 
         return $result;
     }
 
     public function update($data)
     {
-        $transactions = [];
-        $txs = [];
+        $backendTransactions = [];
+        $transactionIds = [];
         if ($data['type'] == 'block') {
             $block = $this->node->getBlock($data['hash']);
-            $txs = $block == 'Block not found' ? [] : $block['tx'];
+            $transactionIds = $block == 'Block not found' ? [] : $block['tx'];
         } else if ($data['type'] == 'wallet') {
-            $txs = [$data['hash']];
+            $transactionIds = [$data['hash']];
         }
 
-        foreach ($txs as $txId) {
-            $tx = $this->node->getRawTransaction($txId, 1);
-            if (\is_string($tx)) {
+        foreach ($transactionIds as $transactionId) {
+            $rawTransaction = $this->node->getRawTransaction($transactionId, 1);
+            if (\is_string($rawTransaction)) {
                 continue;
             }
 
@@ -169,7 +180,7 @@ class LitecoinAdapter implements NodeAdapterInterface
             /** @var Account $account */
             $account = null;
             $addresses = [];
-            foreach ($tx['vout'] as $i => $out) {
+            foreach ($rawTransaction['vout'] as $i => $out) {
                 foreach ($out['scriptPubKey']['addresses'] ?? [] as $address) {
                     $addresses[] = $address;
                 }
@@ -179,35 +190,37 @@ class LitecoinAdapter implements NodeAdapterInterface
             foreach ($addresses as $i => $address) {
                 if ($account = $accounts[$address] ?? null) {
                     $to = $address;
-                    $amount = Currency::showMinorCurrency($this->currency, $tx['vout'][$i]['value']);
+                    $amount = Currency::showMinorCurrency($this->currency, $rawTransaction['vout'][$i]['value']);
                     break;
                 }
             }
 
             if ($account) {
-                $this->db->addOrUpdateTransaction($tx['hash'], $tx['txid'], $tx['locktime'], $tx['confirmations'] ?? 0, '', $to, $amount, '');
+                $this->db->addOrUpdateTransaction($rawTransaction['hash'], $rawTransaction['txid'], $rawTransaction['locktime'], $rawTransaction['confirmations'] ?? 0, '', $to, $amount, '');
                 $balance = $this->node->getBalance($account->getName());
                 $account->setLastBalance(Currency::showMinorCurrency($this->currency, $balance));
-                $account->setLastBlock($tx['locktime']);
+                $account->setLastBlock($rawTransaction['locktime']);
 
-                if (!isset($transactions[$to])) {
-                    $transactions[$to] = [
+                if (!isset($backendTransactions[$to])) {
+                    $backendTransactions[$to] = [
                         'currency' => self::NAME,
                         'balance' => Currency::showMinorCurrency($this->currency, $balance),
                         'guid' => $account->getGlobalUser()->getGuid(),
+                        'type' => $account->getType(),
                         'address' => $to,
                         'transactions' => [],
                     ];
                 }
-                $transactions[$to]['transactions'][$tx['txid']] = [
-                    'txid' => $tx['txid'],
+                $backendTransactions[$to]['transactions'][$rawTransaction['txid']] = [
+                    'txid' => $rawTransaction['txid'],
+                    'hash' => $rawTransaction['hash'],
                     'amount' => $amount,
-                    'confirmations' => $tx['confirmations'] ?? 0,
+                    'confirmations' => $rawTransaction['confirmations'] ?? 0,
                 ];
             }
         }
 
-        $this->notifier->notifyTransactions($transactions);
+        $this->notifier->notifyTransactions($backendTransactions);
     }
 
     public function getName(): string
